@@ -5,7 +5,8 @@ It contains the following subdirectories:
    docs:    Documentation.
    refs:    References.
    data:    Data used for testing the code.
-   util:    some utility functions.
+   util:    Some utility functions.
+   pkgs:    External packages.
 
 To checkout the code, use the following commands:
    git clone git@bitbucket.org:numgeom/ahf.git AHF
