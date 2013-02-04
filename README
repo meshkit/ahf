@@ -1,4 +1,4 @@
-This directory is for Array-based Half-facet data structures.
+This directory is for Array-based Half-Facet (AHF) data structures.
 It contains the following subdirectories:
    c:       C source code.
    matlab:  MATLAB source code and test scripts.
@@ -12,4 +12,3 @@ To checkout the code, use the following commands:
    git clone git@bitbucket.org:numgeom/ahf.git AHF
    cd AHF
    ./util/gitpull
-
