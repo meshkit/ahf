@@ -1,0 +1,2 @@
+This directory contains low-level functions, which manipulate the array
+in the data structure. They are specific to AHF implementation.
