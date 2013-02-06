@@ -1,4 +1,4 @@
-function b = is_quadmesh_mex(nv, elems) %#codegen
+function b = is_quadmesh(nv, elems) %#codegen
 %IS_QUADMESH Determine mesh type.
 % IS_QUADMESH(NV,ELEMS) Determines whether a given mesh is a quadrilateral 
 % or mixed mesh versus a tetrahedral mesh. The following explains the
@@ -11,9 +11,6 @@ function b = is_quadmesh_mex(nv, elems) %#codegen
 % See also determine_opposite_halfface_tet
 
 %#codegen -args {int32(0), coder.typeof(int32(0), [inf,27],[1,1])}
-
-assert( isa( nv, 'int32'));
-assert( isa( elems, 'int32'));
 
 if size(elems,2)~=4 || size(elems,2)==4 && ~all(elems(:,4))
     b = false;

@@ -1,14 +1,15 @@
 function build
 
-m2mex is_quadmesh_mex
-m2mex is_2dmesh_mex
-m2mex determine_border_vertices_mex
-m2mex determine_opposite_halfface_mex
-m2mex extract_border_surf_mex
+compile is_quadmesh
+compile is_2dmesh
+compile determine_border_vertices
+m2mex determine_border_vertices_vol
+m2mex determine_opposite_halfface
+compile extract_border_surf
 
-m2mex nnz_elements
-m2mex split_mixed_elems
-m2mex determine_offsets_mixed_elems
-m2mex linearize_mixed_elems
-m2mex regularize_mixed_elems
-m2mex merge_mixed_elems
+compile nnz_elements
+compile split_mixed_elems
+compile determine_offsets_mixed_elems
+compile linearize_mixed_elems
+compile regularize_mixed_elems
+compile merge_mixed_elems

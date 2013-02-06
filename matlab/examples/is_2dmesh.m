@@ -1,15 +1,12 @@
-function b = is_2dmesh_mex(nv, elems) %#codegen
+function b = is_2dmesh(nv, elems) %#codegen
 %IS_2DMESH Determine whether the input mesh connectivity is 2-D.
-% IS_2DMESH(NV,ELEMS) Determines whether a given mesh is 2-D. 
+% IS_2DMESH(NV,ELEMS) Determines whether a given mesh is 2-D.
 %
 % B = IS_2DMESH(NV,ELEMS) checks whether the given connectivity defines a
 % valid triangular or quadrilateral mesh. Returns true if it is and
 % false otherwise.
 
 %#codegen -args {int32(0), coder.typeof(int32(0), [inf,27],[1,1])}
-
-assert( isa( nv, 'int32'));
-assert( isa( elems, 'int32'));
 
 switch size(elems,2)
     case 1
