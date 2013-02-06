@@ -3,8 +3,8 @@ function build
 compile is_quadmesh
 compile is_2dmesh
 compile determine_border_vertices
-m2mex determine_border_vertices_vol
-m2mex determine_opposite_halfface
+compile determine_border_vertices_vol
+compile determine_opposite_halfface
 compile extract_border_surf
 
 compile nnz_elements
