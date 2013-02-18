@@ -85,7 +85,7 @@ while 1
         
         % Check the incident Add more faces into the queue
         for k=1:3
-            fneighbor = bitshift( opphes_fine( fid, k), -2);
+            fneighbor = heid2fid( opphes_fine( fid, k));
             
             % If the neighbor face has not been checked
             if fneighbor == 0 || parent_f(fneighbor); continue; end
@@ -135,8 +135,8 @@ tol_dist = sqrt(min(min(v1*v1', v2*v2'), v3*v3'));
 mindist = tol_dist;
 parent = int32(0);
 
-faces = [seedface, bitshift( opphes_crs(seedface, 1),-2), ...
-    bitshift( opphes_crs(seedface, 2),-2), bitshift( opphes_crs(seedface, 3),-2)];
+faces = [seedface, heid2fid( opphes_crs(seedface, 1)), ...
+    heid2fid( opphes_crs(seedface, 2)), heid2fid( opphes_crs(seedface, 3))];
 
 for i=1:4
     xs_tri_crs = xs_crs( tris_crs(faces(i),1:3),1:3);

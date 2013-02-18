@@ -56,7 +56,7 @@ for ii=1:nelems
             if v>av(kk) && v>av(next(kk))
                 v2oe_v1(is_index(v)) = av(kk);
                 v2oe_v2(is_index(v)) = av(next(kk));
-                v2hf(is_index(v)) = ii*8 + v2f_tet(jj,kk)-1;
+                v2hf(is_index(v)) = clfids2hfid(ii,v2f_tet(jj,kk));
                 is_index(v) = is_index(v) + 1;
             end
         end
@@ -79,7 +79,7 @@ for ii=1:nelems
         vs = elems(ii, hf_tet(jj,:));     % list of vertices of face
         [v,imax] = max( vs, [], 2);
         
-        first_pageid = ii*8+jj-1;
+        first_pageid = clfids2hfid(ii,jj);
         prev_pageid = first_pageid;
         
         % Search for opposite half-face.

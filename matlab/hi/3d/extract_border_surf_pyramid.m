@@ -76,7 +76,7 @@ if nargout>1
                 bdquads(count,4) = 0;
                 bdquads(count, 1:nvpf) = v2b(elems(ii,hf_pyr(jj,1:nvpf)));
                 
-                if nargout>2; facmap(count)=ii*8+jj-1; end
+                if nargout>2; facmap(count)=clfids2hfid(ii,jj); end
                 count = count + 1;
             end
         end

@@ -115,7 +115,7 @@ if nargout>1
                             elabel(ii)~=elabel(hfid2cid(opphfs(offset_o+jj)))
                         bdquads(count, 1:3) = v2b(elems(offset+hf_tet(jj,:)));
                         
-                        if nargout>2; facmap(count)=ii*8+jj-1; end
+                        if nargout>2; facmap(count)=clfids2hfid(ii,jj); end
                         count = count + 1;
                     end
                 end
@@ -126,7 +126,7 @@ if nargout>1
                         nvpf = 3+(jj==1);
                         bdquads(count, 1:nvpf) = v2b(elems(offset+hf_pyr(jj,1:nvpf)));
                         
-                        if nargout>2; facmap(count)=ii*8+jj-1; end
+                        if nargout>2; facmap(count)=clfids2hfid(ii,jj); end
                         count = count + 1;
                     end
                 end
@@ -137,7 +137,7 @@ if nargout>1
                         nvpf = 3+(jj<4);
                         bdquads(count, 1:nvpf) = v2b(elems(offset+hf_pri(jj,1:nvpf)));
                         
-                        if nargout>2; facmap(count)=ii*8+jj-1; end
+                        if nargout>2; facmap(count)=clfids2hfid(ii,jj); end
                         count = count + 1;
                     end
                 end
@@ -147,7 +147,7 @@ if nargout>1
                             elabel(ii)~=elabel(hfid2cid(opphfs(offset_o+jj)))
                         bdquads(count, :) = v2b(elems(offset+hf_hex(jj,:)));
                         
-                        if nargout>2; facmap(count)=ii*8+jj-1; end
+                        if nargout>2; facmap(count)=clfids2hfid(ii,jj); end
                         count = count + 1;
                     end
                 end

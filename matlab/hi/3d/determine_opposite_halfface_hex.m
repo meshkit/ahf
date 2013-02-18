@@ -45,9 +45,9 @@ for ii=1:nelems
         vs = elems(ii,hf_hex(jj,:));
         [v,kk] = max( vs, [], 2);
         
-        v2oe_v1(is_index(v)) = vs( next(kk)); 
+        v2oe_v1(is_index(v)) = vs( next(kk));
         v2oe_v2(is_index(v)) = vs( prev(kk));
-        v2hf(is_index(v)) = ii*8 + jj-1;
+        v2hf(is_index(v)) = clfids2hfid(ii,jj);
         is_index(v) = is_index(v)+1;
     end
 end
@@ -67,28 +67,26 @@ for ii=1:nelems
         if opphfs(ii,jj); continue; end
         vs = elems(ii, hf_hex(jj,:));     % list of vertices of face
         [v,imax] = max( vs, [], 2);
-
+        
         found = false;
         v1 = vs(prev(imax)); v2 = vs(next(imax));
         % Search for opposite half-face.
         for index = is_index( v):is_index( v+1)-1
-            if v2oe_v1(index) == v1 && v2oe_v2(index) == v2 
+            if v2oe_v1(index) == v1 && v2oe_v2(index) == v2
                 opp = v2hf(index);
                 opphfs(ii,jj) = opp;
                 
-                % opphfs(hfid2cid(opp),hfid2lfid(opp)) = ii*8+jj-1;
-                lfid0=mod(opp,8); opphfs(bitshift(uint32(opp),-3),lfid0+1) = ii*8+jj-1;
-
+                opphfs(hfid2cid(opp),hfid2lfid(opp)) = clfids2hfid(ii,jj);
+                
                 found = true;
                 break;
             end
         end
-
+        
         if ~found
             for index = is_index( v):is_index( v+1)-1
-                % if v2oe(index) == code && hfid2cid(v2hf(index))~=ii
                 if v2oe_v1(index) == v2 && v2oe_v2(index)==v1 && ...
-                        ( v2hf(index)<ii*8 || v2hf(index)>ii*8+7)
+                        hfid2cid(v2hf(index))~=ii
                     if nargin==3
                         error( 'Input mesh is not oriented.');
                     else

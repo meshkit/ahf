@@ -73,7 +73,7 @@ if nargout>1
                 elabel(ii)~=elabel(hfid2cid(opphfs(ii,jj)))
                 bdquads(count, :) = v2b(elems(ii,hf_hex(jj,:)));
                 
-                if nargout>2; facmap(count)=ii*8+jj-1; end
+                if nargout>2; facmap(count)=clfids2hfid(ii,jj); end
                 count = count + 1;
             end
         end

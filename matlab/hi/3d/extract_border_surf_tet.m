@@ -2,7 +2,7 @@ function [b2v, bdtris, facmap] = extract_border_surf_tet...
     (nv, tets, elabel, opphfs, inwards) %#codegen
 %EXTRACT_BORDER_SURF_TET Extract border vertices and edges.
 % [B2V,BDTRIS,FACEMAP] = EXTRACT_BORDER_SURF_TET(NV,TETS,ELABEL,OPPHFS,INWARDS)
-% Extracts border vertices and edges of tetrahedral mesh. Return list of 
+% Extracts border vertices and edges of tetrahedral mesh. Return list of
 % border vertex IDs and list of border faces.  The following explains the
 % input and output arguments.
 %
@@ -33,17 +33,17 @@ isborder = false( nv,1);
 if nargin<3; elabel = 0; end
 if nargin<4;
     opphfs = nullcopy(zeros(size(tets),'int32'));
-    opphfs = determine_opposite_halfface_tet(nv, tets, opphfs); 
+    opphfs = determine_opposite_halfface_tet(nv, tets, opphfs);
 end
 
 ngbtris = int32(0);
 ii=int32(1);
 while ii<=int32(size(tets,1))
     if tets(ii,1)==0; break; end
-
+    
     for jj=1:4
         if opphfs(ii,jj) == 0 || size(elabel,1)>1 && ...
-                elabel(ii)~=elabel(bitshift(uint32(opphfs(ii,jj)),-3)) % elabel(ii)~=elabel(hfid2cid(opphfs(ii,jj)))
+                elabel(ii)~=elabel(hfid2cid(opphfs(ii,jj)))
             isborder( tets(ii,hf_tet(jj,:))) = true; ngbtris = ngbtris +1;
         end
     end
@@ -68,13 +68,13 @@ if nargout>1
     count = int32(1); ii=int32(1);
     while ii<=int32(size(tets,1))
         if tets(ii,1)==0; break; end
-
+        
         for jj=int32(1):4
             if opphfs(ii,jj) == 0 || size(elabel,1)>1 && ...
-                elabel(ii)~=elabel(bitshift(uint32(opphfs(ii,jj)),-3)) % elabel(ii)~=elabel(hfid2cid(opphfs(ii,jj)))
+                    elabel(ii) ~= elabel(hfid2cid(opphfs(ii,jj)))
                 bdtris(count, :) = v2b(tets(ii,hf_tet(jj,:)));
                 
-                if nargout>2; facmap(count)=ii*8+jj-1; end
+                if nargout>2; facmap(count)=clfids2hfid(ii,jj); end
                 count = count + 1;
             end
         end

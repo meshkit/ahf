@@ -134,12 +134,12 @@ while(i<=ind);
     iface2=isort(6,i+1);
     if(isort(5,i)==0 && isort(5,i+1)==0) ;
       %This is an internal face
-      reg_opphfs(it,iface)=it2*8+iface2-1;
-      reg_opphfs(it2,iface2)=it*8+iface-1;
+      reg_opphfs(it,iface) = clfids2hfid(it2, iface2);
+      reg_opphfs(it2,iface2) = clfids2hfid(it, iface);
     else
       %This is an external face
-      reg_opphfs(it,iface)=it2*8+iface2-1;
-      reg_opphfs(it2,iface2)=it*8+iface-1;
+      reg_opphfs(it,iface) = clfids2hfid(it2, iface2);
+      reg_opphfs(it2,iface2) = clfids2hfid(it, iface);
     end;
   else
    %Case (3)

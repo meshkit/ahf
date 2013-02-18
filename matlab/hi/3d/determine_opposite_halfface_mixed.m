@@ -105,7 +105,7 @@ for ii=1:nelems
                 
                 v2oe_v1(start_index(jj):start_index(jj)+2)  = [vs(1); vs(2); vs(3)];
                 v2oe_v2(start_index(jj):start_index(jj)+2)  = [vs(2); vs(3); vs(1)];
-                v2hf(start_index(jj):start_index(jj)+2) = ii*8 + v2f_tet(jj,:)-1;
+                v2hf(start_index(jj):start_index(jj)+2) = clfids2hfid(ii, v2f_tet(jj,:));
             end
             
             nfpE = int32(4);
@@ -119,14 +119,14 @@ for ii=1:nelems
                 
                 v2oe_v1(start_index(jj):start_index(jj)+2)  = [vs(1); vs(2); vs(3)];
                 v2oe_v2(start_index(jj):start_index(jj)+2)  = [vs(2); vs(3); vs(1)];
-                v2hf(start_index(jj):start_index(jj)+2) = ii*8 + v2f_pyr(jj,1:3)-1;
+                v2hf(start_index(jj):start_index(jj)+2) = clfids2hfid(ii, v2f_pyr(jj,1:3));
             end
             
             is_index_v( vs_elem(5)) = is_index_v(vs_elem(5)) + 1;
             vs = vs_elem(v2av_pyr(5,:));
             v2oe_v1(start_index(5):start_index(5)+3)  = [vs(1); vs(2); vs(3); vs(4)];
             v2oe_v2(start_index(5):start_index(5)+3)  = [vs(2); vs(3); vs(4); vs(1)];
-            v2hf(start_index(5):start_index(5)+3) = ii*8 + v2f_pyr(5,:)-1;
+            v2hf(start_index(5):start_index(5)+3) = clfids2hfid(ii, v2f_pyr(5,:));
             
             nfpE = int32(5);
         case {6,15,18}
@@ -139,7 +139,7 @@ for ii=1:nelems
                 
                 v2oe_v1(start_index(jj):start_index(jj)+2)  = [vs(1); vs(2); vs(3)];
                 v2oe_v2(start_index(jj):start_index(jj)+2)  = [vs(2); vs(3); vs(1)];
-                v2hf(start_index(jj):start_index(jj)+2) = ii*8 + v2f_pri(jj,:) - 1;
+                v2hf(start_index(jj):start_index(jj)+2) = clfids2hfid(ii, v2f_pri(jj,:));
             end
             
             nfpE = int32(5);
@@ -153,7 +153,7 @@ for ii=1:nelems
                 
                 v2oe_v1(start_index(jj):start_index(jj)+2)  = [vs(1); vs(2); vs(3)];
                 v2oe_v2(start_index(jj):start_index(jj)+2)  = [vs(2); vs(3); vs(1)];
-                v2hf(start_index(jj):start_index(jj)+2) = ii*8 + v2f_hex(jj,:) - 1;
+                v2hf(start_index(jj):start_index(jj)+2) = clfids2hfid(ii, v2f_hex(jj,:));
             end
             nfpE = int32(6);
         otherwise
@@ -195,8 +195,7 @@ for ii=1:nelems
                         opp = v2hf(index);
                         opphfs(offset_ohf+jj) = opp;
                         
-                        % k = is_index_o(hfid2cid(opp)) + hfid2lfid(opp);
-                        k = is_index_o( bitshift(uint32(opp),-3)) + mod(opp,8)+1;
+                        k = is_index_o(hfid2cid(opp)) + hfid2lfid(opp);
                         if opphfs(k)~=0
                             if nargin==3
                                 error( 'Input mesh is not oriented.');
@@ -204,7 +203,7 @@ for ii=1:nelems
                                 opphfs = zeros(0,1,'int32'); return;
                             end
                         end
-                        opphfs(k) = ii*8+jj-1;
+                        opphfs(k) = clfids2hfid(ii,jj);
                         
                         found = true;
                         break;
@@ -242,8 +241,7 @@ for ii=1:nelems
                         opp = v2hf(index);
                         opphfs(offset_ohf+jj) = opp;
                         
-                        % k = is_index_o(hfid2cid(opp)) + hfid2lfid(opp);
-                        k = is_index_o(bitshift(uint32(opp),-3)) + mod(opp,8)+1;
+                        k = is_index_o(hfid2cid(opp)) + hfid2lfid(opp);
                         if opphfs(k)~=0
                             if nargin==3
                                 error( 'Input mesh is not oriented.');
@@ -251,7 +249,7 @@ for ii=1:nelems
                                 opphfs = zeros(0,1,'int32'); return;
                             end
                         end
-                        opphfs(k) = ii*8+jj-1;
+                        opphfs(k) = clfids2hfid(ii,jj);
                         
                         found = true;
                         break;
@@ -288,8 +286,7 @@ for ii=1:nelems
                         opp = v2hf(index);
                         opphfs(offset_ohf+jj) = opp;
                         
-                        % k = is_index_o(hfid2cid(opp)) + hfid2lfid(opp);
-                        k = is_index_o(bitshift(uint32(opp),-3)) + mod(opp,8)+1;
+                        k = is_index_o(hfid2cid(opp)) + hfid2lfid(opp);
                         if opphfs(k)~=0
                             if nargin==3
                                 error( 'Input mesh is not oriented.');
@@ -297,7 +294,7 @@ for ii=1:nelems
                                 opphfs = zeros(0,1,'int32'); return;
                             end
                         end
-                        opphfs(k) = ii*8+jj-1;
+                        opphfs(k) = clfids2hfid(ii,jj);
                         
                         found = true;
                         break;
@@ -332,8 +329,7 @@ for ii=1:nelems
                         opp = v2hf(index);
                         opphfs(offset_ohf+jj) = opp;
                         
-                        % k = is_index_o(hfid2cid(opp)) + hfid2lfid(opp);
-                        k = is_index_o(bitshift(uint32(opp),-3)) + mod(opp,8)+1;
+                        k = is_index_o(hfid2cid(opp)) + hfid2lfid(opp);
                         if opphfs(k)~=0
                             if nargin==3
                                 error( 'Input mesh is not oriented.');
@@ -341,7 +337,7 @@ for ii=1:nelems
                                 opphfs = zeros(0,1,'int32'); return;
                             end
                         end
-                        opphfs(k) = ii*8+jj-1;
+                        opphfs(k) = clfids2hfid(ii,jj);
                         
                         found = true;
                         break;

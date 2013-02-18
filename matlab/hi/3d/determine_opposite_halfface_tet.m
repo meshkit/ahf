@@ -50,7 +50,7 @@ for ii=1:nelems
         
         v2oe_v1(is_index(v)) = vs( next(kk)); 
         v2oe_v2(is_index(v)) = vs( prev(kk));
-        v2hf(is_index(v)) = ii*8 + jj-1;
+        v2hf(is_index(v)) = clfids2hfid(ii,jj);
         is_index(v) = is_index(v)+1;
     end
 end
@@ -79,9 +79,7 @@ for ii=1:nelems
                 opp = v2hf(index);
                 opphfs(ii,jj) = opp;
                 
-                % opphfs(hfid2cid(opp),hfid2lfid(opp)) = ii*8+jj-1;
-                lfid0=mod(opp,8); opphfs(bitshift(uint32(opp),-3),lfid0+1) = ii*8+jj-1;
-                
+                opphfs(hfid2cid(opp),hfid2lfid(opp)) = clfids2hfid(ii,jj);
                 found = true;
                 break;
             end
@@ -89,9 +87,8 @@ for ii=1:nelems
 
         if ~found
             for index = is_index( v):is_index( v+1)-1
-                % if v2oe(index) == code && hfid2cid(v2hf(index))~=ii
                 if v2oe_v1(index) == v2 && v2oe_v2(index)==v1 && ...
-                        ( v2hf(index)<ii*8 || v2hf(index)>ii*8+7)
+                        hfid2cid(v2hf(index))~=ii
                     if nargin==3
                         error( 'Input mesh is not oriented.');
                     else
