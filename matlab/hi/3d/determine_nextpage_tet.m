@@ -9,8 +9,8 @@ function nxtpg = determine_nextpage_tet( nv, elems, nxtpg) %#codegen
 %
 % See also DETERMINE_OPPOSITE_HALFFACE_TET.
 
-% Note: See http://www.grc.nasa.gov/WWW/cgns/CGNS_docs_current/sids/conv.html for numbering
-%       convention of faces.
+% Note: See http://www.grc.nasa.gov/WWW/cgns/CGNS_docs_current/sids/conv.html 
+%       for numbering convention of faces.
 
 % Table for vertices of each face.
 hf_tet    = int32([1 3 2; 1 2 4; 2 3 4; 3 1 4]);
@@ -39,21 +39,14 @@ for ii=1:nv
     is_index(ii+1) = is_index(ii) + is_index(ii+1);
 end
 
-% Hard limits on the number of elems due to the use of double.
-assert( nv<2^26 && nelems<2^26);
-
 % Store dimensions of objects.
 nf = nelems*12;
 
 % v2hf stores mapping from each vertex to half-face ID.
 v2hf = nullcopy(zeros(nf,1, 'int32'));
-% v2oe stores mapping from each vertex to the encoding of the opposite
-%     edge of each half-face..
-v2oe  = nullcopy(zeros(nf,1, 'double'));
+v2oe_v1 = nullcopy(zeros(nf, 1, 'int32'));
+v2oe_v2 = nullcopy(zeros(nf, 1, 'int32'));
 
-% Edges are encoded using double-precision floating-point numbers, which
-% have 52 digits of accuracy, so each vertex would have 26 digits.
-EC_SHIFT = double(67108864);   % 2^26.
 for ii=1:nelems
     for jj=1:4
         v = elems(ii,jj);
@@ -61,7 +54,8 @@ for ii=1:nelems
         
         for kk=1:3
             if v>av(kk) && v>av(next(kk))
-                v2oe(is_index(v)) = double(av(kk))*EC_SHIFT+double(av(next(kk)));
+                v2oe_v1(is_index(v)) = av(kk);
+                v2oe_v2(is_index(v)) = av(next(kk));
                 v2hf(is_index(v)) = ii*8 + v2f_tet(jj,kk)-1;
                 is_index(v) = is_index(v) + 1;
             end
@@ -88,18 +82,17 @@ for ii=1:nelems
         first_pageid = ii*8+jj-1;
         prev_pageid = first_pageid;
         
-        code = double(vs(prev(imax)))*EC_SHIFT+double(vs(next(imax)));
         % Search for opposite half-face.
         for index = is_index( v):is_index( v+1)-1
-            if v2oe(index) == code
+            if v2oe_v1(index) == vs(prev(imax)) && v2oe_v2(index) == vs(next(imax))
                 nxtpg(hfid2cid(prev_pageid),hfid2lfid(prev_pageid)) = v2hf(index);
                 prev_pageid = v2hf(index);
             end
         end
         
-        code = double(vs(next(imax)))*EC_SHIFT+double(vs(prev(imax)));
         for index = is_index( v):is_index( v+1)-1
-            if v2oe(index) == code && hfid2cid(v2hf(index))~=ii
+            if v2oe_v1(index) == vs(next(imax)) && v2oe_v2(index) == vs(prev(imax)) && ...
+                    hfid2cid(v2hf(index))~=ii
                 nxtpg(hfid2cid(prev_pageid),hfid2lfid(prev_pageid)) = v2hf(index);
                 prev_pageid = v2hf(index);
             end

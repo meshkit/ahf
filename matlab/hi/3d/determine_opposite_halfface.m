@@ -10,7 +10,7 @@ function opphfs = determine_opposite_halfface( nv, elems, opphfs)
 % See also DETERMINE_NEXTPAGE_VOL, DETERMINE_INCIDENT_HALFFACES
 
 %#codegen -args {int32(0), coder.typeof(int32(0), [inf,27],[1,1]),
-%#codegen coder.typeof(int32(0), [inf,6],[1,1])} determine_opposite_halfface_var1
+%#codegen coder.typeof(int32(0), [inf,6],[1,1])} determine_opposite_halfface_v1
 %#codegen -args {int32(0), coder.typeof(int32(0), [inf,27],[1,1])}
 
 if nargin<3

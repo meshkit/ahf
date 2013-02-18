@@ -11,7 +11,7 @@ function opphfs = determine_opposite_halfface_mixed( nv, elems, opphfs) %#codege
 %     [e1_nf, e1_opphf1,e1_opphf2,..., e2_nf, e2_opphf1, e2_opphf2, ...].
 %
 % A half-face ID is a two-tuple <element_ID,local_face_ID-1> encoded 
-%     in an integer. The element_ID takes the first 29 bits and
+%     in an integer. The element_ID uses the higher bits and
 %     (local_face_ID-1) uses the last three bits.
 %
 % See also DETERMINE_INCIDENT_HALFFACES, DETERMINE_OFFSETS_MIXED_ELEMS, 
@@ -80,20 +80,16 @@ for ii=1:nv
     is_index_v(ii+1) = is_index_v(ii) + is_index_v(ii+1);
 end
 
-% Hard limits on the number of elems due to the use of double.
-assert( nv<2^26 && nelems<2^26);
-
 % v2hf stores mapping from each vertex to half-face ID.
-% v2oe stores mapping from each vertex to the encoding of the opposite
-%     edges in its incident half-face.
+% v2oe_v1 && v2oe_v2 stores mapping from each vertex to the encoding of 
+%     the opposite edges in its incident half-face.
 v2hf = nullcopy(zeros(nf,1,'int32'));
-v2oe  = nullcopy(zeros(nf,1,'double'));
+v2oe_v1 = nullcopy(zeros(nf, 1, 'int32'));
+v2oe_v2 = nullcopy(zeros(nf, 1, 'int32'));
 
 is_index_f = zeros(nelems+1,1,'int32'); is_index_f(1) = 1;
 is_index_o = zeros(nelems+1,1,'int32'); is_index_o(1) = 1;
-% Edges are encoded using double-precision floating-point numbers, which
-% have 52 digits of accuracy, so each vertex would have 26 digits.
-EC_SHIFT = double(67108864);   % 2^26.
+
 offset=int32(1); nopphf = int32(0);
 for ii=1:nelems
     nvpE = elems(offset);
@@ -105,10 +101,10 @@ for ii=1:nelems
             is_index_v( vs_elem) = is_index_v( vs_elem) + 3;
             
             for jj=1:4
-                vs = double(vs_elem(v2av_tet(jj,:)));
+                vs = vs_elem(v2av_tet(jj,:));
                 
-                v2oe(start_index(jj):start_index(jj)+2)  = ...
-                    [vs(1)*EC_SHIFT+vs(2); vs(2)*EC_SHIFT+vs(3); vs(3)*EC_SHIFT+vs(1)];
+                v2oe_v1(start_index(jj):start_index(jj)+2)  = [vs(1); vs(2); vs(3)];
+                v2oe_v2(start_index(jj):start_index(jj)+2)  = [vs(2); vs(3); vs(1)];
                 v2hf(start_index(jj):start_index(jj)+2) = ii*8 + v2f_tet(jj,:)-1;
             end
             
@@ -119,17 +115,17 @@ for ii=1:nelems
             is_index_v( vs_elem) = is_index_v( vs_elem) + 3;
             
             for jj=1:4
-                vs = double(vs_elem(v2av_pyr(jj,1:3)));
+                vs = vs_elem(v2av_pyr(jj,1:3));
                 
-                v2oe(start_index(jj):start_index(jj)+2)  = ...
-                    [vs(1)*EC_SHIFT+vs(2); vs(2)*EC_SHIFT+vs(3); vs(3)*EC_SHIFT+vs(1)];
+                v2oe_v1(start_index(jj):start_index(jj)+2)  = [vs(1); vs(2); vs(3)];
+                v2oe_v2(start_index(jj):start_index(jj)+2)  = [vs(2); vs(3); vs(1)];
                 v2hf(start_index(jj):start_index(jj)+2) = ii*8 + v2f_pyr(jj,1:3)-1;
             end
             
             is_index_v( vs_elem(5)) = is_index_v(vs_elem(5)) + 1;
-            vs = double(vs_elem(v2av_pyr(5,:)));
-            v2oe(start_index(5):start_index(5)+3)  = ...
-                [vs(1)*EC_SHIFT+vs(2); vs(2)*EC_SHIFT+vs(3); vs(3)*EC_SHIFT+vs(4); vs(4)*EC_SHIFT+vs(1)];
+            vs = vs_elem(v2av_pyr(5,:));
+            v2oe_v1(start_index(5):start_index(5)+3)  = [vs(1); vs(2); vs(3); vs(4)];
+            v2oe_v2(start_index(5):start_index(5)+3)  = [vs(2); vs(3); vs(4); vs(1)];
             v2hf(start_index(5):start_index(5)+3) = ii*8 + v2f_pyr(5,:)-1;
             
             nfpE = int32(5);
@@ -139,10 +135,10 @@ for ii=1:nelems
             is_index_v( vs_elem) = is_index_v( vs_elem) + 3;
             
             for jj=1:6
-                vs = double(vs_elem(v2av_pri(jj,:)));
+                vs = vs_elem(v2av_pri(jj,:));
                 
-                v2oe(start_index(jj):start_index(jj)+2)  = ...
-                    [vs(1)*EC_SHIFT+vs(2); vs(2)*EC_SHIFT+vs(3); vs(3)*EC_SHIFT+vs(1)];
+                v2oe_v1(start_index(jj):start_index(jj)+2)  = [vs(1); vs(2); vs(3)];
+                v2oe_v2(start_index(jj):start_index(jj)+2)  = [vs(2); vs(3); vs(1)];
                 v2hf(start_index(jj):start_index(jj)+2) = ii*8 + v2f_pri(jj,:) - 1;
             end
             
@@ -153,10 +149,10 @@ for ii=1:nelems
             is_index_v( vs_elem) = is_index_v( vs_elem) + 3;
             
             for jj=1:8
-                vs = double(vs_elem(v2av_hex(jj,:)));
+                vs = vs_elem(v2av_hex(jj,:));
                 
-                v2oe(start_index(jj):start_index(jj)+2)  = ...
-                    [vs(1)*EC_SHIFT+vs(2); vs(2)*EC_SHIFT+vs(3); vs(3)*EC_SHIFT+vs(1)];
+                v2oe_v1(start_index(jj):start_index(jj)+2)  = [vs(1); vs(2); vs(3)];
+                v2oe_v2(start_index(jj):start_index(jj)+2)  = [vs(2); vs(3); vs(1)];
                 v2hf(start_index(jj):start_index(jj)+2) = ii*8 + v2f_hex(jj,:) - 1;
             end
             nfpE = int32(6);
@@ -190,13 +186,12 @@ for ii=1:nelems
             nfpE = int32(4);
             for jj=1:nfpE % local face ID
                 if opphfs(offset_ohf+jj); continue; end
-                vs = double(vs_elem(hf_tet(jj,:)));     % list of vertices of face
+                vs = vs_elem(hf_tet(jj,:));     % list of vertices of face
                 
                 found = false;
-                code = vs(3)*EC_SHIFT+vs(2);
                 % Search for opposite half-face.
                 for index = is_index_v( vs(1)):is_index_v( vs(1)+1)-1
-                    if v2oe(index) == code
+                    if v2oe_v1(index) == vs(3) && v2oe_v2(index) == vs(2) 
                         opp = v2hf(index);
                         opphfs(offset_ohf+jj) = opp;
                         
@@ -218,10 +213,9 @@ for ii=1:nelems
                 
                 % check whether the surface is oriented
                 if ~found
-                    code = vs(2)*EC_SHIFT+vs(3);
                     for index = is_index_v( vs(1)):is_index_v( vs(1)+1)-1
-                        % if v2oe(index) == code && hfid2cid(v2hf(index))~=ii
-                        if v2oe(index) == code && int32(bitshift(uint32(v2hf(index)),-3))~=ii
+                        if v2oe_v1(index) == vs(2) && v2oe_v2(index) == vs(3) && ...
+                                hfid2cid(v2hf(index))~=ii
                             if nargin==3
                                 error( 'Input mesh is not oriented.');
                             else
@@ -239,13 +233,12 @@ for ii=1:nelems
                 if opphfs(offset_ohf+jj); continue; end
                 nvpf = 3+(jj==1);
                 
-                vs = double(vs_elem(hf_pyr(jj,1:nvpf)));  % list of vertices of face
+                vs = vs_elem(hf_pyr(jj,1:nvpf));  % list of vertices of face
                 
                 found = false;
-                code = vs(nvpf)*EC_SHIFT+vs(2);
                 % Search for opposite half-face.
                 for index = is_index_v( vs(1)):is_index_v( vs(1)+1)-1
-                    if v2oe(index) == code
+                    if v2oe_v1(index) == vs(nvpf) && v2oe_v2(index) == vs(2) 
                         opp = v2hf(index);
                         opphfs(offset_ohf+jj) = opp;
                         
@@ -267,10 +260,9 @@ for ii=1:nelems
                 
                 % check whether the surface is oriented
                 if ~found
-                    code = vs(2)*EC_SHIFT+vs(nvpf);
                     for index = is_index_v( vs(1)):is_index_v( vs(1)+1)-1
-                        % if v2oe(index) == code && hfid2cid(v2hf(index))~=ii
-                        if v2oe(index) == code && int32(bitshift(uint32(v2hf(index)),-3))~=ii
+                        if v2oe_v1(index) == vs(2) && v2oe_v2(index) == vs(nvpf) && ...
+                                hfid2cid(v2hf(index))~=ii
                             if nargin==3
                                 error( 'Input mesh is not oriented.');
                             else
@@ -287,13 +279,12 @@ for ii=1:nelems
             for jj=1:nfpE % local face ID
                 if opphfs(offset_ohf+jj); continue; end
                 nvpf = 3+(jj<4);
-                vs = double(vs_elem(hf_pri(jj,1:nvpf)));  % list of vertices of face
+                vs = vs_elem(hf_pri(jj,1:nvpf));  % list of vertices of face
                 
                 found = false;
-                code = vs(nvpf)*EC_SHIFT+vs(2);
                 % Search for opposite half-face.
                 for index = is_index_v( vs(1)):is_index_v( vs(1)+1)-1
-                    if v2oe(index) == code
+                    if v2oe_v1(index) == vs(nvpf) && v2oe_v2(index) == vs(2) 
                         opp = v2hf(index);
                         opphfs(offset_ohf+jj) = opp;
                         
@@ -314,10 +305,9 @@ for ii=1:nelems
                 end
                 
                 if ~found
-                    code = vs(2)*EC_SHIFT+vs(nvpf);
                     for index = is_index_v( vs(1)):is_index_v( vs(1)+1)-1
-                        % if v2oe(index) == code && hfid2cid(v2hf(index))~=ii
-                        if v2oe(index) == code && int32(bitshift(uint32(v2hf(index)),-3))~=ii
+                        if v2oe_v1(index) == vs(2) && v2oe_v2(index) == vs(nvpf) && ...
+                                hfid2cid(v2hf(index))~=ii
                             if nargin==3
                                 error( 'Input mesh is not oriented.');
                             else
@@ -333,13 +323,12 @@ for ii=1:nelems
             
             for jj=1:nfpE % local face ID
                 if opphfs(ii,jj); continue; end
-                vs = double(vs_elem(hf_hex(jj,:)));     % list of vertices of face
+                vs = vs_elem(hf_hex(jj,:));     % list of vertices of face
                 
                 found = false;
-                code = vs(4)*EC_SHIFT+vs(2);
                 % Search for opposite half-face.
                 for index = is_index_v( vs(1)):is_index_v( vs(1)+1)-1
-                    if v2oe(index) == code
+                    if v2oe_v1(index) == vs(4) && v2oe_v2(index) == vs(2)
                         opp = v2hf(index);
                         opphfs(offset_ohf+jj) = opp;
                         
@@ -360,10 +349,9 @@ for ii=1:nelems
                 end
                 
                 if ~found
-                    code = vs(2)*EC_SHIFT+vs(4);
                     for index = is_index_v( vs(1)):is_index_v( vs(1)+1)-1
-                        % if v2oe(index) == code && hfid2cid(v2hf(index))~=ii
-                        if v2oe(index) == code && int32(bitshift(uint32(v2hf(index)),-3))~=ii
+                        if v2oe_v1(index) == vs(2) && v2oe_v2(index) == vs(4) && ...
+                                hfid2cid(v2hf(index))~=ii
                             if nargin==3
                                 error( 'Input mesh is not oriented.');
                             else

@@ -1,4 +1,4 @@
-function [xs tets, new_fields]=hextotet(xs, hexes, mapping, cell_fields)
+function [xs, tets, new_fields]=hextotet(xs, hexes, mapping, cell_fields)
 % CONVERTS A HEXAHEDRAL INPUT GRID INTO A TETRAHEDRAL GRID WITH THE SAME
 % NUMBER OF NODES. IF VECTORS ARE SPECIFIED THESE ARE ASSOCIATED WITH THE
 % TETS. CURRENLTY NO INTERPOLATION IS DONE

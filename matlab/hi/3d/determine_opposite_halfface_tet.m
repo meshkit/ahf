@@ -1,4 +1,4 @@
-function opphfs = determine_opposite_halfface_tet( nv, elems, opphfs) %#codegen
+function opphfs = determine_opposite_halfface_tet( nv, elems, opphfs)
 %DETERMINE_OPPOSITE_HALFFACE_TET Determine the opposite half-face.
 % DETERMINE_OPPOSITE_HALFFACE_TET(NV,ELEMS,OPPHFS) Determines the
 % opposite half-face.
@@ -9,9 +9,12 @@ function opphfs = determine_opposite_halfface_tet( nv, elems, opphfs) %#codegen
 %
 % We assign three bits to local_face_id.
 
-% Note: See http://www.grc.nasa.gov/WWW/cgns/CGNS_docs_current/sids/conv.html for numbering
-%       convention of faces.
+% Note: See http://www.grc.nasa.gov/WWW/cgns/CGNS_docs_current/sids/conv.html 
+%       for numbering convention of faces.
 
+%#codegen -args {int32(0), coder.typeof(int32(0), [inf,17],[1,1]),
+%#codegen coder.typeof(int32(0), [inf,4],[1,1])}
+ 
 % Table for vertices of each face.
 hf_tet    = int32([1 3 2; 1 2 4; 2 3 4; 3 1 4]);
 

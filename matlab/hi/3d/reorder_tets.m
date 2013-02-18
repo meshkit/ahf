@@ -2,7 +2,7 @@ function [xs_vol, tets, new2old] = reorder_tets( xs_vol, tets) %#codegen
 % Reorganize vertices of tetrahedral mesh to list border vertices first.
 % Usage: [xs_vol, tets] = REORDER_TETS( xs_vol, tets)
 
-b2v = extract_border_surf_mex( size(xs_vol,1), tets);
+b2v = extract_border_surf( size(xs_vol,1), tets);
 
 if b2v(end)~=size(b2v)
     % Need to reorder
