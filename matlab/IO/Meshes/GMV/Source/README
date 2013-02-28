@@ -1,0 +1,60 @@
+_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+_/					_/
+_/	README file for the		_/
+_/	"gmvwrite" routines...		_/
+_/					_/
+_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+The "gmvwrite" routines are callable from either C or Fortran and are used to 
+simplify the process of creating GMV input files in the ieee binary format.
+
+------------------------------------------------------------------------------
+
+The following files are included in the "gmvwrite" distribution:
+
+-- gmvwrite.c		/* the C code */
+-- gmvwritef.c		/* the Fortran INTERFACE code */
+-- gmvwritelib.doc	/* documentation for all the functions */
+-- sampfortran.f	/* a sample Fortran program using the "gmvwrite"
+			   routines */
+-- sampfortran2.f	/* a sample Fortran program using the "gmvwrite"
+			   routines for ieei4r8 files */
+-- samplec.c		/* a sample C program using the "gmvwrite" routines */
+-- README		/* this file */
+
+Additionally:
+-- gmvread.c		/* C code that reads a GMV file */
+-- gmvread.h		/* gmvread header file */
+-- ascii2bin.c		/* sample C code that uses gmvread and gmvwrite */
+
+------------------------------------------------------------------------------
+
+Note: gmvwrite can now write ascii files.  Use the following routines to 
+      write an ascii file:
+      gmvwrite_openfile_ascii(filename);
+      gmvwrite_openfile_ir_ascii(filename, isize, rsize);
+      These routines use the same arguments as their binary counterparts.
+
+How to use in the C environment:
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+To use the "gmvwrite" routines in the C programming language, you can either
+include the code directly like this: #include "gmvwrite.c" or you can compile
+it and link with the resulting object in the usual manner.
+
+How to use in the Fortran environment:
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+To use the "gmvwrite" routines in the Fortran programming language, you first
+must compile "gmvwritef.c" as follows:
+
+(note: "cc" is any ANSI C compiler)
+for Hewlett Packard:	cc -Aa -c -Dhp gmvwritef.c       /* or */
+                        gcc -c -Dhp gmvwritef.c
+for Unicos:		cc -c -Dunicos gmvwritef.c
+for all others:		cc -c gmvwritef.c
+
+Save the object file the compiler creates and link it with whatever program
+you're writing.  Note: the names of the Fortran versions of the functions
+have the letter "f" added to the front of the name to distinguish them from
+the C versions.  See the documentation.
+
+------------------------------------------------------------------------------

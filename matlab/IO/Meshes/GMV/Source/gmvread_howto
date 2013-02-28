@@ -1,0 +1,216 @@
+
+Following are the routines that can be called from the gmvread utility 
+in gmvread.c:  
+
+
+   int gmvread_open(char *filename)
+
+      This routine opens the gmv input file specified by filename.  The  
+      routine checks the input file, returns an error number and writes 
+      a message to stderr if an error is found (error number > 0).  The 
+      error numbers and their associated messages are:
+        1 - GMV cannot open file x.
+        2 - This is not a GMV input file.
+        3 - Error - endgmv not found.
+      If the error number is less than or equal to 0, then it is an 
+      indicator of the gmv input type.  These numbers are:
+         0 - ieee
+        -1 - ascii
+        -2 - ieeei4r4
+        -3 - ieeei4r8
+        -4 - ieeei8r4
+        -5 - ieeei8r8
+
+      If this routine is used to open a GMV file, then the routines 
+      gmvread_data and gmvread_mesh will fill the data structure even if 
+      the data resides in a GMV fromfile.
+
+
+   int gmvread_open_skip_fromfile(char *filename)
+
+      This routine opens the gmv input file specified by filename and 
+      checks the input file just as gmvread_open does.  If you open a 
+      GMV file with this routine, then GMV fromfiles will not be read.  
+      Instead, the gmvread_data routine will place a FROMFILE type and 
+      the dataset name in the data structure.
+
+
+   void gmvread_close()
+
+      This routine closes the current gmv input file. 
+
+
+   void gmvread_data()
+
+      This routine reads one "set" of data from the GMV input file and 
+      fills the following structure (defined in gmvread.h):
+
+      EXTERN struct 
+         {
+          int        keyword;    /*  See above for definitions.  */
+          int        datatype;   /*  See above for definitions.  */
+          char       name1[20];  /*  hex, tri, etc, flag name, field name.  */
+          long long  num;        /*  nnodes, ncells, nsurf, ntracers.  */
+          long long  num2;       /*  no. of faces, number of vertices.  */
+
+          long long  ndoubledata1;
+          double     *doubledata1;
+          long long  ndoubledata2;
+          double     *doubledata2;
+          long long  ndoubledata3;
+          double     *doubledata3;
+
+          long long  nlongdata1;
+          long long  *longdata1;
+          long long  nlongdata2;
+          long long  *longdata2;
+
+          int   nchardata1;   /*  Number of 20 character string.  */
+          char  *chardata1;   /*  Array of 20 character strings.  */
+          int   nchardata2;   /*  Number of 20 character string.  */
+          char  *chardata2;   /*  Array of 20 character strings.  */
+         } 
+      gmv_data;
+ 
+      The gmv_data structure will have some of its members filled according  
+      to the keyword value in gmv_data.keyword.  The keywords are defined 
+      in gmvread.h.  For those keywords that contain multiple sets of data 
+      (CELLS, FACES, VFACES, VARIABLE, FLAGS, POLYGONS, SURFACE, SURFVARS,
+      SURFFLAG, UNITS and VINFO), a set of data will be returned for that 
+      keyword.  When data is complete for that keyword, gmv_data will 
+      contain the keyword and will have ENDKEYWORD in gmv_data.datatype. 
+
+      When the GMV input file has been completely read, GMVEND is set in 
+      gmv_data.keyword.  If gmvread_data encounters an error, an error 
+      message is written to stderr and GMVERROR is set in gmv_data.keyword.  
+      Always check for GMVEND and GMVERROR.  If GMVERROR is encountered, do 
+      not call gmvread_data again, it will likely get completely lost.
+
+      Be sure to extract the data contained in the gmv_data structure into 
+      your own data structures because gmvread_data resets and frees the 
+      gmv_data members that it filled from the previous call.  To determine 
+      which of the gmv_data members contain data for each keyword type, see 
+      the ascii2bin.c file.  ascii2bin process all current keyword types 
+      and opens the file with gmvread_open_fromfile_skip to show how the
+      fromfile information is retrieved. 
+
+
+   void gmvread_mesh()
+
+      This routine reads the mesh data (nodes, cells, faces, vfaces) from
+      the GMV input file and fills the following structure (defined in 
+      gmvread.h):
+
+      EXTERN struct 
+         {
+          long long  nnodes; 
+          long long  ncells;
+          long long  nfaces;
+          long long  totfaces;
+          long long  totverts;
+          int        intype;  /* CELLS, FACES, STRUCT, LOGICALLY_STRUCT */
+                              /* AMR, VFACE2D, VFACE3D.                  */
+          int        nxv;  /*  nxv, nyv, nzv for STRUCT,  */
+          int        nyv;  /*  LOGICALLY_STRUC and AMR.   */
+          int        nzv;
+
+          double     *x;  /*  Node x,y,zs, nnodes long.  */
+          double     *y;
+          double     *z;
+
+          long long  *celltoface;   /*  Cell to face pointer, ncells+1 long. */
+          long long  *cellfaces;    /*  Faces in cells, totfaces+1 long.  */
+          long long  *facetoverts;  /*  Face to verts pointer, nfaces+1 long.*/
+          long long  *faceverts;    /*  Verts per face, totverts long.  */
+          long long  *facecell1;    /*  First cell face attaches to.  */
+          long long  *facecell2;    /*  Second cell, nfaces long.  */
+          long long  *vfacepe;       /*  Vface pe no.  */
+          long long  *vfaceoppface;  /*  Vface opposite face no.  */
+          long long  *vfaceoppfacepe;  /*  Vface opposite face pe no.  */
+         } 
+      gmv_meshdata;
+
+      Then use gmvread_data() to continue reading the GMV input file.
+
+      The pointers in gmv_meshdata are not freed by gmvread, so you can 
+      continue to use them.  The data in gmv_meshdata is defined by:
+        gmv_meshdata.nnodes - the number of nodes.
+        gmv_meshdata.ncells - the number of cells.
+        gmv_meshdata.nfaces - the number of faces read or generated.
+        gmv_meshdata.totfaces - the number of faces for all cells 
+            Note that nfaces and totfaces are always the same for meshed 
+                 that  have been defined with a CELLS, VFACE2D or VFACE3D  
+                 intype They may be different for meshes defined with a 
+                 FACES intype.  There are no faces for STRUCT, 
+                 LOGICALLY_STRUCT and AMR intypes.
+        gmv_meshdata.intype - the input type for the mesh can be one of 
+            CELLS, FACES, STRUCT, LOGICALLY_STRUCT, AMR, VFACE2D, VFACE3D.  
+            If an error is encountered during gmvread_mesh, the input type 
+            will contain GMVERROR.
+        gmv_meshdata.nxv - 
+        gmv_meshdata.nyv - 
+        gmv_meshdata.nzv - the number of x, y and z vectors for STRUCT, 
+            LOGICALLY_STRUCT and AMR intypes.
+        gmv_meshdata.x - 
+        gmv_meshdata.y - 
+        gmv_meshdata.z - the x, y, and z values.  They are nnodes long 
+            for CELLS, FACES, LOGICALLY_STRUCT, VFACE2D, VFACE3D.  They 
+            are nxv, nyv and nzv long for STRUCT and AMR.
+        gmv_meshdata.celltoface - the offset for each cell into the 
+            cellfaces array.  It is ncells+1 long.
+        gmv_meshdata.cellfaces - the offset for the cell faces list to 
+            the facetoverts list.  It is totfaces+1 long.
+        gmv_meshdata.facetoverts - the offset from faces to the list of 
+            vertices for the faces.  This array is set by reading FACES, 
+            otherwise it is generated and is the same size as totfaces.  
+            If other than FACES have been input, the cellfaces array can
+            be ignored because the celltoface array offsets are the same 
+            for facetoverts as they are for cellfaces.  This array is 
+            nfaces+1 long.
+        gmv_meshdata.faceverts - the list of vertices (node numbers) for 
+            each face.  It is totverts long.
+        gmv_meshdata.facecell1 - 
+        gmv_meshdata.facecell2 - for FACES, VFACES2D and VFACES3D intypes, 
+            the two cells that this face can be attached to.
+        gmv_meshdata.vfacepe - for VFACES2D and VFACES3D, the face processor 
+            number.
+        gmv_meshdata.vfaceoppface - for VFACES2D and VFACES3D, the opposite 
+            face number.
+        gmv_meshdata.vfaceoppfacepe - for VFACES2D and VFACES3D, the opposite
+            face processor number.
+            
+
+      To read a GMV file using gmvread_mesh, open the file with gmvread_open,
+      then in a loop call gmvread_data to read the a keyword, and check 
+      for the data type.  If the data type is NODES then call gmvread_mesh, 
+      process the mesh data, then continue to process each data type left 
+      in the file until GMVEND is found.  Finally, close the file with 
+      gmvread_close.
+
+      eg.
+      
+      ierr = gmvread_open(filename);
+      if (ierr > 0) exit(0);
+      iend = 0;
+      while (iend == 0)
+         {
+          gmvread_data();
+          if (gmv_data.keyword == GMVEND) iend = 1;
+          switch (gmv_data.keyword)
+            {
+             case(NODES):
+                gmvread_mesh();
+                make_mesh();
+                break;
+             case(MATERIAL):
+                do_materials();
+                break;
+             case(VELOCITY):
+	        do_velocity();
+                break;
+             case(VARIABLE):
+                do_variables();
+                break;
+             ... 
+            }
+         }  

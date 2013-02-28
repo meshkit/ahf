@@ -1,0 +1,15 @@
+Please run "test_snctools.m".  These produce a lot of very verbose output.  Don't be fooled by any of it, if any tests fail, you will know.
+
+In order to test SNCTOOLS with MEXNC as the backend, the mex-file must be on your matlab path.
+
+In order to test SNCTOOLS with java as the backend, a few more conditions must be met:
+    1.  MEXNC must be on your path
+    2.  matlab must not be started with the -nojvm option
+    3.  The toolsUI jar file must be on your javaclasspath
+
+You can also test remote access to OPeNDAP servers if the SNCTOOLS TEST_OPENDAP preference is set to true, i.e.
+
+    >> setpref('SNCTOOLS','TEST_OPENDAP',true);
+
+You may not want to do this if you believe that the opendap server used in the tests is down.  Do NOT set these to true unless you either have an OPeNDAP-enabled mex-file or you have the toolsUI jar file on your javaclasspath.
+

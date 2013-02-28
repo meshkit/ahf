@@ -1,0 +1,89 @@
+SNCTOOLS and the MathWorks
+=======================================================================
+Yes, it's true, the MathWorks has released support for netCDF.  And
+SNCTOOLS can use MATLAB's native support as a backend.  It should just
+work, no need to alter your existing code or setup.
+
+Please note that SNCTOOLS is not supported by the MathWorks.  If you
+have questions about SNCTOOLS, you should continue to use the 
+email address listed on sourceforge.
+
+SNCTOOLS and NetCDF-4
+=======================================================================
+SNCTOOLS supports netCDF-4 files provided you do one of two things.  
+You can read and write to netCDF-4 classic files (those files that do
+not use any advanced netCDF-4 features, like compound or variable-
+length datasets) if you >>>> STATICALLY <<< recompile the netcdf-4 and 
+hdf5 libraries and then relink mexnc.  The R2008b MathWorks netCDF
+support only extends to 3.6.2.  
+
+If you do not compile the libraries statically, you will get an invalid
+mex-file, as the 1.8.x version of hdf5 will conflict with the 1.6.5
+version used by MATLAB.  Please see the instructions for mexnc for 
+further details about compiling mexnc.  
+
+The 2nd route is perhaps easier, but you only get read support.  The
+java backend can read netCDF-4 classic files just fine, just make sure
+you have version 4.0 of toolsUI or better.  This requires MATLAB 
+version R2006a or higher.
+
+
+=======================================================================
+Of all the routines in this m-file collection, the most useful (in my
+humble opinion) are as follows
+	
+	1. nc_varget    - reads a netcdf variable
+	2. nc_varput    - writes to a netcdf variable
+	3. nc_attget    - reads a netcdf attribute
+	4. nc_attput    - writes a netcdf attribute
+	5. nc_padheader - pads header section of large netCDF files
+	6. nc_dump      - prints netcdf metadata
+
+There is a subdirectory called "tests" which has routines that test
+the m-files of SNCTOOLS.  You really don't need to worry about this
+unless you are convinced that there is something wrong with one of
+the m-files.  In that case, you can run the test suite by changing
+directories into "tests" and running "test_snctools" from the matlab
+command line.  
+
+ROW MAJOR VS COLUMN MAJOR ORDER
+=======================================================================
+Mexnc is written in C and therefore retrieves data in row-major order.
+MATLAB is a column-major order beast, however.  This results in a 
+dimension mismatch because the fastest-varying dimension in MATLAB is
+the 1st dimension, whereas it is the last dimension in C.  Therefore, 
+Mexnc has historically transposed data before writing to file and 
+after reading from file.  This imposes a performance hit.  You can now
+set a preference to tell SNCTOOLS to not transpose the data.
+
+    >> setpref('SNCTOOLS','PRESERVE_FVD',true);
+
+This could very well break code written prior to R2008b, so use this
+option at your own risk.  
+
+The default value is false, i.e. NOT transposing the data.  
+
+SNCTOOLS and OPeNDAP
+=======================================================================
+SNCTOOLS can use java to read OPeNDAP URLs.  In order to do this, 
+follow these steps.
+
+	Then download toolsUI-2.2.22.jar or higher from
+	ftp://ftp.unidata.ucar.edu/pub/netcdf-java/ 
+	
+	Make sure that you DO NOT start matlab with the -nojvm option.  
+	
+	Add this jar file to your dynamic java path from within matlab
+	using javaaddpath, i.e.
+
+		>> javaaddpath ( '/path/to/toolsUI-2.2.22.jar' );
+
+	From the command line, you can then turn on the java backend with 
+
+		>> setpref ( 'SNCTOOLS', 'USE_JAVA', true );
+
+Note that if you want netcdf-4 support, you need the 4.0 version of
+the jar file.
+
+
+

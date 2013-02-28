@@ -1,0 +1,1051 @@
+_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+_/								    _/
+_/    Copyright, 1996, The Regents of the University of		    _/
+_/    California.  This software was produced under a U. S.	    _/
+_/    Government contract (W-7405-ENG-36) by the Los Alamos	    _/
+_/    National Laboratory, which is operated by the		    _/
+_/    University of California for the U. S. Department of	    _/
+_/    Energy.  The U. S. Government is licensed to use,		    _/
+_/    reproduce, and distribute this software.  Permission	    _/
+_/    is granted to the public to copy and use this software	    _/
+_/    without charge, provided that this Notice and any statement   _/
+_/    of authorship are reproduced on all copies.  Neither the	    _/
+_/    Government nor the University makes any warranty, express	    _/
+_/    or implied, or assumes any liability or responsibility for    _/
+_/    the use of this software.					    _/
+_/    ----------------------------------			    _/
+_/    Software Author:  Kevin L. Bolling			    _/
+_/    Updated by Jeff Hinrichs					    _/
+_/								    _/
+_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+---------------------------------------------------------------------
+|		Documentation for "gmvwrite" routines		    |
+---------------------------------------------------------------------
+
+The functions included in the libraries in the files "gmvwrite.c" and
+"gmvwritef.c" are to be used in writing gmv files in ieee binary form
+using either the Fortran or C programming languages.  A typical
+function call for C and Fortran would look like:
+
+   c:  gmvwrite_openfile(filename);
+   f77:  call fgmvwrite_openfile(filename(1))
+
+The Fortran function names are the same as the C names with an "f"
+stuck on the front of the name.  Sample C and Fortran programs that 
+use these routines are located in the files "samplec.c" and 
+"sampfortran.f".
+
+---------------------------------------------------------------------
+|	A description of each "gmvwrite" routine follows:	    |
+---------------------------------------------------------------------
+
+gmvwrite_openfile(char filnam[])
+
+The function gmvwrite_openfile has one argument.  The single argument
+is a character array that can be up to 80 characters long.  This
+character string should include the path and file name where you want
+your file to be written.  If the path is the current path then you
+just need the filename.  The calls from Fortran and C are as follows:
+
+   gmvwrite_openfile(filename);
+   call gmvwrite_openfile(filename(1)) 
+
+where filename is a character array.  The function gmvwrite_openfile
+also writes the header of a gmv file.  The gmv header has two
+character arrays and has the form of:
+
+   gmvinputieee
+
+where "gmvinput" and "ieee    " are two separate character arrays.  
+
+NOTE: When using this function, both the integer size and the real
+size will be 4 bytes a piece, therefore you must use (int *) and
+(float *) pointers when calling functions with void parameters.  See
+below for more clarification.
+
+---------------------------------------------------------------------
+
+gmvwrite_openfile_ir(char filnam[], int isize, int rsize)
+
+This function is an alternative to the standard "gmvwrite_opefile"
+that allows you to enlarge the integer and/or floating point data
+types to suit your needs.  The first parameter is the 8 character
+string holding the name of the GMV file to write to.  Then comes
+"isize" and "risze," which loosely stand for "integer size" and
+"real size."  The allowed values are:
+
+	isize ---> must be 4  (Note, 8 byte nodes and cells are 
+                               not yet required in GMV)
+		int = 4 bytes
+		long long = 8 bytes
+	rsize ---> can be 4 or 8
+		float = 4 bytes
+		double = 8 bytes
+
+Calling this function with rsize of 8 means that ALL floating point 
+data will be of size double (8 bytes).  Be sure that the data type 
+is double for node x,y,z data, velocity data, variable data, polygon 
+x,y,z data, tracer x,y,z data, tracer variable data, and problem time.
+
+Calling this function with data sizes other than 4 or 8 will cause
+both isize and rsize to default to 4 bytes each.  From this point
+on in your program, you must watch out for "gmvwrite" functions that
+have (void *) parameters.  These parameters must receive pointers
+to the correct type, depending on how the data sizes were specified.
+This function writes out the following different headers:
+
+	"gmvinput ieee    " OR
+	"gmvinput ieeei4r8" 
+
+---------------------------------------------------------------------
+
+gmvwrite_closefile()
+
+The function gmvwrite_closefile has 0 arguments.  This function does
+two things.  First it writes to the file the closure to a gmvfile
+which is the character string "endgmv  ".  The other thing it does is
+it closes the file to which you have been writing to.  The calls for
+this function are as follows:
+
+   gmvwrite_closefile();
+   call fgmvwrite_closefile().
+
+---------------------------------------------------------------------
+
+gmvwrite_nodes_fromfile(char *filename)
+
+The gmvwrite_nodes_fromfile function is used within the scope of the
+main GMV file to instruct GMV that node data is located in a fromfile
+specified by "filename."
+
+The use of the functions gmvwrite_*_fromfile, where * = {nodes, cells,
+material, flags, and polygons}, specifies that the fromfile will
+contain the respective data in the same format and context as would be
+used in the main GMV file. These functions write a "pointer" in the
+main GMV file, when GMV encounters this command, main file processing
+stops, the fromfile is opened and searched for the applicable
+data. Once the data is input, the fromfile is closed, and main GMV
+file processing continues.
+
+The calls from Fortran and C are as follows:
+
+   gmvwrite_nodes_fromfile(filename);
+   call fgmvwrite_nodes_fromfile(filename(1)) 
+
+where filename is a character array.
+
+---------------------------------------------------------------------
+
+gmvwrite_node_data(void *nndes, void *x, void *y, void *z)
+
+The function gmvwrite_node_data has 4 arguments, all of which are
+pointers of type "void."  The following are the allowed parameter
+types depending on which "openfile" routine you called:
+
+	nndes ---> can be (int *) or (long long *)
+	x, y, and z ---> can be (float *) or (double *)
+
+The first parameter is a pointer to either a 4 or an 8 byte integer
+that holds the number of nodes.  The next three arguments are pointers
+to either 4 or 8 byte floating point arrays which hold the xyz values
+for each of the nodes and each should have a size of nndes.
+The calls for this function are as follows:
+
+   gmvwrite_node_data(&nnodes, x, y, z);
+   call fgmvwrite_node_data(nnodes, x, y, z)  
+
+where nnodes is the number of nodes and x,y,z are floating point
+arrays holding the xyz coordinates for each of the nodes.  This
+function writes out the node data using the regular syntax for the
+"nodes" keyword.
+
+---------------------------------------------------------------------
+
+gmvwrite_node_data_struct(void *nxv, void *nyv, void *nzv, 
+                          void *x, void *y, void *z)
+
+The function gmvwrite_node_data_struct has 6 arguments, all of which
+are pointers of type "void."  The following are the allowed parameter
+types depending on which "openfile" routine you called:
+
+	nxv, nyv, and nzv ---> can be (int *) or (long long *)
+	x, y, and z ---> can be (float *) or (double *)
+
+The parameters nxv, nyv, and nzv are pointers to the number of nodes
+in each of the coordinate directions.  The parameters x, y, and z
+hold the coordinate values in each direction.  For example, x should
+contain nxv values, y should have nyv values, and so on.  The calls 
+for this function are as follows:
+
+   gmvwrite_node_data_struct(&nxv, &nyv, &nzv, x, y, z);
+   call fgmvwrite_node_data_struct(nxv, nyv, nzv, x, y, z)
+
+This function writes out the node data in the "nodes -1" syntax for
+the "nodes" keyword that is used for generating rectangular brick
+meshes.
+
+---------------------------------------------------------------------
+
+gmvwrite_node_data_lstruct(void *nxv, void *nyv, void *nzv, 
+                           void *x, void *y, void *z)
+
+The function gmvwrite_node_data_lstruct has 6 arguments, all of which
+are pointers of type "void."  The following are the allowed parameter
+types depending on which "openfile" routine you called:
+
+	nxv, nyv, and nzv ---> can be (int *) or (long long *)
+	x, y, and z ---> can be (float *) or (double *)
+
+The parameters nxv, nyv, and nzv are pointers to the number of nodes
+in each of the coordinate directions.  The parameters x, y, and z hold
+the coordinate values for all the nodes in the logically rectangular
+brick mesh.  x, y, and z should all have nxv*nyv*nzv values in them.
+The calls for this function are as follows:
+
+  gmvwrite_node_data_lstruct(&nxv, &nyv, &nxv, x, y, z);
+  call fgmvwrite_node_data_lstruct(nxv, nyv, nzv, x, y, z);
+
+This function writes out the node data in the "nodes -2" syntax for
+the "nodes" keyword.  This syntax is used for writing out logically
+rectangular brick meshes.
+
+---------------------------------------------------------------------
+
+gmvwrite_node_data_amr(int nxc, int nyc, int nzc,
+				void *x0, void *y0, void *z0,
+					void *dx, void *dy, void *dz)
+
+The function gmvwrite_node_data_amr has 9 arguments.  The first three
+specifiy the number of nodes in each of the coordinate directions.  The
+second three are floating point numbers that will serve as the origin
+(lower left corner) of the mesh.  The last three parameters give the
+step size in each coordinate direction.  Once again, there is a choice
+here of parameter types to call this function with.  The valid choices
+depending on which openfile routine was used are:
+
+	x0, y0, z0, dx, dy, and dz ---> can be (float *) or (double *)
+
+The calls for this function are as follows:
+
+  gmvwrite_node_data_amr(nxc, nyc, nzc, &x0, &y0, &z0, &dx, &dy, &dz);
+  call fgmvwrite_node_data_amr(nxc, nyc, nzc, x0, y0, z0, dx, dy, dz);
+
+This function writes out the node data in the "nodes -3" syntax for
+the "nodes" keyword.  This syntax is for setting the basis for an AMR
+(adaptive mesh refinement) mesh.  A subsequent call to "gmvwrite_cells_amr"
+is required as well.  See below...
+
+---------------------------------------------------------------------
+
+gmvwrite_cells_amr(void *numcells, void *numtop, void *daughters[])
+
+The function gmvwrite_cells_amr takes 3 parameters.  The allowed
+parameter types are:
+
+	numcells, numtop, and daughters ---> can be (int *) or (long long *)
+
+The first parameter is the total number of cells.  The second parameter
+references the number of top-level cells.  This number should be less 
+than or equal to the total number of cells.  Finally, the last needed 
+information is the list of daughter cells.  The list is an array with a
+length of numcells.  The calls for this function are as follows:
+
+  gmvwrite_cells_amr(&numcells, &numtop, daughters);
+  call fgmvwrite_cells_amr(numcells, numtop, daughters);
+
+This function writes out the character string "cells   " followed by the
+total number of cells, the number of top-level cells, and the daughter
+list.
+
+---------------------------------------------------------------------
+ 
+gmvwrite_cells_fromfile(char *filename)
+ 
+The gmvwrite_cells_fromfile function is used within the scope of the
+main GMV file to instruct GMV that cell data is located in a fromfile
+specified by "filename."
+
+The calls from Fortran and C are as follows:
+
+   gmvwrite_cells_fromfile(filename);
+   call fgmvwrite_cells_fromfile(filename(1)) 
+
+where filename is a character array.
+
+---------------------------------------------------------------------
+
+gmvwrite_cell_header(void *ncells) 
+
+The function gmvwrite_cell_header has a single argument.  The
+parameter "ncells" may be of type (int *) or (long long *) depending
+on which openfile routine was used.  This argument holds the number of 
+cells that you want to write out.  The calls for this function are as 
+follows:
+
+   gmvwrite_cell_header(&ncells);
+   call fgmvwrite_cell_header(ncells)
+
+This function writes out the "cells   " keyword and the number of cells
+that there are.
+
+---------------------------------------------------------------------
+
+gmvwrite_cell_type(char cell_type[], int nverts, void *nodes)
+
+The function gmvwrite_cell_type has three arguments.  The first is a
+character string.  This character string has to be 8 characters long.
+This character string should be one of the following depending on what
+type of cell you are writing out. The different types are:
+
+   "tet     "
+   "hex     "
+   "pyramid "
+   "prism   "
+   "tri     "
+   "quad    "
+
+The second argument is an integer that holds the number of vertices
+the cell has.  The last argument is an array that holds the node numbers 
+for each of the vertices that the cell has.  The array must be passed
+as either (int *) or (long long *) depending on which "opefile" routine
+was used.  The calls for this functions are as follows:
+
+   gmvwrite_cell_type(celltype, nverts, nodes);
+   call fgmvwrite_cell_type(celltype(1), nverts, nodes)
+
+This function writes out the character array cell_type, the number of
+vertices, and the node numbers for each of the vertices.  Call this
+function for each cell you want to write out.
+
+---------------------------------------------------------------------
+
+gmvwrite_general_cell_type(char cell_type[], int nverts[], 
+                           int nfaces, void *nodeids)
+
+The function gmvwrite_general_cell_type has 4 arguments.  The first is
+a character string that holds the cell type.  Unlike the previous
+function, this can be only one type and that is "general ".  Again
+this character string must be 8 characters long.  The second argument
+is an integer array that has a size of nfaces and holds the number of
+vertices each face of the cell has.  The third argument is an integer
+that holds the number of faces that this cell has.  The last argument
+is an array passed as either (int *) or (long long *), depending on
+which "openfile" routine was used.  This array holds the node numbers
+for each of the vertices that this cell has.  The calls for this 
+function are as follows:
+
+   gmvwrite_general_cell_type(cell_type, nverts, nfaces, nodeids);
+   call fgmvwrite_general_cell_type(cell_type(1), nverts, nfaces, nodeids)
+
+This function write out the character string "general ", the number of
+faces the cell has, the number of vertices per face, and a list of
+node numbers that define the polygonal faces.
+
+---------------------------------------------------------------------
+
+gmvwrite_face_header(void *nfaces, void *ncells) 
+
+The function gmvwrite_face_header has two arguments.  The two parameters
+"nfaces" and "ncells" may be of type (int *) or (long long *) depending
+on which openfile routine was used.  The "nfaces" argument holds the number 
+of faces that you want to write out and the "ncell" argument is the number 
+of cells that are created from the faces.  The calls for this function are 
+as follows:
+
+   gmvwrite_face_header(&nfaces, &ncells);
+   call fgmvwrite_face_header(nfaces, ncells)
+
+This function writes out the "faces   " keyword and the number of faces
+and cells that there are.
+
+---------------------------------------------------------------------
+
+gmvwrite_face_data(int nverts, void *nodeids, void cellid1, void cellid2)
+
+The function gmvwrite_face_data has 4 arguments.  The first is
+the number of vertices in the face.  The second argument is an integer 
+array that has a size of nverts and holds the node numbers that define 
+this face.  The third argument is the first cell number that this face 
+is part of.  The fourth argument is the second cell number that this 
+face is part of.  If the face lies in only one cell, the second cell
+number must be 0.  Arguments 2, 3, and 4 can be passed as either (int *) 
+or (long long *), depending on which "openfile" routine was used.  The 
+calls for this function are as follows:
+
+   gmvwrite_face_data(nverts, nodeids, cellid1, cellid2);
+   call fgmvwrite_face_data(nverts, nodeids, cellid1, cellid2)
+
+This function writes out the number of vertices and a list of node 
+numbers that define the polygonal face, and the two cells that contain 
+the face.  If the face is contained in only one cell, the second cellid 
+must be 0.
+
+---------------------------------------------------------------------
+
+gmvwrite_material_fromfile(char *filename)
+ 
+The gmvwrite_material_fromfile function is used within the scope of
+the main GMV file to instruct GMV that material data is located in a
+fromfile specified by "filename."
+ 
+The calls from Fortran and C are as follows:
+ 
+   gmvwrite_material_fromfile(filename);
+   call fgmvwrite_material_fromfile(filename(1))
+ 
+where filename is a character array.
+ 
+---------------------------------------------------------------------
+
+gmvwrite_material_header(int nmats, int data_type)
+
+The function gmvwrite_material_header has two arguments.  The first is
+an integer value holding the number of materials that there are.  The
+second is also a integer type and it holds the data type.  The data
+type tells gmv whether the materials are for the cells or the nodes.
+If cells then data_type should be 0 and if nodes then it should be 1.
+For further information on this see the gmv manual.  The calls for
+this function are as follows:
+
+   gmvwrite_material_header(nmats, datatype); 
+   call fgmvwrite_material-header(nmats, datatype)
+
+This function writes out the keyword "material", the number of materials, 
+and the data type.
+
+---------------------------------------------------------------------
+
+gmvwrite_material_name(char matname[])
+
+The function gmvwrite_material_name has one argument.  This argument
+is a character string that holds the name of the material that you
+want to write out.  The string must be 8 characters long.  The calls
+for this function are as follows:
+
+   gmvwrite_material_name(matname);
+   call fgmvwrite_material_name(matname(1))
+
+This function writes out a material name and must be called once for 
+each material you want to write out.
+
+---------------------------------------------------------------------
+
+gmvwrite_material_ids(int matids[], int data_type)
+
+The function gmvwrite_material_ids has two arguments.  The first is a
+integer array of either the size of the number of nodes or the size of
+the number of cells.  This array holds the material numbers for each
+of the nodes or cells.  The data type tells the function whether you
+are entering materials for cells or nodes.  If for cells then
+data_type needs to be 0 and for nodes data_type needs to be 1.  The
+calls for this function are as follows:
+
+   gmvwrite_material_ids(matids, datatype);
+   call fgmvwrite_material_ids(matids, datatype)
+
+This function writes out the material values for each of the nodes or 
+cells.  
+
+---------------------------------------------------------------------
+
+gmvwrite_velocity_data(int data_type, void *u, void *v, void *w)
+
+The function gmvwrite_velocity_data has four arguments.  The first is
+data_type.  This argument has the purpose as in earlier functions.
+The next three are floating point or double arrays that hold the xyz values
+for the velocities for each cell or node.  The calls for this function are
+as follows:
+
+   gmvwrite_velocity_data(datatype, u, v, w);
+   call fgmvwrite_velocity_data(datatype, u, v, w);
+
+This function writes out the keyword "velocity", the data type, and
+the floating point or double xyz velocities for each cell or node.
+
+---------------------------------------------------------------------
+
+gmvwrite_variable_header()
+
+The function gmvwrite_variable_header has no arguments.  The calls for
+this function are as follows:
+
+   gmvwrite_variable_header();
+   call fgmvwrite_variable_header()
+
+This function writes out the keyword "variable".
+
+---------------------------------------------------------------------
+
+gmvwrite_variable_name_data(int data_type, char varname[], void *vids)
+
+The function gmvwrite_variable_name_data has three arguments.  The
+first is the data type.  The second is a character array that holds
+the name of the variable.  The third argument is a floating point or
+double array that holds the floating point values for the variable for 
+each node or cell.  The calls for this function are as follows:
+
+   gmvwrite_variable_name_data(datatype, varname, varids);
+   call fgmvwrite_variable_name_data(datatype, varname(1), varids)
+
+This function writes out the variable name, data type, and the array
+of floating point or double data pertaining to the variable.  You must 
+call this function one time for each variable you wish to write out.
+
+---------------------------------------------------------------------
+
+gmvwrite_variable_endvars()
+
+The function gmvwrite_variable_endvars has no arguments.  The calls for 
+this function are as follows:
+
+   gmvwrite_variable_endvars();
+   call fgmvwrite_variable_endvars()
+
+This function writes out the character string "endvars ".  This
+character string tells gmv that there are no more variable to be read.
+
+---------------------------------------------------------------------
+
+gmvwrite_flag_fromfile(char *filename)
+ 
+The gmvwrite_flags_fromfile function is used within the scope of the
+main GMV file to instruct GMV that flag data is located in a fromfile
+specified by "filename."
+ 
+The calls from Fortran and C are as follows:
+ 
+   gmvwrite_flag_fromfile(filename);
+   call fgmvwrite_flag_fromfile(filename(1))
+ 
+where filename is a character array.
+ 
+---------------------------------------------------------------------
+
+gmvwrite_flag_header()
+
+The gmvwrite_flag_header function takes no parameters.  It's sole function
+is to write out the string "flags   " to the gmv binary file, which marks
+the beginning of the flag section.  A call to this function must precede
+any flag data to be written out.
+
+The calls from Fortran and C are as follows:
+
+   gmvwrite_flag_header();
+   call fgmvwrite_flag_header()
+
+---------------------------------------------------------------------
+
+gmvwrite_flag_name(char flagname[], int numtypes, int data_type)
+
+The function gmvwrite_flag_name takes three parameters.  The first must
+be an 8 character string containing the name of the flag data set.  The
+second is an integer representing the number of sub-types within this
+flag data set.  The third is either 1 or 0, depending on whether or not
+the flags are for node or cell data.
+
+The calls from Fortran and C are as follows:
+
+   gmvwrite_flag_name(flagname, numtypes, data_type);
+   call fgmvwrite_flag_name(flagname(1), numtypes, data_type)
+
+---------------------------------------------------------------------
+
+gmvwrite_flag_subname(char *subname)
+
+The gmvwrite_flag_subname function does one thing: it writes out the name
+of a single flag subtype that is part of a larger flag data set.  The flag
+data set must be defined before calls to this function are made.  Please
+the see the gmv input format specifications in the gmv manual for more
+clarification.
+
+The calls from Fortran and C are as follows:
+
+   gmvwrite_flag_subname(subname);
+   call fgmvwrite_flag_subname(subname(1))
+
+---------------------------------------------------------------------
+
+gmvwrite_flag_data(int data_type, int *flag_data)
+
+The function gmvwrite_flag_data writes out the node (or cell) list
+that accompanies a flag data set definition.  A flag for each node
+(or cell) must be present in the data list.  The data type should be
+1 for nodes and 0 for cells.
+
+The calls from Fortran and C are as follows:
+
+   gmvwrite_flag_data(data_type, flag_data);
+   call gmvwrite_flag_data(data_type, flag_data)
+
+---------------------------------------------------------------------
+
+gmvwrite_flag_endflag()
+
+The function gmvwrite_flag_endflag takes no parameters.  All it does
+is write out the 8 character string "endflag " to signify the end of
+all flag data.
+
+The calls from Fortran and C are as follows:
+
+   gmvwrite_flag_endflag();
+   call fgmvwrite_flag_endflag()
+
+---------------------------------------------------------------------
+
+gmvwrite_polygons_fromfile(char *filename)
+ 
+The gmvwrite_polygons_fromfile function is used within the scope of
+the main GMV file to instruct GMV that polygon data is located in a
+fromfile specified by "filename."
+ 
+The calls from Fortran and C are as follows:
+ 
+   gmvwrite_polygons_fromfile(filename);
+   call fgmvwrite_polygons_fromfile(filename(1))
+ 
+where filename is a character array.
+ 
+---------------------------------------------------------------------
+
+gmvwrite_polygons_header()
+
+The function gmvwrite_polygons_header has no arguments.  The calls for 
+this function are as follows:
+
+   gmvwrite_polygons_header();
+   call fgmvwrite_polygons_header()
+
+This function writes out the keyword "polygons".  
+
+---------------------------------------------------------------------
+
+gmvwrite_polygons_data(int nverts, int matnum, 
+                       void *x, void *y, void *z)
+
+The function gmvwrite_polygons_data has five arguments.  The first is
+an integer value that holds the number of vertices that the polygons
+has.  The second is an integer value that holds that material number
+of the polygon.  The next three are floating point or double arrays that 
+hold the xyz coordinates for each of the vertices of the polygon.  The
+calls for this function are as follows:
+
+   gmvwrite_polygons_data(nverts, matnum, x, y, z);
+   call fgmvwrite_polygons_data(nverts, matnum, x, y, z)
+
+This function writes out the material number, the number of vertices,
+and the xyz coordinates of each of the vertices for the polygon.  This
+function needs to be called one time for each polygon you want to
+write out.
+
+---------------------------------------------------------------------
+
+gmvwrite_polygons_endpoly()
+
+The function gmvwrite_polygons_endpoly has no arguments.  The calls for 
+this function are as follows:
+
+   gmvwrite_polygons_endpoly();
+   call fgmvwrite_polygons_endpoly()
+
+This function writes out the character string "endpoly ".  This string
+tells gmv that there are no more polygons to read.
+
+---------------------------------------------------------------------
+
+gmvwrite_tracers_header(int ntracers, void *x, void *y, void *z)
+
+The function gmvwrite_tracers_header has four arguments.  The first is
+an integer value that holds the number of tracers there are.  The next
+three are floating point or double arrays that each has the size of 
+ntracers and holds the xyz coordinates for each tracer.  The calls for 
+this function are as follows:
+
+   gmvwrite_tracers_header(ntracers, x, y, z);
+   call fgmvwrite_tracers_header(ntracers, x, y, z)
+
+This function writes out the keyword "tracers ", the number of tracers, 
+and the xyz coordinates of each tracer.  
+
+---------------------------------------------------------------------
+
+gmvwrite_tracers_name_data(int ntracers, char tracername[], void *data)
+
+The function gmvwrite_tracers_name_data has three arguments.  The
+first is an integer value holding the number of tracers.  The second
+is a character array holding the name of a tracer variable.  This
+character array must be 8 characters long.  The third argument is a
+floating point or double array holding values for the tracer variable 
+for each tracer.  The calls for this function are as follows:
+
+   gmvwrite_tracers_name_data(ntracers, tracername, data);
+   call fgmvwrite_tracers_name_data(ntracers, tracername(1), data)
+
+This function writes out the tracer variable name and the array of data 
+pertaining to that variable.
+
+---------------------------------------------------------------------
+
+gmvwrite_tracers_endtrace()
+
+The function gmvwrite_tracers_endtrace has no arguments.  The calls
+for this function are as follows:
+
+   gmvwrite_tracers_endtrace();
+   call fgmvwrite_tracers_endtrace()
+
+This function writes out the character string "endtrace" which tells 
+gmv not to read any more tracers.  
+
+---------------------------------------------------------------------
+
+gmvwrite_probtime(double *ptime)
+
+The function gmvwrite_probtime has one argument.  This argument is a
+double pointer double value that holds the simulation problem time.  
+The calls for this function are:
+
+   gmvwrite_probtime(ptime);
+   call fgmvwrite_probtime(ptime)
+
+This function writes out the keyword "probtime" and the floating point 
+or double value of ptime.
+
+---------------------------------------------------------------------
+
+gmvwrite_cycleno(int cyclenum)
+
+The function gmvwrite_cycleno has one argument.  This argument is an
+integer value that holds the cycle number.  The calls for this
+function are:
+
+   gmvwrite_cycleno(cyclenum);
+   call fgmvwrite_cycleno(cyclenum)
+
+This function writes out the keyword "cycleno " and the integer value 
+cyclenum.
+
+---------------------------------------------------------------------
+
+gmvwrite_nodeids(int nodeids[])
+
+The function gmvwrite_nodeids has one argument, an integer array the
+size of the number of nodes that contains the node number to display.
+   gmvwrite_nodeids(nodeids);
+   call fgmvwrite_nodeids(nodeids)
+
+This function writes out a node id number for each of the nodes for 
+display and reference purposes.  
+
+---------------------------------------------------------------------
+
+gmvwrite_cellids(int cellids[])
+
+The function gmvwrite_cellids has one argument, an integer array the
+size of the number of cells that contains the cell number to display.
+   gmvwrite_cellids(cellids);
+   call fgmvwrite_cellids(cellids)
+
+This function writes out a cell id number for each of the cells for 
+display and reference purposes.  
+
+---------------------------------------------------------------------
+
+gmvwrite_surface_header(void *nsurf) 
+
+The function gmvwrite_surface_header has one argument.  The parameter
+"nsurf" may be of type (int *) or (long long *) depending on which 
+openfile routine was used.  The "nsurf" argument holds the number 
+of surface facets that you want to write out.  The calls for this function  
+are as follows:
+
+   gmvwrite_surface_header(&nsurf);
+   call fgmvwrite_surface_header(nsurf)
+
+This function writes out the "surface " keyword and the number of surface
+factes there are.
+
+---------------------------------------------------------------------
+
+gmvwrite_surface_data(int nverts, void *nodeids)
+
+The function gmvwrite_surface_data has 2 arguments.  The first is
+the number of vertices in the facet.  The second argument is an integer 
+array that has a size of nverts and holds the node numbers that define 
+this face.  Arguments 2, 3, and 4 can be passed as either (int *) or
+(long long *), depending on which "openfile" routine was used.  The 
+calls for this function are as follows:
+
+   gmvwrite_surface_data(nverts, nodeids);
+   call fgmvwrite_surface_data(nverts, nodeids)
+
+This function writes out the number of vertices and a list of node 
+numbers that define the polygonal face.
+
+---------------------------------------------------------------------
+
+gmvwrite_surfmats(int matids[])
+
+The function gmvwrite_surfmats has one arguments.  It is an integer
+array the size of the number of surface facets (nsurf).  This array holds  
+the material numbers for each of the surface facets.  The calls for this 
+function are as follows:
+
+   gmvwrite_surfmats(matids);
+   call fgmvwrite_surfmats(matids)
+
+This function writes out the keyword "surfmats" and the material values 
+for the nsurf surface facets.  
+
+---------------------------------------------------------------------
+
+gmvwrite_surfvel(void *u, void *v, void *w)
+
+The function gmvwrite_surfvel has three arguments.  These are the 
+three floating point or double arrays that hold the xyz values for
+the velocities for each surface facet.  The calls for this function
+are as follows:
+
+   gmvwrite_surfvel(u, v, w);
+   call fgmvwrite_surfvel(u, v, w);
+
+This function writes out the keyword "surfvel" and the floating point
+or double xyz velocities for each surface facet.
+
+---------------------------------------------------------------------
+
+gmvwrite_surfvars_header()
+
+The function gmvwrite_surfvars_header has no arguments.  The calls for
+this function are as follows:
+
+   gmvwrite_surfvars_header();
+   call fgmvwrite_surfvars_header()
+
+This function writes out the keyword "surfvars".
+
+---------------------------------------------------------------------
+
+gmvwrite_surfvars_name_data(char varname[], void *vids)
+
+The function gmvwrite_surfvars_name_data has two arguments.  The
+first is a character array that holds the name of the variable.  The 
+second argument is a floating point or double array that holds the 
+floating point values for the variable for each surface facet.  The 
+calls for this function are as follows:
+
+   gmvwrite_surfvars_name_data(varname, varids);
+   call fgmvwrite_surfvars_name_data(varname(1), varids)
+
+This function writes out the variable name and the array of floating 
+point or double data pertaining to the variable.  You must call this 
+function one time for each variable you wish to write out.
+
+---------------------------------------------------------------------
+
+gmvwrite_surfvars_endvars()
+
+The function gmvwrite_surfvars_endvars has no arguments.  The calls for 
+this function are as follows:
+
+   gmvwrite_surfvars_endvars();
+   call fgmvwrite_surfvars_endvars()
+
+This function writes out the character string "endsvar ".  This
+character string tells gmv that there are no more variable to be read.
+ 
+---------------------------------------------------------------------
+
+gmvwrite_surfflag_header()
+
+The gmvwrite_surfflag_header function takes no parameters.  It's sole function
+is to write out the string "surfflag" to the gmv binary file, which marks
+the beginning of the flag section.  A call to this function must precede
+any surface flag data to be written out.
+
+The calls from Fortran and C are as follows:
+
+   gmvwrite_surfflag_header();
+   call fgmvwrite_surfflag_header()
+
+---------------------------------------------------------------------
+
+gmvwrite_surfflag_name(char flagname[], int numtypes)
+
+The function gmvwrite_surfflag_name takes two parameters.  The first must
+be an 8 character string containing the name of the flag data set.  The
+second is an integer representing the number of sub-types within this
+flag data set.
+
+The calls from Fortran and C are as follows:
+
+   gmvwrite_surfflag_name(flagname, numtypes);
+   call fgmvwrite_surfflag_name(flagname(1), numtypes)
+
+---------------------------------------------------------------------
+
+gmvwrite_surfflag_subname(char *subname)
+
+The gmvwrite_surfflag_subname function does one thing: it writes out the name
+of a single flag subtype that is part of a larger flag data set.  The flag
+data set must be defined before calls to this function are made.  Please
+see the gmv input format specifications in the gmv manual for more
+clarification.
+
+The calls from Fortran and C are as follows:
+
+   gmvwrite_surfflag_subname(subname);
+   call fgmvwrite_surfflag_subname(subname(1))
+
+---------------------------------------------------------------------
+
+gmvwrite_surfflag_data( int *flag_data)
+
+The function gmvwrite_surfflag_data writes out the surface list that 
+accompanies a flag data set definition.  A flag for each surface facet 
+must be present in the integer array.
+
+The calls from Fortran and C are as follows:
+
+   gmvwrite_surfflag_data(flag_data);
+   call gmvwrite_surfflag_data(flag_data)
+
+---------------------------------------------------------------------
+
+gmvwrite_surfflag_endflag()
+
+The function gmvwrite_surfflag_endflag takes no parameters.  All it does
+is write out the 8 character string "endsflag" to signify the end of
+all surface flag data.
+
+The calls from Fortran and C are as follows:
+
+   gmvwrite_surfflag_endflag();
+   call fgmvwrite_surfflag_endflag()
+
+---------------------------------------------------------------------
+
+gmvwrite_cellids(int traceids[])
+
+The function gmvwrite_traceids has one argument, an integer array the
+size of the number of tracers that contains the tracer number to display.
+   gmvwrite_cellids(traceids);
+   call fgmvwrite_traceids(traceids)
+
+This function writes out a cell id number for each of the cells for 
+display and reference purposes.  
+
+---------------------------------------------------------------------
+
+gmvwrite_faceids(int faceids[])
+
+The function gmvwrite_faceids has one argument, an integer array the
+size of the number of faces that contains the face number to display.
+   gmvwrite_faceids(faceids);
+   call fgmvwrite_faceids(faceids)
+
+This function writes out a face id number for each of the faces for 
+display and reference purposes.  
+
+---------------------------------------------------------------------
+
+gmvwrite_group_header()
+
+
+The function gmvwrite_group_header has no arguments.  The calls for
+this function are as follows:
+
+   gmvwrite_group_header();
+   call fgmvwrite_group_header()
+
+This function writes out the keyword "groups".
+
+---------------------------------------------------------------------
+
+gmvwrite_group_data(char groupname[], int data_type, int numgrp,
+                    void *group_data)
+
+The function gmvwrite_variable_name_data has four arguments.  The
+first is a character array that holdsthe name of the group.  The 
+second is the data type.  The third argument is an integer that 
+specifies the number of elements in the group.  The fourth argument
+is an integer or long integer array that holds the element numbers 
+that are in this group.  The calls for this function are as follows:
+
+   gmvwrite_group_data(datatype, numgrp, group_data);
+   call fgmvwrite_group_data(groupname(1), datatype, numgrp, group_data)
+
+This function writes out the group name, data type, and the array
+of integers specifying the elements in the group.  You must call this 
+one time for each group you wish to write out.
+
+---------------------------------------------------------------------
+
+gmvwrite_group_endgroup()
+
+The function gmvwrite_group_endgroup has no arguments.  The calls for 
+this function are as follows:
+
+   gmvwrite_group_endgroup();
+   call fgmvwrite_group_endgroup()
+
+This function writes out the character string "endgrp ".  This
+character string tells gmv that there are no more groups to be read.
+
+---------------------------------------------------------------------
+
+gmvwrite_surfids(int surfids[])
+
+The function gmvwrite_surfids has one argument, an integer array the
+size of the number of faces that contains the surface number to display.
+   gmvwrite_surfids(surfids);
+   call fgmvwrite_surfids(surfids)
+
+This function writes out a surface id number for each of the surfaces 
+for display and reference purposes.  
+
+---------------------------------------------------------------------
+
+gmvwrite_codename(char *codename)
+
+The gmvwrite_codename function does one thing: it writes out the name
+of the code that generated the file.
+The calls from Fortran and C are as follows:
+
+   gmvwrite_codename(codename);
+   call fgmvwrite_codename(codename(1))
+
+---------------------------------------------------------------------
+
+gmvwrite_codever(char *codever)
+
+The gmvwrite_codever function does one thing: it writes out the version
+of the code that generated the file.
+The calls from Fortran and C are as follows:
+
+   gmvwrite_codever(codever);
+   call fgmvwrite_codever(codever(1))
+
+---------------------------------------------------------------------
+
+gmvwrite_codename(char *simdate)
+
+The gmvwrite_simdate function does one thing: it writes out the date
+that the file was generated in the form mm/dd/yy.
+The calls from Fortran and C are as follows:
+
+   gmvwrite_simdate(simdate);
+   call fgmvwrite_simdate(simdate(1))
+
+---------------------------------------------------------------------
+
+Other References:
+
+The only other place to look at would be the gmv manual.  In the
+manual there is a section called "The GMV Input Format."  This starts
+on page 9-1.  I recommend reading this section completely before using
+this library.
+
+---------------------------------------------------------------------
+|				THE END				    |
+---------------------------------------------------------------------

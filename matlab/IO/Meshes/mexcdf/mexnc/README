@@ -1,0 +1,69 @@
+Regarding Official Mathworks Support
+=======================================================================
+Beginning with R2008b, the MathWorks is shipping MATLAB with official
+support for netCDF.  The interface looks somewhat different than mexnc,
+but mexnc has been augmented to be able to use the native MathWorks
+support instead of the mexnc mex-file.  Just think, all you windows
+users, no more fooling around with getting the netcdf.dll installed 
+into the proper location!
+
+The first question that may arise here is "will my old code continue
+to work?"  The answer is a qualified "yes".  Just about everything 
+works as before (so far as I know), but there are a couple of 
+exceptions.
+
+    1.  Writing attributes with NaN or Inf does not result in the same
+	    datatype as it did with the mexnc-2 interface.  Since I cannot
+		think of a good reason why one would want to do this in the
+		first place, I haven't much sympathy for anyone who has a 
+		problem with this.
+
+    2.  The memory-mapped I/O routines are not supported by the 
+	    MathWorks native mex-file.  For example, one cannot use
+
+		mexnc('PUT_VARM_DOUBLE',...)
+
+		anymore.  I do not believe this to be much of an issue because
+		the main thing that these routines was good for was to permute
+		data, and MATLAB is much faster at this than the netCDF library
+		anyway.
+
+
+
+R2008a and Earlier
+=======================================================================
+If you have MATLAB versions R2008a or earlier, then you need to 
+realize that you still need the mex-file mexnc.  This is not included
+in this download.  You need to either retrieve it from an earlier
+release at sourceforge or compile it yourself (the source code IS 
+still included).
+
+SUPPORT
+=======================================================================
+Please note, mexnc is NOT supported by The MathWorks, so please do
+not ask them questions about it.  If you encounter problems with
+mexnc, you should continue to use the same contact email address
+that is listed on the sourceforge web site.
+
+
+OPeNDAP
+=======================================================================
+If you wish to use an opendap-enabled version of mexnc, then you have to
+compile your mex-file yourself.  Take a look at the online notes at 
+http://mexcdf.sourceforge.net/opendap/ for further details.
+
+
+Compiling your Own:
+========================================================================
+    You shouldn't be reading this far.  Please stop.
+
+	No really ... stop.
+
+    Alright, you really want to continue compiling your own mex-file.
+	Take a look into the source directory and try to figure things out.
+
+
+Problems?  
+========================================================================
+I don't have a lot of time for mexnc anymore, but you can still email me
+at johne.g.evans.ne@gmail.com
