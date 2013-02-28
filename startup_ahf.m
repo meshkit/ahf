@@ -16,3 +16,5 @@ end
 addpath(projroot); %#ok<*MCAP>
 addpath([projroot '/util']);
 addpath([projroot '/util/CodeGen']);
+addpath([projroot '/matlab/IO/Meshes']);
+
