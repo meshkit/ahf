@@ -223,16 +223,12 @@ l entities.
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
-
-\begin_layout Plain Layout
-
-\end_layout
+status open
 
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename AHF.pdf
+	filename figures/AHF.pdf
 
 \end_inset
 
