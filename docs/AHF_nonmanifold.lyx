@@ -1,0 +1,346 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1in
+\topmargin 1in
+\rightmargin 1in
+\bottommargin 1in
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Array-based Half-Facet (AHF) Data Structure
+\begin_inset Newline newline
+\end_inset
+
+for Mixed-Dimensional Non-manifold Meshes
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+The design objectives of our data structure include the following:
+\end_layout
+
+\begin_layout Description
+Conceptual
+\begin_inset space ~
+\end_inset
+
+simplicity.
+ It should be simple and intuitive, with a minimum number of concepts.
+\end_layout
+
+\begin_layout Description
+Coherence.
+ The data structure should be coherent for different dimensions.
+ 
+\end_layout
+
+\begin_layout Description
+Computational
+\begin_inset space ~
+\end_inset
+
+efficiency.
+ It should support all local adjacency queries in constant time, assuming
+ the valence of each entity is bounded by a small constant.
+\end_layout
+
+\begin_layout Description
+Minimal
+\begin_inset space ~
+\end_inset
+
+extra
+\begin_inset space ~
+\end_inset
+
+storage.
+ It should require minimum amount of storage additional to the element connectiv
+ity (i.e., list of nodal IDs of each entity), which are stored explicitly
+ in general.
+\end_layout
+
+\begin_layout Standard
+The basic concept of our data structure is a 
+\emph on
+half-facet 
+\emph default
+of an entity, which is an oriented 
+\begin_inset Formula $(d-1)$
+\end_inset
+
+st dimensional sub-entity of a 
+\begin_inset Formula $d$
+\end_inset
+
+-dimensional entity.
+ In particular, a half-facet of a cell is a 
+\emph on
+half-face
+\emph default
+, a half-facet of a face is a 
+\emph on
+half-edge
+\emph default
+, and a half-facet of an edge is a 
+\emph on
+half-vertex
+\emph default
+.
+\end_layout
+
+\begin_layout Standard
+In a manifold mesh, a facet can have up to two half-facets (with opposite
+ orientations), which are commonly referred to as 
+\emph on
+twin
+\emph default
+ half-facets.
+ A boundary half-facet does not have a twin half-facet.
+ In a non-manifold mesh, a facet can have more than two half-facets, which
+ we refer to as 
+\emph on
+sibling half-facets
+\emph default
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Using the the concepts of 
+\emph on
+half-facet 
+\emph default
+and 
+\emph on
+sibling half-facets
+\emph default
+, we can represent non-manifold meshes in 1-D, 2-D, or 3-D.
+ In particular, besides the vertex coordinates and the element connectivity
+ of a 
+\begin_inset Formula $d$
+\end_inset
+
+-dimensional mesh, we store 1) the mapping of sibling half-facets and 2)
+ the mapping from a vertex to a half-facet.
+ 
+\end_layout
+
+\begin_layout Standard
+For a non-manifold meshes with mixed dimensional entities, we use the union
+ of the non-manifold meshes of the different dimensions.
+ Assuming that the valence of each entity is bounded by a constant, this
+ union will allow perform any top-down or bottom-up query in constant time.
+ For better efficiency, some auxiliary arrays for intermediate-dimensional
+ entities (i.e., edges and faces of a volume mesh) may be constructed and
+ cached dynamically to speed up the operations.
+ Such a caching strategy is effective and efficient, because in general
+ only a small subset of the intermediate-dimensional entities (i.e., edges
+ and faces of a volume mesh) are stored explicitly, such as those incident
+ on the boundary or internal boundaries.
+ 
+\end_layout
+
+\begin_layout Section
+Design and Implementation
+\end_layout
+
+\begin_layout Standard
+Figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Design-of-AHF"
+
+\end_inset
+
+ illustrates the design of the AHF for a non-manifold mesh with mixed-dimensiona
+l entities.
+ Our data structure is composed of the following three core parts: 
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename AHF.pdf
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Design-of-AHF"
+
+\end_inset
+
+Design of AHF.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+Half-face data structure for 3-D entities, composed of three arrays:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+cells: a list of vertex IDs for each cell;
+\end_layout
+
+\begin_layout Enumerate
+sibhf: a map from each half-face to a sibling half-face (the map forms a
+ loop for the sibling half-faces corresponding to the same face);
+\end_layout
+
+\begin_layout Enumerate
+v2hf: a map from a vertex to a half-face ID.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Half-edge data structure for 2-D entities, composed of three arrays:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+faces: a list of vertex IDs for each (boundary) face;
+\end_layout
+
+\begin_layout Enumerate
+sibhe: a map from each half-edge to a sibling half-edge (the map forms a
+ loop for the sibling half-edges corresponding to the same edge);
+\end_layout
+
+\begin_layout Enumerate
+v2he: a map from a vertex to a half-edge ID.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Half-vertex data structure for 1-D entities, composed of three arrays:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+edges: a list of vertex IDs for each (boundary) edge;
+\end_layout
+
+\begin_layout Enumerate
+sibhv: a map from each half-vertex to a sibling half-vertex (the map forms
+ a loop for the sibling half-vertices corresponding to the same vertex);
+\end_layout
+
+\begin_layout Enumerate
+v2hv: a map from a vertex to a half-vertex ID.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+In addition, we have some optional auxiliary cache for intermediate-dimensional
+ entities:
+\end_layout
+
+\begin_layout Enumerate
+bf2hf: boundary face ID to a half-face ID;
+\end_layout
+
+\begin_layout Enumerate
+be2hf: boundary edge ID to a half-face ID;
+\end_layout
+
+\begin_layout Enumerate
+be2he: boundary edge ID to a boundary half-edge ID.
+\end_layout
+
+\begin_layout Standard
+Each entry in these arrays can be computed in constant time, so we don't
+ need to precomputed them in a batch mode, and instead can compute and cache
+ them on the fly.
+\end_layout
+
+\end_body
+\end_document
