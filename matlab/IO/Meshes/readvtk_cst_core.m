@@ -76,10 +76,10 @@ if strcmpi(tmp(1:7),'DATASET')
             end
             if strcmpi(t,'CELL_TYPES')
                 assert( ~feof(fid));
-                s = get_nextline(fid);
-                [t,s] = strtok(s);
+                %s = get_nextline(fid);
+                %[t,s] = strtok(s);
             end
-            %s = get_nextline(fid);
+            s = get_nextline(fid);
             [t,s] = strtok(s);
             type = str2double(t);
             type = round(type);
