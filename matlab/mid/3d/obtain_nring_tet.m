@@ -3,6 +3,7 @@ function buf = obtain_nring_tet( cid, lvid, tets, sibhfs, ring, buf, minpnts) %#
 %
 %    BUF = OBTAIN_NRING_TET(CID, LVID, TETS, SIDHFS)
 %    BUF = OBTAIN_NRING_TET(CID, LVID, TETS, SIDHFS, RING)
+%    BUF = OBTAIN_NRING_TET(CID, LVID, TETS, SIDHFS, RING, [], MINPNTS)
 %    BUF = OBTAIN_NRING_TET(CID, LVID, TETS, SIDHFS, RING, BUF, MINPNTS)
 % collects n-ring neighbor vertices and elements of vertex TETS(CID, LVID)
 % and saves them into BUF.
@@ -32,7 +33,7 @@ function buf = obtain_nring_tet( cid, lvid, tets, sibhfs, ring, buf, minpnts) %#
 %     ring is too small, the function will automatically expand the ring.
 
 if nargin<5; ring = 1; end
-if nargin<6;
+if nargin<6 || isempty(buf)
     nv = max(tets(:));
     buf.nverts = int32(0);
     buf.ngbvs  = nullcopy( zeros(nv, 1, 'int32'));
@@ -73,6 +74,7 @@ nelems_pre = int32(0);
 fvids_tet  = int32([1 3 2; 1 2 4; 2 3 4; 3 1 4]);
 
 % Extend to the rings
+ovf = false;
 while 1
     nverts_last = buf.nverts; nelems_last = buf.nelems;
     
@@ -85,16 +87,19 @@ while 1
             
             if hfid
                 cid = hfid2cid( hfid); lfid = hfid2lfid( hfid);
-                buf = insert_halfface( tets(cid,fvids_tet(lfid,1)), hfid, tets, buf);
+                [buf,ovf] = insert_halfface( tets(cid,fvids_tet(lfid,1)), hfid, tets, buf);
+                if ovf; break; end
             end
         end
         
-        if cur_ring+0.5>=ring && buf.nverts>=minpnts || ...
+        if ovf || cur_ring+0.5>=ring && buf.nverts>=minpnts || ...
                 buf.nverts>=minpnts && cur_ring>=ring || nelems_last==buf.nelems
             % If reached goal or it no longer grows, stop.
             break;
         else
+            % Reset buffer to cur_ring.
             buf = reset_buffe(vid, buf, nverts_last, nelems_last);
+            buf.nverts = nverts_last; buf.nelems = nelems_last;
         end
     end
     
@@ -107,13 +112,15 @@ while 1
             cid = hfid2cid( hfid); lfid = hfid2lfid( hfid);
             
             for jj=1:3
-                buf = append_one_ring( cid, fvids_tet(lfid,jj), tets, sibhfs, buf);
+                [buf,ovf] = append_one_ring( cid, fvids_tet(lfid,jj), tets, sibhfs, buf);
+                if ovf; break; end
             end
+            if ovf; break; end
         end
     end
     
     cur_ring = cur_ring + 1;
-    if buf.nverts>=minpnts && cur_ring>=ring || nelems_last==buf.nelems
+    if ovf || buf.nverts>=minpnts && cur_ring>=ring || nelems_last==buf.nelems
         % If no longer grows, stop.
         break;
     end
@@ -123,9 +130,10 @@ while 1
 end
 buf = reset_buffe(vid, buf, int32(0), int32(0));
 
-function buf = append_one_ring( cid, lvid, tets, sibhfs, buf)
+function [buf,ovf] = append_one_ring( cid, lvid, tets, sibhfs, buf)
 % Append the one-ring neighborhood of a vertex tets(cid,lvid)
 %        into buf.ngbvs and buf.ngbes.
+
 adjhfs_tet = int32([1,2,4; 1 2 3; 1 3 4; 2 3 4]);
 % Opposite vertex of a face
 oppvid_tet = int32([4; 3; 1; 2]);
@@ -134,11 +142,11 @@ oppfid_tet = int32([3; 4; 2; 1]);
 
 hfid = clfids2hfid( cid, oppfid_tet(lvid));
 
+ovf = false;
 % Insert element itself into queue.
-if ~buf.etags(cid) && buf.nelems < length(buf.ngbes)
-    buf.etags(cid) = true;
-    buf.nelems = buf.nelems + 1;
-    buf.ngbes(buf.nelems) = hfid;
+if ~buf.etags(cid)
+    ovf = buf.nelems >= length(buf.ngbes);
+    if ovf; return; end
     
     % Append vertices of the element
     for ii=int32(1):4
@@ -148,9 +156,16 @@ if ~buf.etags(cid) && buf.nelems < length(buf.ngbes)
             if buf.nverts<=length(buf.ngbvs);
                 buf.vtags( v) = true;
                 buf.nverts = buf.nverts + 1; buf.ngbvs(buf.nverts) = v;
+            else
+                % Buffer ovf. Stop.
+                ovf = true; return;
             end
         end
     end
+    
+    buf.etags(cid) = true;
+    buf.nelems = buf.nelems + 1;
+    buf.ngbes(buf.nelems) = hfid;
 end
 
 % Use unused part of buf.ngbes as queue.
@@ -164,7 +179,8 @@ while 1
     assert( tets(cid, lvid)==vid);
     for ii=int32(1):3
         hfid = sibhfs(cid, adjhfs_tet(lvid,ii));
-        buf = insert_halfface(vid, hfid, tets, buf);
+        [buf, ovf] = insert_halfface(vid, hfid, tets, buf);
+        if ovf; return; end
     end
     
     if queue_start<=buf.nelems
@@ -175,9 +191,10 @@ while 1
     end
 end
 
-function buf = insert_halfface(vid, hfid, tets, buf)
+function [buf, ovf] = insert_halfface(vid, hfid, tets, buf)
 % Insert a halfface and its opposite vertex into buffer
 
+ovf = false;
 if hfid<=0; return; end
 
 % list of vertices of each face
@@ -190,8 +207,24 @@ oppfid_tet = int32([3; 4; 2; 1]);
 cid = hfid2cid( hfid);
 lfid = hfid2lfid( hfid);
 
+ovf = false;
 % Insert element
-if cid && ~buf.etags(cid) && buf.nelems<length(buf.ngbes)
+if cid && ~buf.etags(cid)
+    ovf = buf.nelems>=length(buf.ngbes);
+    if ovf; return; end
+    
+    % Insert opposite vertex of halfface
+    v = tets( cid, oppvid_tet(lfid));
+    if ~buf.vtags(v)
+        if buf.nverts<=length(buf.ngbvs);
+            buf.vtags( v) = true;
+            buf.nverts = buf.nverts + 1; buf.ngbvs(buf.nverts) = v;
+        else
+            ovf = true; return;
+        end
+    end
+    
+    % Insert element
     buf.etags(cid) = true;
     buf.nelems = buf.nelems + 1;
     
@@ -209,27 +242,19 @@ if cid && ~buf.etags(cid) && buf.nelems<length(buf.ngbes)
     end
     
     buf.ngbes(buf.nelems) = clfids2hfid(cid, oppfid_tet(lvid));
-
-    % Insert opposite vertex of halfface
-    v = tets( cid, oppvid_tet(lfid));
-    if ~buf.vtags(v)
-        if buf.nverts<=length(buf.ngbvs);
-            buf.vtags( v) = true;
-            buf.nverts = buf.nverts + 1; buf.ngbvs(buf.nverts) = v;
-        end
-    end
 end
 
 function buf = reset_buffe(vid, buf, nverts_last, nelems_last)
-% Reset flags in the buffer
+% Reset tags in the buffer
 
+% Reset vtags
 buf.vtags(vid) = nverts_last~=0;
-
 for i=nverts_last+1:buf.nverts
     v = buf.ngbvs(i);
     buf.vtags( v) = false;
 end
 
+% Reset etags
 for i=nelems_last+1:buf.nelems
     cid = hfid2cid(buf.ngbes(i));
     buf.ngbes(i) = cid;
@@ -237,6 +262,41 @@ for i=nelems_last+1:buf.nelems
 end
 
 if nverts_last==0 && isempty( coder.target)
+    % If not compiled, verify that there is no duplicate
     assert( length(unique( buf.ngbvs(1:buf.nverts)))==buf.nverts);
     assert( length(unique( buf.ngbes(1:buf.nelems)))==buf.nelems);
 end
+
+function test  %#ok<DEFNU>
+
+%!test
+%  Build mesh data structure
+%! [xs, tets]=readvtk('dragon_5K.vtk');
+%! opphfs=determine_opposite_halfface(size(xs,1),tets);
+%  Collect neighborhood
+
+%  First test
+%! buf = obtain_nring_tet( 1, 1, tets, opphfs, 3.5);
+%  Verify completeness of nodes
+%! g2l = zeros( size(buf.ngbvs)); g2l( tets(1,1))=1;
+%! g2l(buf.ngbvs(1:buf.nverts))=2:buf.nverts+1;
+%! lelems = g2l(tets(buf.ngbes(1:buf.nelems),:));
+%! assert( min(lelems(:))==1 && max(lelems(:))==buf.nverts+1);
+
+%  Second test to grow until reaching 100 points
+%! buf = obtain_nring_tet( 1, 1, tets, opphfs, 1, [], 100);
+%  Verify completeness of nodes
+%! g2l = zeros( size(buf.ngbvs)); g2l( tets(1,1))=1;
+%! g2l(buf.ngbvs(1:buf.nverts))=2:buf.nverts+1;
+%! lelems = g2l(tets(buf.ngbes(1:buf.nelems),:));
+%! assert( min(lelems(:))==1 && max(lelems(:))==buf.nverts+1);
+
+%  Third test to use a smaller buffer
+%! buf.ngbvs = zeros(100,1,'int32');
+%! buf.ngbes = zeros(100,1,'int32');
+%! buf = obtain_nring_tet( 1, 1, tets, opphfs, 1, buf, 100);
+%  Verify completeness of nodes
+%! g2l = zeros( size(buf.ngbvs)); g2l( tets(1,1))=1;
+%! g2l(buf.ngbvs(1:buf.nverts))=2:buf.nverts+1;
+%! lelems = g2l(tets(buf.ngbes(1:buf.nelems),:));
+%! assert( min(lelems(:))==1 && max(lelems(:))==buf.nverts+1);
