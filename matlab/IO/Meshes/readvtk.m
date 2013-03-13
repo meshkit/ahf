@@ -339,7 +339,7 @@ if strcmpi(t,'DATASET')
                     [t,s] = strtok(s);
                     for j = 1:((cell_size/num_cell)-1)
                         [t,s] = strtok(s);
-                        elem(i,j) = str2double(t);
+                        elem(i,j) = str2double(t)+1;
                     end
                 end
             end
