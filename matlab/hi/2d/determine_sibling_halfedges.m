@@ -63,7 +63,6 @@ for ii=1:nelems
     hasthree = nepE~=4 || ~elems(ii,4);
     for j=1:4-int32(hasthree)
         k = elems(ii,j);
-        is_index(k) = is_index(k) + 1;
 
         v2nv(is_index( k)) = elems(ii,next(j+int32(hasthree & j==3)));
         v2he(is_index( k)) = fleids2heid(ii, j);
@@ -91,12 +90,14 @@ for ii=int32(1):nelems
 
         first_heid = fleids2heid(ii, jj);
         prev_heid = first_heid;
+        nhes = 0;
 
         % LOCATE: Locate index in v2nv(first:last)
         for index = is_index(vn):is_index(vn+1)-1
             if v2nv(index)==v
                 sibhes(heid2fid(prev_heid),heid2leid(prev_heid)) = v2he(index);
                 prev_heid = v2he(index);
+                nhes = nhes+1;
             end
         end
 
@@ -105,6 +106,7 @@ for ii=int32(1):nelems
             if v2nv(index)==vn && heid2fid(v2he(index))~=ii
                 sibhes(heid2fid(prev_heid),heid2leid(prev_heid)) = v2he(index);
                 prev_heid = v2he(index);
+                nhes = nhes+1;
                 oriented = false;
             end
         end
@@ -112,6 +114,10 @@ for ii=int32(1):nelems
         if prev_heid ~= first_heid
             % Close up the cycle
             sibhes(heid2fid(prev_heid),heid2leid(prev_heid)) = first_heid;
+            nhes = nhes+1;
+        end
+
+        if nargout>1 && manifold && nhes>2
             manifold = false; oriented = false;
         end
     end

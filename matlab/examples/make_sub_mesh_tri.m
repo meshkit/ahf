@@ -59,7 +59,7 @@ if(closed)
       fprintf(1,'Removing dog eared triangles.\n');
       for jj=1:2
         fprintf(1,'Build half-edge data structure \n');tic;
-        sibhes = determine_opposite_halfedge_tri( nv, newtris);
+        sibhes = determine_sibling_halfedges( nv, newtris);
         toc;
         label=zeros(size(newtris,1),1,'int32');
         T=nullcopy(zeros(3,1,'int32'));
@@ -85,7 +85,7 @@ if(closed)
     end
 %
     label=zeros(size(newtris,1),1,'int32');
-    [b2v, bdedgs] = extract_border_curv_tri(nv, newtris);
+    [b2v, bdedgs] = extract_border_curv(nv, newtris);
     % Flip the order of edges
     bdedgs(:,[2,1]) = bdedgs(:,[1,2]);
     if(isempty(b2v))

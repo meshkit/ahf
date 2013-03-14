@@ -133,7 +133,7 @@ flabel_new = zeros( size( elems_new,1), 1, 'int32');
 %% For each patch, starting from the seed triangle label the adjacent 
 %  faces in a breadth-first manner.
 
-sibhes = determine_opposite_halfedge( size(xs_new,1), elems_new);
+sibhes = determine_sibling_halfedges( size(xs_new,1), elems_new);
 flags = nullcopy(zeros(size(elems_new,1),1, 'int32'));
 queue = nullcopy(zeros(size(elems_new,1),1, 'int32'));
 

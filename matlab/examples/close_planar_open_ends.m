@@ -17,7 +17,7 @@ coder.extrinsic('fprintf');
 %% Extract border edges
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 nv = int32(size(xs,1)); nt = int32(size(tris,1));
-[b2v, bdedgs] = extract_border_curv_tri(nv, tris);
+[b2v, bdedgs] = extract_border_curv(nv, tris);
 nb = int32(length(b2v));
 
 % Verify boundary curve does not have self-intersections
@@ -221,7 +221,7 @@ edges = [1:nnodes; [2:nnodes,1]]';
 [us_new, tris_patch] = triangle( uv, edges, triopts);
 
 % Check whether the boundary curve are the first vertices
-[b2v, bdedgs] = extract_border_curv_tri(size(us_new,1), tris_patch);
+[b2v, bdedgs] = extract_border_curv(size(us_new,1), tris_patch);
 
 if length(b2v) ~= nnodes || sum( bdedgs(:,1)<bdedgs(:,2))~=1 && ...
         sum( bdedgs(:,1)>bdedgs(:,2))~=1

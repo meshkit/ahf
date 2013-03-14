@@ -14,8 +14,8 @@ assert( size(xs_fine,2)==3 && size(tris_fine,2)==3);
 assert( size(xs_fine,1)>=int32(size(xs_crs,1)) && size(tris_fine,1)>=int32(size(tris_crs,1)));
 
 % Construct data structures.
-sibhes_crs = determine_opposite_halfedge( size(xs_crs, 1), tris_crs);
-sibhes_fine = determine_opposite_halfedge( size(xs_fine, 1), tris_fine);
+sibhes_crs = determine_sibling_halfedges( size(xs_crs, 1), tris_crs);
+sibhes_fine = determine_sibling_halfedges( size(xs_fine, 1), tris_fine);
 
 parent_f = zeros( size(tris_fine,1),1, 'int32');
 queue = nullcopy(zeros(size(tris_fine,1),1, 'int32'));

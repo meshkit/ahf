@@ -38,7 +38,7 @@ else
 end
 
 if nargin<3; flabel=0; end
-if nargin<4; sibhes = determine_opposite_halfedge_quad(nv, elems); end
+if nargin<4; sibhes = determine_sibling_halfedges(nv, elems); end
 
 nbdedgs = int32(0); nelems=int32(size(elems,1));
 for ii=1:nelems

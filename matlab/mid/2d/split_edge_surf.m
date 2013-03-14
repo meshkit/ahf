@@ -136,7 +136,7 @@ function test %#ok<DEFNU>
 %!     10,6,3];
 %! 
 %! nv = int32(size(xs,1)); nf=int32(size(tris,1));
-%! sibhes = determine_opposite_halfedge(nv, tris);
+%! sibhes = determine_sibling_halfedges(nv, tris);
 %! v2he = determine_incident_halfedges(nv, tris, sibhes);
 %!
 %! tris = [tris; zeros(2,3,'int32')];
@@ -148,7 +148,7 @@ function test %#ok<DEFNU>
 %!         heid = 4*j + i - 1;
 %!         [nv2, nf2, tris2, sibhes2, v2he2] = split_edge_surf(heid, nv, nf, ...
 %!               tris, sibhes, v2he);
-%!         if ~isequal(sibhes2(1:nf2,:),determine_opposite_halfedge(nv2,tris2(1:nf2,:)))
+%!         if ~isequal(sibhes2(1:nf2,:),determine_sibling_halfedges(nv2,tris2(1:nf2,:)))
 %!             error('Failed checking');
 %!         end
 %!         assert(verify_incident_halfedges(tris2, sibhes2, v2he2));

@@ -1,17 +1,25 @@
-function isborder = determine_border_vertices_surf(nv, elems, sibhes, isborder) %#codegen
-%DETERMINE_BORDER_VERTICES Determine border vertices of a surface mesh. 
+function isborder = determine_border_vertices_surf(nv, elems, varargin) %#codegen
+%DETERMINE_BORDER_VERTICES Determine border vertices of a surface mesh.
 % DETERMINE_BORDER_VERTICES_SURF(NV,ELEMS,SIBHES,ISBORDER) Determines
-% border vertices of a surface mesh.  Returns bitmap of border vertices.
+% border vertices of a surface mesh. Returns bitmap of border vertices.
 %
 % Example
-% ISBORDER = DETERMINE_BORDER_VERTICES_SURF(NV,ELEMS)
-% ISBORDER = DETERMINE_BORDER_VERTICES_SURF(NV,ELEMS,SIBHES)
-% ISBORDER = DETERMINE_BORDER_VERTICES_SURF(NV,ELEMS,SIBHES,ISBORDER)
+%   ISBORDER = DETERMINE_BORDER_VERTICES_SURF(NV,ELEMS)
+%   ISBORDER = DETERMINE_BORDER_VERTICES_SURF(NV,ELEMS,SIBHES)
+%   ISBORDER = DETERMINE_BORDER_VERTICES_SURF(NV,ELEMS,SIBHES,ISBORDER)
 %
 % See also DETERMINE_BORDER_VERTICES_CURV, DETERMINE_BORDER_VERTICES_VOL
 
-if nargin<3; sibhes = determine_opposite_halfedge(nv, elems); end
-if nargin<4; isborder = false(nv,1); end
+if nargin<3; 
+    sibhes = determine_sibling_halfedges(nv, elems); 
+else
+    sibhes = varargin{1};
+end
+if nargin<4; 
+    isborder = false(nv,1); 
+else
+    isborder = varargin{2};
+end
 
 he_tri3 = int32([1,2; 2 3; 3 1]);
 he_tri6 = int32([1,4,2; 2,5,3; 3,6,1]);

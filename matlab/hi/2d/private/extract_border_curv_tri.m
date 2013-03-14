@@ -35,7 +35,7 @@ else
 end
 
 if nargin<3; flabel=0; end
-if nargin<4; sibhes = determine_opposite_halfedge_tri(nv, tris); end
+if nargin<4; sibhes = determine_sibling_halfedges(nv, tris); end
 
 nbdedgs = 0; ntris=int32(size(tris,1));
 for ii=1:ntris

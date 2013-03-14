@@ -24,7 +24,7 @@ function [b2v, bdedgs, edgmap] = extract_border_curv...
 % EXTRACT_BORDER_CURV_QUAD
 
 if nargin<3; flabel=0; end
-if nargin<4; sibhes = determine_opposite_halfedge(nv, elems); end
+if nargin<4; sibhes = determine_sibling_halfedges(nv, elems); end
 if nargin<6; inwards = 0; end
 
 if nargin<3
