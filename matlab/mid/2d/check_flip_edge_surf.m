@@ -1,15 +1,15 @@
-function OK = check_flip_edge_surf(heid, tris, opphes) %#codegen
+function OK = check_flip_edge_surf(heid, tris, sibhes) %#codegen
 % Check whether it is OK topologically to flip a given halfedge.
-%   ok = check_flip_edge_surf(heid, tris, opphes)
+%   ok = check_flip_edge_surf(heid, tris, sibhes)
 
 fid = heid2fid(heid);
 lid = heid2leid(heid);
 
 % Cannot flip a border edge.
-if ~opphes(fid, lid); OK = false; return; end
+if ~sibhes(fid, lid); OK = false; return; end
 
-fid_opp = heid2fid(opphes(fid,lid));
-lid_opp = heid2leid(opphes(fid,lid));
+fid_opp = heid2fid(sibhes(fid,lid));
+lid_opp = heid2leid(sibhes(fid,lid));
 
 prev = int32([3 1 2]);
 next = int32([2 3 1]);
@@ -19,13 +19,13 @@ vid_opp = tris(fid_opp, prev(lid_opp));
 fid_start = fid; lid = prev(lid);
 count = int32(1);
 while true
-    fid_next = heid2fid( opphes( fid, lid));
+    fid_next = heid2fid( sibhes( fid, lid));
     if fid_next == fid_start
         OK = true; return;
     end
     if fid_next ==0; break; end
     
-    lid_next = next(heid2leid( opphes( fid, lid)));
+    lid_next = next(heid2leid( sibhes( fid, lid)));
     if tris( fid_next, next( lid_next)) == vid_opp
         OK = false; return;
     end
@@ -42,10 +42,10 @@ vid_opp = tris(fid_opp, prev(lid_opp));
 fid = fid_start; lid = next(heid2leid(heid));
 
 while true
-    fid_next = heid2fid( opphes( fid, lid));
+    fid_next = heid2fid( sibhes( fid, lid));
     if fid_next==0; break; end
     
-    lid_next = prev(heid2leid( opphes( fid, lid)));
+    lid_next = prev(heid2leid( sibhes( fid, lid)));
     if tris( fid_next, lid_next) == vid_opp
         OK = false; return;
     end

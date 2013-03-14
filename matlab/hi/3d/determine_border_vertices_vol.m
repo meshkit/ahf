@@ -1,10 +1,10 @@
-function isborder = determine_border_vertices_vol(nv, elems, opphfs, isborder, quadratic)
+function isborder = determine_border_vertices_vol(nv, elems, sibhfs, isborder, quadratic)
 % DETERMINE_BORDER_VERTICES_VOL Determine border vertices of a volume mesh.
 %
 % ISBORDER = DETERMINE_BORDER_VERTICES_VOL(NV,ELEMS)
-% ISBORDER = DETERMINE_BORDER_VERTICES_VOL(NV,ELEMS,OPPHFS)
-% ISBORDER = DETERMINE_BORDER_VERTICES_VOL(NV,ELEMS,OPPHFS,ISBORDER)
-% ISBORDER = DETERMINE_BORDER_VERTICES_VOL(NV,ELEMS,OPPHFS,ISBORDER,QUADRATIC)
+% ISBORDER = DETERMINE_BORDER_VERTICES_VOL(NV,ELEMS,SIBHFS)
+% ISBORDER = DETERMINE_BORDER_VERTICES_VOL(NV,ELEMS,SIBHFS,ISBORDER)
+% ISBORDER = DETERMINE_BORDER_VERTICES_VOL(NV,ELEMS,SIBHFS,ISBORDER,QUADRATIC)
 % Determines border vertices of a volume mesh.  It supports both linear
 %    and quadratic elements. It returns bitmap of border vertices. For
 %    quadratic elements, vertices on edge and face centers are set to false,
@@ -20,8 +20,8 @@ function isborder = determine_border_vertices_vol(nv, elems, opphfs, isborder, q
 %#codegen determine_border_vertices_vol_v3 -args {int32(0), coder.typeof(int32(0), [inf,27],[1,1]),
 %#codegen coder.typeof(int32(0), [inf,6],[1,1]),coder.typeof(false, [inf,1])}
 
-if nargin<3 || isempty(opphfs)
-    opphfs = determine_opposite_halfface(nv, elems);
+if nargin<3 || isempty(sibhfs)
+    sibhfs = determine_opposite_halfface(nv, elems);
 end
 if nargin<4 || isempty(isborder)
     isborder = false(nv,1);
@@ -53,7 +53,7 @@ if size(elems,2)==1
                 nvpf = 3*(1+isquadratic);
                 
                 for jj=1:4
-                    if opphfs(offset_o+jj) == 0
+                    if sibhfs(offset_o+jj) == 0
                         for kk=1:nvpf
                             isborder( elems(offset+hf_tet(jj,kk))) = true;
                         end
@@ -63,7 +63,7 @@ if size(elems,2)==1
                 % Pyramid
                 isquadratic = int32(quadratic && elems(offset)>5);
                 for jj=1:5
-                    if opphfs(offset_o+jj) == 0
+                    if sibhfs(offset_o+jj) == 0
                         nvpf = int32(3+(jj==1))*(1+isquadratic)+int32(isquadratic && jj==1);
                         for kk=1:nvpf
                             isborder( elems(offset+hf_pyr(jj,kk))) = true;
@@ -74,7 +74,7 @@ if size(elems,2)==1
                 % Prism
                 isquadratic = int32(quadratic && elems(offset)>6);
                 for jj=1:5
-                    if opphfs(offset_o+jj) == 0
+                    if sibhfs(offset_o+jj) == 0
                         nvpf = int32(3+(jj<4))*(1+isquadratic)+int32(elems(offset)==18 && jj<4);
                         for kk=1:nvpf
                             isborder( elems(offset+hf_pri(jj,kk))) = true;
@@ -87,7 +87,7 @@ if size(elems,2)==1
                 nvpf = 4*(1+isquadratic) + int32(elems(offset)==27);
                 
                 for jj=1:6
-                    if opphfs(offset_o+jj) == 0
+                    if sibhfs(offset_o+jj) == 0
                         for kk=1:nvpf
                             isborder( elems(offset+hf_hex(jj,kk))) = true;
                         end
@@ -99,7 +99,7 @@ if size(elems,2)==1
         
         ii = ii + 1;
         offset = offset+elems(offset)+1;
-        offset_o = offset_o + opphfs(offset_o) + 1;
+        offset_o = offset_o + sibhfs(offset_o) + 1;
     end
 else
     % Table for local IDs of incident faces of each vertex.
@@ -131,7 +131,7 @@ else
         if elems(ii,1)==0; break; end
         
         for jj=1:nfpE
-            if opphfs(ii,jj) == 0
+            if sibhfs(ii,jj) == 0
                 for kk=1:nvpf
                     isborder( elems(ii,hf(jj,kk))) = true;
                 end

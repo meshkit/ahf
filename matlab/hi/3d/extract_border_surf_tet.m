@@ -1,19 +1,19 @@
 function [b2v, bdtris, facmap] = extract_border_surf_tet...
-    (nv, tets, elabel, opphfs, inwards) %#codegen
+    (nv, tets, elabel, sibhfs, inwards) %#codegen
 %EXTRACT_BORDER_SURF_TET Extract border vertices and edges.
-% [B2V,BDTRIS,FACEMAP] = EXTRACT_BORDER_SURF_TET(NV,TETS,ELABEL,OPPHFS,INWARDS)
+% [B2V,BDTRIS,FACEMAP] = EXTRACT_BORDER_SURF_TET(NV,TETS,ELABEL,SIBHFS,INWARDS)
 % Extracts border vertices and edges of tetrahedral mesh. Return list of
 % border vertex IDs and list of border faces.  The following explains the
 % input and output arguments.
 %
 % [B2V,BDTRIS,FACEMAP] = EXTRACT_BORDER_SURF_TET(NV,TETS)
 % [B2V,BDTRIS,FACEMAP] = EXTRACT_BORDER_SURF_TET(NV,TETS,ELABEL)
-% [B2V,BDTRIS,FACEMAP] = EXTRACT_BORDER_SURF_TET(NV,TETS,ELABEL,OPPHFS)
-% [B2V,BDTRIS,FACEMAP] = EXTRACT_BORDER_SURF_TET(NV,TETS,ELABEL,OPPHFS,INWARDS)
+% [B2V,BDTRIS,FACEMAP] = EXTRACT_BORDER_SURF_TET(NV,TETS,ELABEL,SIBHFS)
+% [B2V,BDTRIS,FACEMAP] = EXTRACT_BORDER_SURF_TET(NV,TETS,ELABEL,SIBHFS,INWARDS)
 % NV: specifies the number of vertices.
 % TETS: contains the connectivity.
 % ELABEL: contains a label for each element.
-% OPPHFS: contains the opposite half-faces.
+% SIBHFS: contains the opposite half-faces.
 % INWARDS: specifies whether the face normals should be inwards (false by default)
 % B2V: is a mapping from border-vertex ID to vertex ID.
 % BDTRIS: is connectivity of border faces.
@@ -32,8 +32,8 @@ isborder = false( nv,1);
 
 if nargin<3; elabel = 0; end
 if nargin<4;
-    opphfs = nullcopy(zeros(size(tets),'int32'));
-    opphfs = determine_opposite_halfface_tet(nv, tets, opphfs);
+    sibhfs = nullcopy(zeros(size(tets),'int32'));
+    sibhfs = determine_opposite_halfface_tet(nv, tets, sibhfs);
 end
 
 ngbtris = int32(0);
@@ -42,8 +42,8 @@ while ii<=int32(size(tets,1))
     if tets(ii,1)==0; break; end
     
     for jj=1:4
-        if opphfs(ii,jj) == 0 || size(elabel,1)>1 && ...
-                elabel(ii)~=elabel(hfid2cid(opphfs(ii,jj)))
+        if sibhfs(ii,jj) == 0 || size(elabel,1)>1 && ...
+                elabel(ii)~=elabel(hfid2cid(sibhfs(ii,jj)))
             isborder( tets(ii,hf_tet(jj,:))) = true; ngbtris = ngbtris +1;
         end
     end
@@ -70,8 +70,8 @@ if nargout>1
         if tets(ii,1)==0; break; end
         
         for jj=int32(1):4
-            if opphfs(ii,jj) == 0 || size(elabel,1)>1 && ...
-                    elabel(ii) ~= elabel(hfid2cid(opphfs(ii,jj)))
+            if sibhfs(ii,jj) == 0 || size(elabel,1)>1 && ...
+                    elabel(ii) ~= elabel(hfid2cid(sibhfs(ii,jj)))
                 bdtris(count, :) = v2b(tets(ii,hf_tet(jj,:)));
                 
                 if nargout>2; facmap(count)=clfids2hfid(ii,jj); end

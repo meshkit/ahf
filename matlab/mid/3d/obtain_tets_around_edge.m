@@ -1,6 +1,6 @@
 function [nNtets, elms_1ring, lvid_1ring,bitmap] = ...
     obtain_tets_around_edge(itet, iface, iedge, ...
-    elems, elems_offsets, elems_type, inset, reg_opphfs,...
+    elems, elems_offsets, elems_type, inset, reg_sibhfs,...
     elms_1ring,lvid_1ring,MAX,bitmap,b) %#codegen
 % Extract the tetrahedra around an edge, assuming that the edge is 
 %     in the interior of the mesh.
@@ -51,7 +51,7 @@ for ntets = 1:MAX
     %Determine the next tetrahedron across the shared edge
     elms_1ring(ntets) = itet;
     lvid_1ring(ntets) = tetface_nodes(iface, prev(iedge));
-    opphf = reg_opphfs(itet, tetface_adjlfid(iface, iedge));
+    opphf = reg_sibhfs(itet, tetface_adjlfid(iface, iedge));
 
     if opphf<=0 % We have reached at boundary
         error = IS_BND; break;

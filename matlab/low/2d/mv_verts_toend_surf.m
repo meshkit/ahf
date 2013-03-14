@@ -1,8 +1,8 @@
-function [nv, tris, opphes, v2he, xs] = mv_verts_toend_surf...
-    ( vlist, nv, tris, opphes, v2he, xs) %#codegen 
+function [nv, tris, sibhes, v2he, xs] = mv_verts_toend_surf...
+    ( vlist, nv, tris, sibhes, v2he, xs) %#codegen 
 %MV_VERTS_TOEND_SURF    Swap vertices to the end of xs.
-%  [nv, tris, opphes, v2he, xs] = mv_verts_toend_surf...
-%        ( vlist, nv, tris, opphes, v2he, xs)
+%  [nv, tris, sibhes, v2he, xs] = mv_verts_toend_surf...
+%        ( vlist, nv, tris, sibhes, v2he, xs)
 %
 % See also MV_TRIS_TOEND_SURF, SEAL_HOLE
 
@@ -33,7 +33,7 @@ for i=1:int32(length(vlist))
             toswap = toswap - 1;
         end
         
-        [tris, opphes, v2he, xs] = swap_vertices_surf( v, toswap, tris, ...
-            opphes, v2he, xs);
+        [tris, sibhes, v2he, xs] = swap_vertices_surf( v, toswap, tris, ...
+            sibhes, v2he, xs);
     end
 end

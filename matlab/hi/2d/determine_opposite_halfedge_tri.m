@@ -1,12 +1,12 @@
-function opphes = determine_opposite_halfedge_tri(nv, tris, opphes) %#codegen
+function sibhes = determine_opposite_halfedge_tri(nv, tris, sibhes) %#codegen
 %DETERMINE_OPPOSITE_HALFEDGE_TRI Determine opposite half-edges for triangle 
 %mesh.
-% DETERMINE_OPPOSITE_HALFEDGE_TRI(NV,TRIS,OPPHES) Determines
+% DETERMINE_OPPOSITE_HALFEDGE_TRI(NV,TRIS,SIBHES) Determines
 % opposite half-edges for triangle mesh. The following explains the input
 % and output arguments.
 %
-% OPPHES = DETERMINE_OPPOSITE_HALFEDGE_TRI(NV,TRIS)
-% OPPHES = DETERMINE_OPPOSITE_HALFEDGE_TRI(NV,TRIS,OPPHES)
+% SIBHES = DETERMINE_OPPOSITE_HALFEDGE_TRI(NV,TRIS)
+% SIBHES = DETERMINE_OPPOSITE_HALFEDGE_TRI(NV,TRIS,SIBHES)
 % Computes mapping from each half-edge to its opposite half-edge for 
 % triangle mesh.
 %
@@ -43,17 +43,17 @@ for ii=1:ntris
 end
 for ii=nv-1:-1:1; is_index(ii+1) = is_index(ii); end
 is_index(1)=1;
-%% Set opphes
-if nargin<3 || isempty(opphes)
-    opphes = zeros(size(tris,1), nepE, 'int32');
+%% Set sibhes
+if nargin<3 || isempty(sibhes)
+    sibhes = zeros(size(tris,1), nepE, 'int32');
 else
-    assert( size(opphes,1)>=ntris && size(opphes,2)>=nepE);
-    opphes(:) = 0;
+    assert( size(sibhes,1)>=ntris && size(sibhes,2)>=nepE);
+    sibhes(:) = 0;
 end
 
 for ii=1:ntris
     for jj=int32(1):3
-        if opphes(ii,jj); continue; end
+        if sibhes(ii,jj); continue; end
         v = tris(ii,jj); vn = tris(ii,next(jj));
 
         % LOCATE: Locate index col in v2nv(first:last)
@@ -61,9 +61,9 @@ for ii=1:ntris
         for index = is_index(vn):is_index(vn+1)-1
             if v2nv(index)==v
                 opp = v2he(index);
-                opphes(ii,jj) = opp;
-                %opphes(heid2fid(opp),heid2leid(opp)) = ii*4+jj-1;
-                opphes(bitshift(uint32(opp),-2),mod(opp,4)+1) = ii*4+jj-1;
+                sibhes(ii,jj) = opp;
+                %sibhes(heid2fid(opp),heid2leid(opp)) = ii*4+jj-1;
+                sibhes(bitshift(uint32(opp),-2),mod(opp,4)+1) = ii*4+jj-1;
 
                 found = found + 1;
             end
@@ -78,7 +78,7 @@ for ii=1:ntris
                     if nargin==3
                         error( 'Input mesh is not oriented.');
                     else
-                        opphes = zeros(0,3, 'int32'); return;
+                        sibhes = zeros(0,3, 'int32'); return;
                     end
                 end
             end

@@ -14,7 +14,7 @@ function nxtpgs = determine_nextpage_surf(nv, elems, nxtpgs) %#codegen
 % Usage:
 %  The following function calls set up the extended half-edge data structure:
 %  >> nxtpgs = determine_nextpage_surf(nv, elems);
-%  >> v2he = determine_incident_halfverts(elems, nxtpgs);
+%  >> v2he = determine_incident_halfface(elems, nxtpgs);
 %
 %  Then 
 %  >> heid_1 = v2he(v)

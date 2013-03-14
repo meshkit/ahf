@@ -1,6 +1,6 @@
 function [live_elements nflips elems_buf,elems_type,...
-  elems_offsets,reg_opphfs,ninset]=...
-  three2two(inset,eltset,elems_buf,elems_type,elems_offsets,reg_opphfs,...
+  elems_offsets,reg_sibhfs,ninset]=...
+  three2two(inset,eltset,elems_buf,elems_type,elems_offsets,reg_sibhfs,...
   xs_hyb,ninset)  %#codegen
 
 % specifying input parameters types for eml
@@ -10,7 +10,7 @@ assert(isa(elems_buf,'int32')&&(size(elems_buf,2)==1)&&(size(elems_buf,1)>=1)); 
 assert(isa(elems_type,'int32')&&(size(elems_type,2)==1)&&(size(elems_type,1)>=1));              % elems_type is an integer column vector or scalar
 assert(isa(elems_offsets,'int32')&&(size(elems_offsets,2)==1)&&(size(elems_offsets,1)>=1));     % elems_offsets is an integer column vector or scalar
 
-assert(isa(reg_opphfs,'int32')&&(size(reg_opphfs,2)>=3)&&(size(reg_opphfs,1)>=1));              % elems_offsets is an integer [nx4] matrix
+assert(isa(reg_sibhfs,'int32')&&(size(reg_sibhfs,2)>=3)&&(size(reg_sibhfs,1)>=1));              % elems_offsets is an integer [nx4] matrix
 assert(isa(xs_hyb,'double')&&(size(xs_hyb,2)==3)&&(size(xs_hyb,1)>=1));                         % xs_hyb is a double [nx4] matrix
 
 assert(isa(ninset,'int32') && isscalar(ninset));                                                % ninsets is an integer scalar
@@ -49,8 +49,8 @@ for iset=1:ninset;
   %THE MESH MAY BE HYBRID, BUT WE ONLY FLIP TETS. 
   %elem_buf < 0 indicates a dudded element
   if elems_type(it)~=tet || inset(it)<=0; continue; end
-  neighborhood1(1:4,1)=hfid2cid(reg_opphfs(it,1:4));
-  neighborhood1(1:4,2)=hfid2lfid(reg_opphfs(it,1:4));
+  neighborhood1(1:4,1)=hfid2cid(reg_sibhfs(it,1:4));
+  neighborhood1(1:4,2)=hfid2lfid(reg_sibhfs(it,1:4));
   nfpE = 4;
   for iface=1:nfpE;
     %LOOP OVER ALL OF THE EDGES OF THE SHARED FACE
@@ -61,7 +61,7 @@ for iset=1:ninset;
        end;
        [ntets, elems_1ring, lvid_1ring,visited] = ...
        obtain_tets_around_edge(it, iface, j, elems_buf,elems_offsets,  ...
-          elems_type, inset, reg_opphfs,elms_1ring,lvid_1ring,MAX,visited,1);   
+          elems_type, inset, reg_sibhfs,elms_1ring,lvid_1ring,MAX,visited,1);   
        if ntets~=3; continue; end
             
        vids_1ring = [ elems_buf( elems_offsets( it) + tetface_nodes( iface, next(j)));
@@ -100,15 +100,15 @@ for iset=1:ninset;
        common1(2)=neighborhood1(oppnode(lvid_1ring(1)),2);%right
        common2(2)=oppnode(lvid_1ring(2));
                 
-       common1(3)=hfid2lfid(reg_opphfs(elems_1ring(2),oppnode(lvid_1ring(2))));%right
+       common1(3)=hfid2lfid(reg_sibhfs(elems_1ring(2),oppnode(lvid_1ring(2))));%right
        common2(3)=neighborhood1(iface,2);%right
                 
        %THE MTET ARRAY HOLDS THE NEW CONNECTIONS
        tet_new = vids_flip(local_tets);
                 
-       [elems_buf,elems_offsets,reg_opphfs,visited]=...
+       [elems_buf,elems_offsets,reg_sibhfs,visited]=...
        fliphybnxm(3,2,elems_1ring,elems_buf,elems_offsets,...
-          reg_opphfs,isort,common1,common2,tet_new,tempsort,itemp,visited);
+          reg_sibhfs,isort,common1,common2,tet_new,tempsort,itemp,visited);
                 
        inset(elems_1ring(3))=-1;
                 
@@ -123,9 +123,9 @@ end;
 %
 % COMPRESS MESH
 if(nflips>0);
-  [elems_buf,elems_type,elems_offsets,reg_opphfs,live_elements]=...
+  [elems_buf,elems_type,elems_offsets,reg_sibhfs,live_elements]=...
     fill_hybflip_holes(nflips,elems_buf,elems_type,elems_offsets,...
-    reg_opphfs,inset,eltset);
+    reg_sibhfs,inset,eltset);
 else
 live_elements=nelements;
 end;

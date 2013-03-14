@@ -35,8 +35,8 @@ for ii=1:nb
 end
 
 % Construct half-vertex data structure
-opphvs = determine_nextpage_curv(nb, bdedgs);
-b2hv = determine_incident_halfverts(bdedgs, opphvs);
+sibhvs = determine_sibling_halfvert(nb, bdedgs);
+b2hv = determine_incident_halfverts(nv, bdedgs);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Arrange border edges into individual curves and fill the holes.
@@ -59,7 +59,7 @@ for ii=1:nb
         flags(org) = true;
         
         ne = ne+1; verts_curv(ne) = org;
-        hv  = opphvs( fid, 1);
+        hv  = sibhvs( fid, 1);
         fid = hvid2eid(hv); org = bdedgs( fid,1);
     end
     if start ~= org || any( nadjbvs(verts_curv(1:ne))~=2)

@@ -1,5 +1,5 @@
 function [bitmap, err] = set_bitmap_edge(itet, iface, iedge, ...
-    elems, elems_offsets, elems_type, inset, reg_opphfs, bitmap, b) %#codegen 
+    elems, elems_offsets, elems_type, inset, reg_sibhfs, bitmap, b) %#codegen 
 % Set a bitmap for all the copies of a given edge to b, assuming that
 %     the edge is in the interior of the mesh.
 % Input:
@@ -10,7 +10,7 @@ function [bitmap, err] = set_bitmap_edge(itet, iface, iedge, ...
 %     elems_offsets: the offset for each element
 %     elems_type: the type of each element
 %     inset: specifies whether each element is inside
-%     reg_opphfs: opposite half-faces in 2-D array
+%     reg_sibhfs: opposite half-faces in 2-D array
 %     bitmap: a bitmap for each edge of each element.
 %     b: 0 or 1
 % Output:
@@ -34,7 +34,7 @@ tet_start = itet;
 err = 0;  ntets = 0;
 while true
     %Determine the next tetrahedron across the shared edge
-    opphf = reg_opphfs(itet, tetface_adjlfid(iface, iedge));
+    opphf = reg_sibhfs(itet, tetface_adjlfid(iface, iedge));
     
     bitmap(itet) = bitset( bitmap(itet), tetface_edges(iface, iedge), b);
     

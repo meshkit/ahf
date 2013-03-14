@@ -1,9 +1,9 @@
 function [ngbvs, nverts, vtags, ftags, ngbfs, nfaces] = obtain_nring_tri...
-    ( vid, ring, minpnts, tris, opphes, v2he, ngbvs, vtags, ftags, ngbfs) %#codegen 
+    ( vid, ring, minpnts, tris, sibhes, v2he, ngbvs, vtags, ftags, ngbfs) %#codegen 
 %OBTAIN_NRING_TRI Collect n-ring vertices and faces of a triangle mesh.
 %
 % [NGBVS,NVERTS,VTAGS,FTAGS,NGBFS,NFACES] = OBTAIN_NRING_TRI(VID,RING, ...
-% MINPNTS,TRIS,OPPHES,V2HE,NGBVS,VTAGS,FTAGS,NGBFS) Collects n-ring 
+% MINPNTS,TRIS,SIBHES,V2HE,NGBVS,VTAGS,FTAGS,NGBFS) Collects n-ring 
 % vertices and faces of a vertex and saves them into NGBVS and NGBFS,
 % where n is a floating point number with 0.5 increments (1, 1.5, 2, etc.)
 % We define the n-ring verticse as follows:
@@ -18,7 +18,7 @@ function [ngbvs, nverts, vtags, ftags, ngbfs, nfaces] = obtain_nring_tri...
 %   ring: the desired number of rings (it is a float as it can have halves)
 %   minpnts: the minimum number of points desired
 %   tris: element connectivity
-%   opphes: opposite half-edges
+%   sibhes: opposite half-edges
 %   v2he: vertex-to-halfedge mapping
 %   ngbvs: buffer space for neighboring vertices (not including vid itself)
 %   vtags: vertex tags (boolean, of length equal to number of vertices)
@@ -79,7 +79,7 @@ oneringonly = ring==1 && minpnts==0 && nargout<5;
 hebuf = nullcopy(zeros(maxnv,1, 'int32'));
 
 % Optimized version for collecting one-ring vertices
-if opphes( fid, lid)
+if sibhes( fid, lid)
     fid_in = fid;
 else
     fid_in = int32(0);
@@ -101,14 +101,14 @@ while 1
         
         if ~oneringonly
             % Save starting position for next vertex
-            hebuf(nverts) = opphes( fid, prv(lid_prv));
+            hebuf(nverts) = sibhes( fid, prv(lid_prv));
             nfaces = nfaces + 1; ngbfs( nfaces) = fid;
         end
     else
         overflow = true;
     end
     
-    opp = opphes(fid, lid_prv);
+    opp = sibhes(fid, lid_prv);
     fid = heid2fid(opp);
     
     if fid == fid_in % Finished cycle
@@ -145,7 +145,7 @@ while true
         for ii = nfaces_pre+1 : nfaces_last
             % take opposite vertex in opposite face
             for jj=int32(1):3
-                oppe = opphes( ngbfs(ii), jj);
+                oppe = sibhes( ngbfs(ii), jj);
                 fid = heid2fid(oppe);
                 
                 if oppe && ~ftags(fid)
@@ -187,13 +187,13 @@ while true
         
         % Allow early termination of the loop if an incident halfedge
         % was recorded and the vertex is not incident on a border halfedge
-        allow_early_term = hebuf(ii) && opphes(fid,lid);
+        allow_early_term = hebuf(ii) && sibhes(fid,lid);
         if allow_early_term
             fid = heid2fid(hebuf(ii)); lid = heid2leid(hebuf(ii));
         end
         
         %
-        if opphes( fid, lid)
+        if sibhes( fid, lid)
             fid_in = fid;
         else
             fid_in = cast(0,class(fid));
@@ -227,7 +227,7 @@ while true
                     nverts = nverts + 1; ngbvs( nverts) = v; vtags(v)=true;
                     
                     % Save starting position for next ring
-                    hebuf(nverts) = opphes( fid, prv(lid_prv));
+                    hebuf(nverts) = sibhes( fid, prv(lid_prv));
                 end
                 
                 if ~ftags(fid) && ~overflow
@@ -236,7 +236,7 @@ while true
                 isfirst = false;
             end
             
-            opp = opphes(fid, lid_prv);
+            opp = sibhes(fid, lid_prv);
             fid = heid2fid(opp);
             
             if fid == fid_in % Finished cycle

@@ -1,11 +1,11 @@
-function opphes = determine_opposite_halfedge_quad(nv, quads, opphes) %#codegen 
+function sibhes = determine_opposite_halfedge_quad(nv, quads, sibhes) %#codegen 
 %DETERMINE_OPPOSITE_HALFEDGE_QUAD Determine the opposite half-edge.
-% DETERMINE_OPPOSITE_HALFEDGE_QUAD(NV,QUADS,OPPHES) Determines
+% DETERMINE_OPPOSITE_HALFEDGE_QUAD(NV,QUADS,SIBHES) Determines
 % the opposite half-edge for a quadrilateral or mixed (quad-dominant) mesh.
 % The following explains the input and output arguments.
 %
-% OPPHES = DETERMINE_OPPOSITE_HALFEDGE_QUAD(NV,QUADS)
-% OPPHES = DETERMINE_OPPOSITE_HALFEDGE_QUAD(NV,QUADS,OPPHES)
+% SIBHES = DETERMINE_OPPOSITE_HALFEDGE_QUAD(NV,QUADS)
+% SIBHES = DETERMINE_OPPOSITE_HALFEDGE_QUAD(NV,QUADS,SIBHES)
 % Computes mapping from each half-edge to its opposite half-edge.
 %
 % Convention: Each half-edge is indicated by <face_id,local_edge_id>.
@@ -53,18 +53,18 @@ end
 for ii=nv-1:-1:1; is_index(ii+1) = is_index(ii); end
 is_index(1)=1;
 
-%% Set opphes
-if nargin<3 || isempty(opphes)
-    opphes = zeros(size(quads,1), nepE, 'int32');
+%% Set sibhes
+if nargin<3 || isempty(sibhes)
+    sibhes = zeros(size(quads,1), nepE, 'int32');
 else
-    assert( size(opphes,1)>=nquads && size(opphes,2)>=nepE);
-    opphes(:) = 0;
+    assert( size(sibhes,1)>=nquads && size(sibhes,2)>=nepE);
+    sibhes(:) = 0;
 end
 
 for ii=1:nquads
     
     for jj=1:3+int32(quads(ii,4)~=0)
-        if opphes(ii,jj); continue; end
+        if sibhes(ii,jj); continue; end
         v = quads(ii,jj); 
         if quads(ii,4)~=0; 
             vn = quads(ii,next4(jj));
@@ -77,9 +77,9 @@ for ii=1:nquads
         for index = is_index(vn):is_index(vn+1)-1
             if v2nv(index)==v
                 opp = v2he(index);
-                opphes(ii,jj) = opp;
-                % opphes(heid2fid(opp),heid2leid(opp)) = ii*4+jj-1;
-                opphes( bitshift( uint32(opp),-2),mod(opp,4)+1) = ii*4+jj-1;
+                sibhes(ii,jj) = opp;
+                % sibhes(heid2fid(opp),heid2leid(opp)) = ii*4+jj-1;
+                sibhes( bitshift( uint32(opp),-2),mod(opp,4)+1) = ii*4+jj-1;
 
                 found = found + 1;
             end
@@ -94,7 +94,7 @@ for ii=1:nquads
                     if nargin==3
                         error( 'Input mesh is not oriented.');
                     else
-                        opphes = zeros(0,nepE, 'int32'); return;
+                        sibhes = zeros(0,nepE, 'int32'); return;
                     end
                 end
             end

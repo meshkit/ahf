@@ -272,11 +272,11 @@ function test  %#ok<DEFNU>
 %!test
 %  Build mesh data structure
 %! [xs, tets]=readvtk('dragon_5K.vtk');
-%! opphfs=determine_opposite_halfface(size(xs,1),tets);
+%! sibhfs=determine_opposite_halfface(size(xs,1),tets);
 %  Collect neighborhood
 
 %  First test
-%! buf = obtain_nring_tet( 1, 1, tets, opphfs, 3.5);
+%! buf = obtain_nring_tet( 1, 1, tets, sibhfs, 3.5);
 %  Verify completeness of nodes
 %! g2l = zeros( size(buf.ngbvs)); g2l( tets(1,1))=1;
 %! g2l(buf.ngbvs(1:buf.nverts))=2:buf.nverts+1;
@@ -284,7 +284,7 @@ function test  %#ok<DEFNU>
 %! assert( min(lelems(:))==1 && max(lelems(:))==buf.nverts+1);
 
 %  Second test to grow until reaching 100 points
-%! buf = obtain_nring_tet( 1, 1, tets, opphfs, 1, [], 100);
+%! buf = obtain_nring_tet( 1, 1, tets, sibhfs, 1, [], 100);
 %  Verify completeness of nodes
 %! g2l = zeros( size(buf.ngbvs)); g2l( tets(1,1))=1;
 %! g2l(buf.ngbvs(1:buf.nverts))=2:buf.nverts+1;
@@ -294,7 +294,7 @@ function test  %#ok<DEFNU>
 %  Third test to use a smaller buffer
 %! buf.ngbvs = zeros(100,1,'int32');
 %! buf.ngbes = zeros(100,1,'int32');
-%! buf = obtain_nring_tet( 1, 1, tets, opphfs, 1, buf, 100);
+%! buf = obtain_nring_tet( 1, 1, tets, sibhfs, 1, buf, 100);
 %  Verify completeness of nodes
 %! g2l = zeros( size(buf.ngbvs)); g2l( tets(1,1))=1;
 %! g2l(buf.ngbvs(1:buf.nverts))=2:buf.nverts+1;

@@ -1,9 +1,9 @@
 function [ngbes, nelems, etags,eltypes] = ...
   obtain_1ring_elems_mixed(vid, elems_buf, elems_offsets, elems_type,... 
-  reg_opphfs, v2hf, ngbes, etags,eltypes) %#codegen
+  reg_sibhfs, v2hf, ngbes, etags,eltypes) %#codegen
 %OBTAIN_1RING_ELEMS_MIXED Collects 1-ring neighbor elements of mixed mesh.
 % [NGBES, NELEMS, ETAGS] = OBTAIN_1RING_ELEMS_TET( VID, ...
-%         ELEMS_HYB, OPPHFS, V2HF, NGBES, ETAGS)
+%         ELEMS_HYB, SIBHFS, V2HF, NGBES, ETAGS)
 % Collects 1-ring neighbor elements of given vertex and saves them into 
 % NGBES. At input, ETAGS must be set to false. It is reset to false
 % at output.
@@ -19,13 +19,13 @@ nelems=int32(0);
 eid = hfid2cid(v2hf(vid));
 if ~eid; return; end
 
-opphfs_tet = int32([1 2 4; 1 2 3; 1 3 4; 2 3 4]);
+sibhfs_tet = int32([1 2 4; 1 2 3; 1 3 4; 2 3 4]);
 
-opphfs_pyr = int32([1 2 5 0; 1 3 2 0; 1 4 3 0; 1 5 4 0; 2 3 4 5]);
+sibhfs_pyr = int32([1 2 5 0; 1 3 2 0; 1 4 3 0; 1 5 4 0; 2 3 4 5]);
 
-opphfs_pri = int32([4 3 1; 4 1 2; 4 2 3; 5 1 3; 5 2 1; 5 3 2]);
+sibhfs_pri = int32([4 3 1; 4 1 2; 4 2 3; 5 1 3; 5 2 1; 5 3 2]);
 
-opphfs_hex = int32([1 5 2; 1 2 3; 1 3 4; 1 4 5;6 2 5; 6 3 2;6 4 3; 6 5 4 ]);
+sibhfs_hex = int32([1 5 2; 1 2 3; 1 3 4; 1 4 5;6 2 5; 6 3 2;6 4 3; 6 5 4 ]);
 %ADD THE OTHERS LATER
 
 
@@ -64,17 +64,17 @@ while size_stack>0
         ngb=int32(0);
         if(nvpE==4)
           if(ii==4);continue;end;
-          ngb = hfid2cid(reg_opphfs(eid,opphfs_tet(lvid,ii)));
+          ngb = hfid2cid(reg_sibhfs(eid,sibhfs_tet(lvid,ii)));
         elseif(nvpE==5)
-          if(opphfs_pyr(lvid,ii))>0
-            ngb = hfid2cid(reg_opphfs(eid,opphfs_pyr(lvid,ii)));
+          if(sibhfs_pyr(lvid,ii))>0
+            ngb = hfid2cid(reg_sibhfs(eid,sibhfs_pyr(lvid,ii)));
           end
         elseif(nvpE==6)
           if(ii==4);continue;end;
-          ngb = hfid2cid(reg_opphfs(eid,opphfs_pri(lvid,ii)));
+          ngb = hfid2cid(reg_sibhfs(eid,sibhfs_pri(lvid,ii)));
         elseif(nvpE==8)
           if(ii==4);continue;end;
-          ngb = hfid2cid(reg_opphfs(eid,opphfs_hex(lvid,ii)));
+          ngb = hfid2cid(reg_sibhfs(eid,sibhfs_hex(lvid,ii)));
         else
           error('Not implemented yet for this type');
         end

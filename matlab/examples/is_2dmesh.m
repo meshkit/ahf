@@ -16,27 +16,27 @@ switch size(elems,2)
         elseif size(elems_out,2)<4 || any(elems_out(:,end)==0)
             b=true;
         else
-            opphfs = determine_opposite_halfface_tet( nv, elems_out);
-            b = ~any(any(opphfs,2));
+            sibhfs = determine_opposite_halfface_tet( nv, elems_out);
+            b = ~any(any(sibhfs,2));
         end
     case 3
         % Allow triangles to be non-oriented
-        opphes = determine_nextpage_surf( nv, elems);
-        b = any(any(opphes,2));
+        sibhes = determine_nextpage_surf( nv, elems);
+        b = any(any(sibhes,2));
     case 4
         if any(elems(elems(:,1)~=0,4)==0)
             % If mesh contains triangles, then it cannot be tet mesh
             b = true;
         else
-            opphfs = determine_opposite_halfface_tet( nv, elems);
-            b = ~any(any(opphfs,2));
+            sibhfs = determine_opposite_halfface_tet( nv, elems);
+            b = ~any(any(sibhfs,2));
         end
     case 6
-        opphfs = determine_opposite_halfface_prism( nv, elems);
-        b = ~any(any(opphfs,2));
+        sibhfs = determine_opposite_halfface_prism( nv, elems);
+        b = ~any(any(sibhfs,2));
     case 8
-        opphfs = determine_opposite_halfface_hex( nv, elems);
-        b = ~any(any(opphfs,2));
+        sibhfs = determine_opposite_halfface_hex( nv, elems);
+        b = ~any(any(sibhfs,2));
     case 9
         b = true;
     otherwise

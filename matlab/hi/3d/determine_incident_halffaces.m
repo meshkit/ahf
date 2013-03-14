@@ -1,11 +1,11 @@
-function v2hf = determine_incident_halffaces(elems, opphfs, v2hf)  %#codegen
+function v2hf = determine_incident_halffaces(elems, sibhfs, v2hf)  %#codegen
 %DETERMINE_INCIDENT_HALFFACES Determine an incident half-faces.
-% DETERMINE_INCIDENT_HALFFACES(ELEMS,OPPHFS,V2HF) Determines an
+% DETERMINE_INCIDENT_HALFFACES(ELEMS,SIBHFS,V2HF) Determines an
 % incident half-faces of each vertex. Give higher priorities to border
 % faces. The following explains the inputs and outputs.
 %
 % Input:  ELEMS:  matrix of size mx4 storing element connectivity
-%         OPPHFS: matrix of size mx4 storing opposite half-faces
+%         SIBHFS: matrix of size mx4 storing opposite half-faces
 %
 % Output: V2HF:   array of size equal to number of vertices.
 %
@@ -21,7 +21,7 @@ v2f_hex   = int32([2,5,1; 3,2,1; 4,3,1; 5,4,1; 6,5,2; 6,2,3; 6,3,4; 6,4,5]);
 SHIFT = int32(8);
 
 if size(elems,2)==1
-    assert( size(opphfs,2)==1);
+    assert( size(sibhfs,2)==1);
     % Mixed elements
     if nargin<3;
         % Set nv to maximum value in elements
@@ -40,7 +40,7 @@ if size(elems,2)==1
         v2hf(:) = 0;
     end
     
-    isborder = determine_border_vertices_vol(nv, elems, opphfs);
+    isborder = determine_border_vertices_vol(nv, elems, sibhfs);
     
     offset=int32(1); offset_o=int32(1); ii = int32(1);
     while offset < size(elems,1)
@@ -52,7 +52,7 @@ if size(elems,2)==1
                     
                     if v2hf(v)==0
                         for kk=1:3
-                            if ~isborder(v) || opphfs( offset_o+v2f_tet(jj,kk))==0
+                            if ~isborder(v) || sibhfs( offset_o+v2f_tet(jj,kk))==0
                                 v2hf(v) = ii*SHIFT + v2f_tet(jj,kk) - 1;
                             end
                         end
@@ -65,7 +65,7 @@ if size(elems,2)==1
                     
                     if v2hf(v)==0
                         for kk=1:3+(jj==4)
-                            if ~isborder(v) || opphfs( offset_o+v2f_pyr(jj,kk))==0
+                            if ~isborder(v) || sibhfs( offset_o+v2f_pyr(jj,kk))==0
                                 v2hf(v) = ii*SHIFT + v2f_pyr(jj,kk) - 1;
                             end
                         end
@@ -78,7 +78,7 @@ if size(elems,2)==1
                     
                     if v2hf(v)==0
                         for kk=1:3
-                            if ~isborder(v) || opphfs( offset_o+v2f_pri(jj,kk))==0
+                            if ~isborder(v) || sibhfs( offset_o+v2f_pri(jj,kk))==0
                                 v2hf(v) = ii*SHIFT + v2f_pri(jj,kk) - 1;
                             end
                         end
@@ -91,7 +91,7 @@ if size(elems,2)==1
                     
                     if v2hf(v)==0
                         for kk=1:4
-                            if ~isborder(v) || opphfs( offset_o+v2f_hex(jj,kk))==0
+                            if ~isborder(v) || sibhfs( offset_o+v2f_hex(jj,kk))==0
                                 v2hf(v) = ii*SHIFT + v2f_hex(jj,kk) - 1;
                             end
                         end
@@ -103,7 +103,7 @@ if size(elems,2)==1
         
         ii = ii + 1;
         offset = offset+elems(offset)+1;
-        offset_o = offset_o + opphfs(offset_o) + 1;
+        offset_o = offset_o + sibhfs(offset_o) + 1;
     end
 else
     nvpE = int32(size(elems,2));
@@ -146,7 +146,7 @@ else
             ncvpE = int32(0); v2f = v2f_hex; %#ok<UNRCH>
     end
     
-    isborder = determine_border_vertices_vol(nv, elems, opphfs);
+    isborder = determine_border_vertices_vol(nv, elems, sibhfs);
     
     % Construct a vertex-to-halfface mapping.
     ii = int32(1);
@@ -158,7 +158,7 @@ else
             
             if v2hf(v)==0
                 for kk=1:(3+(size(v2f,2)>3 && v2f(jj,end)))
-                    if ~isborder(v) || opphfs( ii,v2f(jj,kk))==0
+                    if ~isborder(v) || sibhfs( ii,v2f(jj,kk))==0
                         v2hf(v) = ii*SHIFT + v2f(jj,kk) - 1;
                     end
                 end

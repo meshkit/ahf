@@ -1,11 +1,11 @@
-function correct = verify_incident_halfedges(elems, opphes, v2he, nf) %#codegen 
+function correct = verify_incident_halfedges(elems, sibhes, v2he, nf) %#codegen 
 % VERIFY_INCIDENT_HALFEDGES    Check whether v2he is correct.
 %
-% B = VERIFY_INCIDENT_HALFEDGES(ELEMS,OPPHES,V2HE,NF) Checks whether 
+% B = VERIFY_INCIDENT_HALFEDGES(ELEMS,SIBHES,V2HE,NF) Checks whether 
 % v2he is correct for a triangular, quadrilateral, or mixed mesh. 
 %
 %     ELEMS is mx3 (for triangle mesh) or mx4 (for quadrilateral mesh).
-%     OPPHES is mx3 (for triangle mesh) or mx4 (for quadrilateral mesh).
+%     SIBHES is mx3 (for triangle mesh) or mx4 (for quadrilateral mesh).
 %     V2HE is the vertex to half-edge map.
 %     NF is the number of faces. If not given, then it is set to 
 %        nnz_elements(ELEMS,1).
@@ -38,8 +38,8 @@ end
 for i=1:nf
     for lid=1:int32(size(elems,2))
         v = elems(i,lid);
-        if v>0 && (v2he(v)==0 || opphes( i,lid) <= 0 && ...
-                opphes( heid2fid(v2he(v)), heid2leid(v2he(v))))
+        if v>0 && (v2he(v)==0 || sibhes( i,lid) <= 0 && ...
+                sibhes( heid2fid(v2he(v)), heid2leid(v2he(v))))
             correct = false;
             return;
         end

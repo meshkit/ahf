@@ -59,14 +59,14 @@ if(closed)
       fprintf(1,'Removing dog eared triangles.\n');
       for jj=1:2
         fprintf(1,'Build half-edge data structure \n');tic;
-        opphes = determine_opposite_halfedge_tri( nv, newtris);
+        sibhes = determine_opposite_halfedge_tri( nv, newtris);
         toc;
         label=zeros(size(newtris,1),1,'int32');
         T=nullcopy(zeros(3,1,'int32'));
         for ii=1:int32(size(newtris,1))
-          T(1)=heid2fid(opphes(ii,1));
-          T(2)=heid2fid(opphes(ii,2));
-          T(3)=heid2fid(opphes(ii,3)); 
+          T(1)=heid2fid(sibhes(ii,1));
+          T(2)=heid2fid(sibhes(ii,2));
+          T(3)=heid2fid(sibhes(ii,3)); 
           if(T(1)==0 && T(2)==0)
             label(ii)=1;
           elseif(T(1)==0 && T(3)==0)
@@ -110,8 +110,8 @@ if(closed)
     end
 
     % Construct half-vertex data structure
-    opphvs = determine_nextpage_curv(nb, bdedgs);
-    b2hv = determine_incident_halfverts(bdedgs, opphvs);
+    sibhvs = determine_sibling_halfvert(nb, bdedgs);
+    b2hv = determine_incident_halfverts(nb, bdedgs);
     % Arrange border edges into individual curves and fill the holes.
     verts_curv = nullcopy(zeros( nb,1,'int32'));
     flags = false(nb,1);
@@ -128,7 +128,7 @@ if(closed)
          flags(org) = true;
         
          ne = ne+1; verts_curv(ne) = org;
-         hv  = opphvs( fid, 1);
+         hv  = sibhvs( fid, 1);
          fid = hvid2eid(hv); org = bdedgs( fid,1);
        end
        verts_curv=verts_curv(1:ne);
@@ -189,15 +189,15 @@ end
 
 function [tempnodes,temptris]=split_patch(tempnodes,temptris)
 ne=int32(size(tempnodes,1));
-opphes_tmp = determine_opposite_halfedge_tri( ne, temptris);
+sibhes_tmp = determine_opposite_halfedge_tri( ne, temptris);
 v2he = nullcopy(zeros(ne,1,'int32'));
-v2he = determine_incident_halfedges(temptris, opphes_tmp, v2he);
+v2he = determine_incident_halfedges(temptris, sibhes_tmp, v2he);
 ntris=int32(size(temptris,1));
 ntris_start=ntris;
 map=[1 2;2 3;3 1];
 for i=1:ntris_start
   for neighbor=1:3
-    heid=opphes_tmp(i, neighbor);
+    heid=sibhes_tmp(i, neighbor);
     if(heid>0)
       v2he(ne+1)=int32(0);
       tempnodes(ne+1,1:3)=int32(0);
@@ -205,16 +205,16 @@ for i=1:ntris_start
           mean([tempnodes(temptris(i,map(neighbor,1)),:); ...
           tempnodes(temptris(i,map(neighbor,2)),:)]);
       temptris(ntris+1:ntris+4,1:3)=nullcopy(zeros(4,3,'int32'));
-      opphes_tmp(ntris+1:ntris+4,1:3)=nullcopy(zeros(4,3,'int32'));
-      [ne, ntris, temptris, opphes_tmp, v2he] = ...
+      sibhes_tmp(ntris+1:ntris+4,1:3)=nullcopy(zeros(4,3,'int32'));
+      [ne, ntris, temptris, sibhes_tmp, v2he] = ...
           split_edge_surf(heid, ne, ntris, ...
-            temptris, opphes_tmp, v2he);
+            temptris, sibhes_tmp, v2he);
         if(ne<size(v2he,1))
             v2he(ne+1)=[];
         end
         if(ntris<size(temptris,1))
           temptris(ntris+1:end,:)=[];
-          opphes_tmp(ntris+1:end,:)=[];
+          sibhes_tmp(ntris+1:end,:)=[];
         end
     end
   end
@@ -223,18 +223,18 @@ end
 end
 
 function temptris=surface_tension(ne, temptris,tempnodes,ntri)
-opphes_tmp = determine_opposite_halfedge_tri( ne, temptris);
+sibhes_tmp = determine_opposite_halfedge_tri( ne, temptris);
 v2he = nullcopy(zeros(ne,1,'int32'));
-v2he = determine_incident_halfedges(temptris, opphes_tmp, v2he);
+v2he = determine_incident_halfedges(temptris, sibhes_tmp, v2he);
 notchanged=false;
 
 while(~notchanged)
     notchanged=true;
     for i=1:ntri
         for neighbor=1:3
-          heid=opphes_tmp(i, neighbor);
+          heid=sibhes_tmp(i, neighbor);
           if(heid>0)
-           TN=heid2fid(opphes_tmp(i, neighbor));
+           TN=heid2fid(sibhes_tmp(i, neighbor));
            vids = temptris(i, 1:3);
            vcoords = tempnodes( vids,1:3);
            vcoords=reshape(vcoords',1,9);
@@ -251,8 +251,8 @@ while(~notchanged)
            surface_area2=signed_triangle_area(x1,y1,z1,x2,y2,z2,x3,y3,z3);
            presurface_area=surface_area1+surface_area2;
            % TRY FLIPPING
-           [temptris, opphes_tmp, v2he] = flip_edge_surf(heid,...
-               temptris, opphes_tmp, v2he);
+           [temptris, sibhes_tmp, v2he] = flip_edge_surf(heid,...
+               temptris, sibhes_tmp, v2he);
            vids = temptris(i, 1:3);
            vcoords = tempnodes( vids,1:3);
            vcoords=reshape(vcoords',1,9);
@@ -270,8 +270,8 @@ while(~notchanged)
            presurface_area2=surface_area1+surface_area2;
            if(presurface_area<presurface_area2)
                if(presurface_area>0)
-                 [temptris, opphes_tmp, v2he] = flip_edge_surf(heid,...
-                   temptris, opphes_tmp, v2he, 1);
+                 [temptris, sibhes_tmp, v2he] = flip_edge_surf(heid,...
+                   temptris, sibhes_tmp, v2he, 1);
                end
            else
                notchanged=false;

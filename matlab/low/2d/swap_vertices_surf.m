@@ -1,7 +1,7 @@
-function [tris, opphes, v2he, us] = swap_vertices_surf( vid1, vid2, tris, opphes, v2he, us) %#codegen 
+function [tris, sibhes, v2he, us] = swap_vertices_surf( vid1, vid2, tris, sibhes, v2he, us) %#codegen 
 %SWAP_VERTICES_SURF    Swap two vertices in a triangle mesh.
-%   [TRIS, OPPHES, V2HE] = ...
-%   SWAP_VERTICES_CURV( VID1, VID2, EDGS, OPPHVS, V2HV) swaps two vertices
+%   [TRIS, SIBHES, V2HE] = ...
+%   SWAP_VERTICES_CURV( VID1, VID2, EDGS, SIBHVS, V2HV) swaps two vertices
 %       in connecitivity table.
 
 if vid1==vid2; return; end
@@ -10,7 +10,7 @@ if (nargin > 5 && nargout < 4)
     error('not enough input arguments for requested number of output arguments');
 end
 
-% Update tris and opphes
+% Update tris and sibhes
 prev = [3 1 2];
 
 % set vid1 to be vid2
@@ -20,7 +20,7 @@ while 1
     cur_fid = heid2fid(cur_heid); cur_lid = heid2leid(cur_heid);
     if cur_fid~=0
         tris(cur_fid,cur_lid) = vid2;
-        cur_heid = opphes(cur_fid,prev(cur_lid));
+        cur_heid = sibhes(cur_fid,prev(cur_lid));
         if (~cur_heid || cur_heid == st_heid)
             break;
         end
@@ -35,7 +35,7 @@ while 1
     cur_fid = heid2fid(cur_heid); cur_lid = heid2leid(cur_heid);
     if cur_fid~=0
         tris(cur_fid,cur_lid) = vid1;
-        cur_heid = opphes(cur_fid,prev(cur_lid));
+        cur_heid = sibhes(cur_fid,prev(cur_lid));
         if (~cur_heid || cur_heid == st_heid)
             break;
         end

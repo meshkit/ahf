@@ -9,7 +9,7 @@ function offsets = determine_offsets_mixed_elems( elems)
 %      in elems (i.e., the index of ei_nv for the ith element).
 %
 % Note that you can also use this function for the table of opposite
-%      half-faces (opphfs) instead of element connectivity. In this case,
+%      half-faces (sibhfs) instead of element connectivity. In this case,
 %      the first input argument should have format
 %      [e1_nf, e1_opphf1,e1_opphf2,..., e2_nf, e2_opphf1, e2_opphf2, ...].
 %

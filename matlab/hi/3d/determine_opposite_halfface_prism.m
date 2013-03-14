@@ -1,10 +1,10 @@
-function opphfs = determine_opposite_halfface_prism( nv, elems, opphfs) %#codegen
+function sibhfs = determine_opposite_halfface_prism( nv, elems, sibhfs) %#codegen
 %DETERMINE_OPPOSITE_HALFFACE_PRISM Determine the opposite half-face.
-% DETERMINE_OPPOSITE_HALFFACE_PRISM(NV,ELEMS,OPPHFS) Determines
+% DETERMINE_OPPOSITE_HALFFACE_PRISM(NV,ELEMS,SIBHFS) Determines
 % the opposite half-face.
 %
-% OPPHFS = DETERMINE_OPPOSITE_HALFFACE_PRISM(NV,ELEMS)
-% OPPHFS = DETERMINE_OPPOSITE_HALFFACE_PRISM(NV,ELEMS,OPPHFS)
+% SIBHFS = DETERMINE_OPPOSITE_HALFFACE_PRISM(NV,ELEMS)
+% SIBHFS = DETERMINE_OPPOSITE_HALFFACE_PRISM(NV,ELEMS,SIBHFS)
 % Computes mapping from each half-face to its opposite half-face.
 %
 % We assign three bits to local_face_id.
@@ -56,17 +56,17 @@ end
 for ii=nv-1:-1:1; is_index(ii+1) = is_index(ii); end
 is_index(1)=1;
 
-% Fill in opphfs for each half-face.
-if nargin<3 || isempty(opphfs)
-    opphfs = zeros(size(elems,1), 5, 'int32');
+% Fill in sibhfs for each half-face.
+if nargin<3 || isempty(sibhfs)
+    sibhfs = zeros(size(elems,1), 5, 'int32');
 else
-    assert( size(opphfs,1)>=nelems && size(opphfs,2)>=5);
-    opphfs(:) = 0;
+    assert( size(sibhfs,1)>=nelems && size(sibhfs,2)>=5);
+    sibhfs(:) = 0;
 end
 
 for ii=1:nelems
     for jj=int32(1):5 % local face ID
-        if opphfs(ii,jj); continue; end
+        if sibhfs(ii,jj); continue; end
         nvpf = 3+(jj<4);
         vs = elems(ii, hf_pri(jj,1:nvpf));  % list of vertices of face
         [v,imax] = max( vs, [], 2);
@@ -77,9 +77,9 @@ for ii=1:nelems
         for index = is_index( v):is_index( v+1)-1
             if v2oe_v1(index) == v1 && v2oe_v2(index) == v2 
                 opp = v2hf(index);
-                opphfs(ii,jj) = opp;
+                sibhfs(ii,jj) = opp;
                 
-                opphfs(hfid2cid(opp),hfid2lfid(opp)) = clfids2hfid(ii,jj);
+                sibhfs(hfid2cid(opp),hfid2lfid(opp)) = clfids2hfid(ii,jj);
                 found = true;
                 break;
             end
@@ -92,7 +92,7 @@ for ii=1:nelems
                     if nargin==3
                         error( 'Input mesh is not oriented.');
                     else
-                        opphfs = zeros(0, 5, 'int32'); return;
+                        sibhfs = zeros(0, 5, 'int32'); return;
                     end
                 end
             end

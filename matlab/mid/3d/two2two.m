@@ -1,5 +1,5 @@
-function [nflips elems_buf,elems_type,elems_offsets,reg_opphfs]=...
-  two2two(inset,eltset,elems_buf,elems_type,elems_offsets,reg_opphfs,...
+function [nflips elems_buf,elems_type,elems_offsets,reg_sibhfs]=...
+  two2two(inset,eltset,elems_buf,elems_type,elems_offsets,reg_sibhfs,...
   xs_hyb,lboundary_prisms,toldamage,node_constraints,ninset) %#codegen
 
 % specifying input parameters types for eml
@@ -9,7 +9,7 @@ assert(isa(elems_buf,'int32')&&(size(elems_buf,2)==1)&&(size(elems_buf,1)>=1)); 
 assert(isa(elems_type,'int32')&&(size(elems_type,2)==1)&&(size(elems_type,1)>=1));              % elems_type is an integer column vector or scalar
 assert(isa(elems_offsets,'int32')&&(size(elems_offsets,2)==1)&&(size(elems_offsets,1)>=1));     % elems_offsets is an integer column vector or scalar
 
-assert(isa(reg_opphfs,'int32')&&(size(reg_opphfs,2)>=3)&&(size(reg_opphfs,1)>=1)&&(size(reg_opphfs,2)<=4));
+assert(isa(reg_sibhfs,'int32')&&(size(reg_sibhfs,2)>=3)&&(size(reg_sibhfs,1)>=1)&&(size(reg_sibhfs,2)<=4));
 % elems_offsets is an integer [nx4] matrix
 
 assert(isa(xs_hyb,'double')&&(size(xs_hyb,2)==3)&&(size(xs_hyb,1)>=1));                         % xs_hyb is a double [nx4] matrix
@@ -61,7 +61,7 @@ for iset=1:ninset;
   if(lboundary_prisms);
     hasBoundary=true;
   else
-    onBoundary=find(hfid2cid(reg_opphfs(it,1:4))==0, 1);
+    onBoundary=find(hfid2cid(reg_sibhfs(it,1:4))==0, 1);
     if(~isempty(onBoundary));
       hasBoundary=true;
     end;
@@ -69,8 +69,8 @@ for iset=1:ninset;
   if(elems_type(it)~=tet || inset(it)<=0 || ~hasBoundary);continue;end
   nfpE = 4;
   for iface=1:nfpE;
-    it2=hfid2cid(reg_opphfs(it,iface));
-    shared_face=hfid2lfid(reg_opphfs(it,iface));
+    it2=hfid2cid(reg_sibhfs(it,iface));
+    shared_face=hfid2lfid(reg_sibhfs(it,iface));
     if(it2<=0 || elems_type(it2)~=tet || inset(it2)<=0);continue;end
     %LOCAL ELEMENT NUMBERS FOR THE SHARED FACE IN IT
     loci(1)=tetface_nodes(iface,1);
@@ -115,7 +115,7 @@ for iset=1:ninset;
         isum=sum(loci);
         lthird1=isum-tet_edges(ie,1)-tet_edges(ie,2);
         %ELEMENT OPPOSITE IT THAT CONTAINS EDGE i1-i2
-        if(reg_opphfs(it,oppnode(lthird1))==0);
+        if(reg_sibhfs(it,oppnode(lthird1))==0);
           onboundary1=true;
         end
         isum=fi1 + fi2 + fi3;
@@ -132,7 +132,7 @@ for iset=1:ninset;
           fprintf(1,'stopped after %d flips\n',nflips);
           error('corrupted connectivity and neighborhood data');
         end;
-        if(reg_opphfs(it2,oppnode(lthird2))==0);
+        if(reg_sibhfs(it2,oppnode(lthird2))==0);
           onboundary2=true;
           %MARK EDGE IN IT2 AS VISITED
           iedge=tetedge_faces(shared_face,oppnode(lthird2));
@@ -196,9 +196,9 @@ for iset=1:ninset;
               else
                 common1(1)=iface;common2(1)=iface;
                 common1(2)=shared_face;common2(2)=shared_face;
-                [elems_buf,elems_offsets,reg_opphfs]=...
+                [elems_buf,elems_offsets,reg_sibhfs]=...
                      fliphybnxm(n,m,ntets,elems_buf,elems_offsets,...
-                     reg_opphfs,isort,common1,common2,mtet,tempsort,...
+                     reg_sibhfs,isort,common1,common2,mtet,tempsort,...
                      itemp,visited);
                 nflips=nflips+1;
                 break;

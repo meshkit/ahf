@@ -1,19 +1,19 @@
 function [b2v, bdquads, facmap] = extract_border_surf_mixed...
-    (nv, elems, elabel, opphfs, inwards) %#codegen
+    (nv, elems, elabel, sibhfs, inwards) %#codegen
 %EXTRACT_BORDER_SURF_HEX Extract border vertices and edges.
-% [B2V,BDQUADS,FACMAP] = EXTRACT_BORDER_SURF_MIXED(NV,ELEMS,ELABEL,OPPHFS,INWARDS)
+% [B2V,BDQUADS,FACMAP] = EXTRACT_BORDER_SURF_MIXED(NV,ELEMS,ELABEL,SIBHFS,INWARDS)
 % Extracts border vertices and edges of hexahedral mesh. Returns list of
 % border vertex IDs and list of border faces. The following explains the
 % input and output arguments.
 %
 % [B2V,BDQUADS,FACMAP] = EXTRACT_BORDER_SURF_MIXED(NV,ELEMS)
 % [B2V,BDQUADS,FACMAP] = EXTRACT_BORDER_SURF_MIXED(NV,ELEMS,ELABEL)
-% [B2V,BDQUADS,FACMAP] = EXTRACT_BORDER_SURF_MIXED(NV,ELEMS,ELABEL,OPPHFS)
-% [B2V,BDQUADS,FACMAP] = EXTRACT_BORDER_SURF_MIXED(NV,ELEMS,ELABEL,OPPHFS,INWARDS)
+% [B2V,BDQUADS,FACMAP] = EXTRACT_BORDER_SURF_MIXED(NV,ELEMS,ELABEL,SIBHFS)
+% [B2V,BDQUADS,FACMAP] = EXTRACT_BORDER_SURF_MIXED(NV,ELEMS,ELABEL,SIBHFS,INWARDS)
 % NV: specifies the number of vertices.
 % ELEMS: contains the connectivity.
 % ELABEL: contains a label for each element.
-% OPPHFS: contains the opposite half-faces.
+% SIBHFS: contains the opposite half-faces.
 % INWARDS: specifies whether the face normals should be inwards (false by default)
 % B2V:     is a mapping from border-vertex ID to vertex ID.
 % BDQUADS: is connectivity of border faces.
@@ -37,7 +37,7 @@ end
 isborder = false( nv,1);
 
 if nargin<3; elabel = int32(0); end
-if nargin<4; opphfs = determine_opposite_halfface_mixed(nv, elems); end
+if nargin<4; sibhfs = determine_opposite_halfface_mixed(nv, elems); end
 
 ngbquads = int32(0);
 offset=int32(1); offset_o=int32(1); ii=int32(1);
@@ -46,8 +46,8 @@ while offset < size(elems,1)
         case {4,10}
             % Tetrahedral
             for jj=1:4
-                if opphfs(offset_o+jj) == 0 || size(elabel,1)>1 && ...
-                        elabel(ii)~=elabel(hfid2cid(opphfs(offset_o+jj)))
+                if sibhfs(offset_o+jj) == 0 || size(elabel,1)>1 && ...
+                        elabel(ii)~=elabel(hfid2cid(sibhfs(offset_o+jj)))
                     isborder( elems(offset+hf_tet(jj,:))) = true;
                     ngbquads = ngbquads +1;
                 end
@@ -55,8 +55,8 @@ while offset < size(elems,1)
         case {5,14}
             % Pyramid
             for jj=1:5
-                if opphfs(offset_o+jj) == 0 || size(elabel,1)>1 && ...
-                        elabel(ii)~=elabel(hfid2cid(opphfs(offset_o+jj)))
+                if sibhfs(offset_o+jj) == 0 || size(elabel,1)>1 && ...
+                        elabel(ii)~=elabel(hfid2cid(sibhfs(offset_o+jj)))
                     nvpf = 3+(jj==1);
                     isborder( elems(offset+hf_pyr(jj,1:nvpf))) = true;
                     ngbquads = ngbquads +1;
@@ -65,8 +65,8 @@ while offset < size(elems,1)
         case {6,15,18}
             % Prism
             for jj=1:5
-                if opphfs(offset_o+jj) == 0 || size(elabel,1)>1 && ...
-                        elabel(ii)~=elabel(hfid2cid(opphfs(offset_o+jj)))
+                if sibhfs(offset_o+jj) == 0 || size(elabel,1)>1 && ...
+                        elabel(ii)~=elabel(hfid2cid(sibhfs(offset_o+jj)))
                     nvpf = 3+(jj<4);
                     isborder( elems(offset+hf_pri(jj,1:nvpf))) = true;
                     ngbquads = ngbquads +1;
@@ -75,8 +75,8 @@ while offset < size(elems,1)
         case {8,20,27}
             % Hexhedral
             for jj=1:6
-                if opphfs(offset_o+jj) == 0 || size(elabel,1)>1 && ...
-                        elabel(ii)~=elabel(hfid2cid(opphfs(offset_o+jj)))
+                if sibhfs(offset_o+jj) == 0 || size(elabel,1)>1 && ...
+                        elabel(ii)~=elabel(hfid2cid(sibhfs(offset_o+jj)))
                     isborder( elems(offset+hf_hex(jj,:))) = true;
                     ngbquads = ngbquads +1;
                 end
@@ -87,7 +87,7 @@ while offset < size(elems,1)
     
     ii = ii + 1;
     offset = offset+elems(offset)+1;
-    offset_o = offset_o + opphfs(offset_o) + 1;
+    offset_o = offset_o + sibhfs(offset_o) + 1;
 end
 
 %% Determine border faces
@@ -111,8 +111,8 @@ if nargout>1
         switch elems(offset)
             case {4,10}
                 for jj=1:4
-                    if opphfs(offset_o+jj) == 0 || size(elabel,1)>1 && ...
-                            elabel(ii)~=elabel(hfid2cid(opphfs(offset_o+jj)))
+                    if sibhfs(offset_o+jj) == 0 || size(elabel,1)>1 && ...
+                            elabel(ii)~=elabel(hfid2cid(sibhfs(offset_o+jj)))
                         bdquads(count, 1:3) = v2b(elems(offset+hf_tet(jj,:)));
                         
                         if nargout>2; facmap(count)=clfids2hfid(ii,jj); end
@@ -121,8 +121,8 @@ if nargout>1
                 end
             case {5,14}
                 for jj=1:5
-                    if opphfs(offset_o+jj) == 0 || size(elabel,1)>1 && ...
-                            elabel(ii)~=elabel(hfid2cid(opphfs(offset_o+jj)))
+                    if sibhfs(offset_o+jj) == 0 || size(elabel,1)>1 && ...
+                            elabel(ii)~=elabel(hfid2cid(sibhfs(offset_o+jj)))
                         nvpf = 3+(jj==1);
                         bdquads(count, 1:nvpf) = v2b(elems(offset+hf_pyr(jj,1:nvpf)));
                         
@@ -132,8 +132,8 @@ if nargout>1
                 end
             case {6,15,18}
                 for jj=1:5
-                    if opphfs(offset_o+jj) == 0 || size(elabel,1)>1 && ...
-                            elabel(ii)~=elabel(hfid2cid(opphfs(offset_o+jj)))
+                    if sibhfs(offset_o+jj) == 0 || size(elabel,1)>1 && ...
+                            elabel(ii)~=elabel(hfid2cid(sibhfs(offset_o+jj)))
                         nvpf = 3+(jj<4);
                         bdquads(count, 1:nvpf) = v2b(elems(offset+hf_pri(jj,1:nvpf)));
                         
@@ -143,8 +143,8 @@ if nargout>1
                 end
             case {8,20,27}
                 for jj=1:6
-                    if opphfs(offset_o+jj) == 0 || size(elabel,1)>1 && ...
-                            elabel(ii)~=elabel(hfid2cid(opphfs(offset_o+jj)))
+                    if sibhfs(offset_o+jj) == 0 || size(elabel,1)>1 && ...
+                            elabel(ii)~=elabel(hfid2cid(sibhfs(offset_o+jj)))
                         bdquads(count, :) = v2b(elems(offset+hf_hex(jj,:)));
                         
                         if nargout>2; facmap(count)=clfids2hfid(ii,jj); end
@@ -157,6 +157,6 @@ if nargout>1
         
         ii = ii + 1;
         offset = offset+elems(offset)+1;
-        offset_o = offset_o + opphfs(offset_o) + 1;
+        offset_o = offset_o + sibhfs(offset_o) + 1;
     end
 end

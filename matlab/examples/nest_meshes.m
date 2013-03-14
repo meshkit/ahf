@@ -14,8 +14,8 @@ assert( size(xs_fine,2)==3 && size(tris_fine,2)==3);
 assert( size(xs_fine,1)>=int32(size(xs_crs,1)) && size(tris_fine,1)>=int32(size(tris_crs,1)));
 
 % Construct data structures.
-opphes_crs = determine_opposite_halfedge( size(xs_crs, 1), tris_crs);
-opphes_fine = determine_opposite_halfedge( size(xs_fine, 1), tris_fine);
+sibhes_crs = determine_opposite_halfedge( size(xs_crs, 1), tris_crs);
+sibhes_fine = determine_opposite_halfedge( size(xs_fine, 1), tris_fine);
 
 parent_f = zeros( size(tris_fine,1),1, 'int32');
 queue = nullcopy(zeros(size(tris_fine,1),1, 'int32'));
@@ -85,7 +85,7 @@ while 1
         
         % Check the incident Add more faces into the queue
         for k=1:3
-            fneighbor = heid2fid( opphes_fine( fid, k));
+            fneighbor = heid2fid( sibhes_fine( fid, k));
             
             % If the neighbor face has not been checked
             if fneighbor == 0 || parent_f(fneighbor); continue; end
@@ -96,7 +96,7 @@ while 1
             % Determine the parent face of the face
             xs_tri = xs_fine( tris_fine( fneighbor, 1:3), 1:3);
             parent_f(fneighbor) = get_parent_face( xs_tri, ...
-                parent_f(fid), xs_crs, tris_crs, opphes_crs);
+                parent_f(fid), xs_crs, tris_crs, sibhes_crs);
             
             assert( parent_f (fneighbor)~=0);
         end
@@ -122,7 +122,7 @@ for i=1:int32(size(tris_fine,1))
 end
 
 function parent = get_parent_face( xs_tri, ...
-    seedface, xs_crs, tris_crs, opphes_crs) 
+    seedface, xs_crs, tris_crs, sibhes_crs) 
 % Locate the parent face in the coarse mesh for the face fid 
 %    in the fine mesh. The parent face must be either the seedface
 %    or an incident face of the seedface
@@ -135,8 +135,8 @@ tol_dist = sqrt(min(min(v1*v1', v2*v2'), v3*v3'));
 mindist = tol_dist;
 parent = int32(0);
 
-faces = [seedface, heid2fid( opphes_crs(seedface, 1)), ...
-    heid2fid( opphes_crs(seedface, 2)), heid2fid( opphes_crs(seedface, 3))];
+faces = [seedface, heid2fid( sibhes_crs(seedface, 1)), ...
+    heid2fid( sibhes_crs(seedface, 2)), heid2fid( sibhes_crs(seedface, 3))];
 
 for i=1:4
     xs_tri_crs = xs_crs( tris_crs(faces(i),1:3),1:3);

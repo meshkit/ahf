@@ -102,7 +102,7 @@ fclose(points);
 % DETERMINE THE FACE PAIRS
 ntets=size(tets,1);
 fprintf(1,'Determining half-face data structure ...\n');tic
-opphfs = determine_opposite_halfface_mex( nv, tets);
+sibhfs = determine_opposite_halfface_mex( nv, tets);
 fprintf(1, 'Done in %e seconds.\n', toc);
 fprintf(1,'Sorting and writing the ascii file ...\n');tic
 nfaces=4*ntets;
@@ -130,7 +130,7 @@ for tet=1:ntets
     for j=1:4
         count=count+1;
         face=j;
-        neighbor=int32(bitshift(uint32(opphfs(tet,j)),-3)); % hfid2cid(opphfs(tet,j));
+        neighbor=int32(bitshift(uint32(sibhfs(tet,j)),-3)); % hfid2cid(sibhfs(tet,j));
         if(tet > neighbor)
             facepairs(count,1)=neighbor;
             facepairs(count,2)=tet;
@@ -138,7 +138,7 @@ for tet=1:ntets
                 facepairs(count,3)=face;
                 nborder=nborder+1;
             else
-                facepairs(count,3)=mod(opphfs(tet,j),8)+1; % hfid2lfid(opphfs(tet,j));
+                facepairs(count,3)=mod(sibhfs(tet,j),8)+1; % hfid2lfid(sibhfs(tet,j));
             end
         else
             facepairs(count,1)=tet;

@@ -1,13 +1,13 @@
-function opphfs = determine_opposite_halfface_mixed( nv, elems, opphfs) %#codegen
+function sibhfs = determine_opposite_halfface_mixed( nv, elems, sibhfs) %#codegen
 % Determine the opposite half-faces of a mixed mesh.
 %
-% OPPHFS = DETERMINE_OPPOSITE_HALFFACE_MIXED(NV,ELEMS)
-% OPPHFS = DETERMINE_OPPOSITE_HALFFACE_MIXED(NV,ELEMS,OPPHFS)
+% SIBHFS = DETERMINE_OPPOSITE_HALFFACE_MIXED(NV,ELEMS)
+% SIBHFS = DETERMINE_OPPOSITE_HALFFACE_MIXED(NV,ELEMS,SIBHFS)
 %    computes a mapping from each half-face to its opposite half-face.
 %
 % At input, ELEMS is a column vector, with format
 %     [e1_nv, e1_v1,e1_v2,..., e2_nv, e2_v1,e2_v2, ...].
-% At output, OPPHFS is a column vector, with format
+% At output, SIBHFS is a column vector, with format
 %     [e1_nf, e1_opphf1,e1_opphf2,..., e2_nf, e2_opphf1, e2_opphf2, ...].
 %
 % A half-face ID is a two-tuple <element_ID,local_face_ID-1> encoded 
@@ -53,9 +53,9 @@ v2av_hex  = int32([2,5,4; 3,6,1; 4,7,2; 1,8,3; 6,8,1; 7,5,2; 8,6,3; 5,7,4]);
 v2f_hex   = int32([2,5,1; 3,2,1; 4,3,1; 5,4,1; 6,5,2; 6,2,3; 6,3,4; 6,4,5]);
 
 if nargin<3; 
-    opphfs = zeros(size(elems,1),1,'int32'); 
+    sibhfs = zeros(size(elems,1),1,'int32'); 
 else
-    opphfs(:) = 0;
+    sibhfs(:) = 0;
 end
 
 %% First, build is_index_v to store starting position for each vertex.
@@ -168,12 +168,12 @@ for ii=1:nelems
 end
 is_index_v(2:nv) = is_index_v(1:nv-1); is_index_v(1)=1;
 
-% Fill in opphfs for each half-face.
-if isempty(opphfs)
-    opphfs = zeros(nopphf+nelems,1,'int32');
+% Fill in sibhfs for each half-face.
+if isempty(sibhfs)
+    sibhfs = zeros(nopphf+nelems,1,'int32');
 else
-    assert(int32(size(opphfs,1))>=nopphf+nelems);
-    opphfs(:) = int32(0);
+    assert(int32(size(sibhfs,1))>=nopphf+nelems);
+    sibhfs(:) = int32(0);
 end
 
 offset=int32(1); offset_ohf=int32(1);
@@ -185,7 +185,7 @@ for ii=1:nelems
             vs_elem = elems(offset+1:offset+4);
             nfpE = int32(4);
             for jj=1:nfpE % local face ID
-                if opphfs(offset_ohf+jj); continue; end
+                if sibhfs(offset_ohf+jj); continue; end
                 vs = vs_elem(hf_tet(jj,:));     % list of vertices of face
                 
                 found = false;
@@ -193,17 +193,17 @@ for ii=1:nelems
                 for index = is_index_v( vs(1)):is_index_v( vs(1)+1)-1
                     if v2oe_v1(index) == vs(3) && v2oe_v2(index) == vs(2) 
                         opp = v2hf(index);
-                        opphfs(offset_ohf+jj) = opp;
+                        sibhfs(offset_ohf+jj) = opp;
                         
                         k = is_index_o(hfid2cid(opp)) + hfid2lfid(opp);
-                        if opphfs(k)~=0
+                        if sibhfs(k)~=0
                             if nargin==3
                                 error( 'Input mesh is not oriented.');
                             else
-                                opphfs = zeros(0,1,'int32'); return;
+                                sibhfs = zeros(0,1,'int32'); return;
                             end
                         end
-                        opphfs(k) = clfids2hfid(ii,jj);
+                        sibhfs(k) = clfids2hfid(ii,jj);
                         
                         found = true;
                         break;
@@ -218,7 +218,7 @@ for ii=1:nelems
                             if nargin==3
                                 error( 'Input mesh is not oriented.');
                             else
-                                opphfs = zeros(0,1,'int32'); return;
+                                sibhfs = zeros(0,1,'int32'); return;
                             end
                         end
                     end
@@ -229,7 +229,7 @@ for ii=1:nelems
             
             nfpE = int32(5);
             for jj=1:nfpE % local face ID
-                if opphfs(offset_ohf+jj); continue; end
+                if sibhfs(offset_ohf+jj); continue; end
                 nvpf = 3+(jj==1);
                 
                 vs = vs_elem(hf_pyr(jj,1:nvpf));  % list of vertices of face
@@ -239,17 +239,17 @@ for ii=1:nelems
                 for index = is_index_v( vs(1)):is_index_v( vs(1)+1)-1
                     if v2oe_v1(index) == vs(nvpf) && v2oe_v2(index) == vs(2) 
                         opp = v2hf(index);
-                        opphfs(offset_ohf+jj) = opp;
+                        sibhfs(offset_ohf+jj) = opp;
                         
                         k = is_index_o(hfid2cid(opp)) + hfid2lfid(opp);
-                        if opphfs(k)~=0
+                        if sibhfs(k)~=0
                             if nargin==3
                                 error( 'Input mesh is not oriented.');
                             else
-                                opphfs = zeros(0,1,'int32'); return;
+                                sibhfs = zeros(0,1,'int32'); return;
                             end
                         end
-                        opphfs(k) = clfids2hfid(ii,jj);
+                        sibhfs(k) = clfids2hfid(ii,jj);
                         
                         found = true;
                         break;
@@ -264,7 +264,7 @@ for ii=1:nelems
                             if nargin==3
                                 error( 'Input mesh is not oriented.');
                             else
-                                opphfs = zeros(0,1,'int32'); return;
+                                sibhfs = zeros(0,1,'int32'); return;
                             end
                         end
                     end
@@ -275,7 +275,7 @@ for ii=1:nelems
             vs_elem = elems(offset+1:offset+6);
             
             for jj=1:nfpE % local face ID
-                if opphfs(offset_ohf+jj); continue; end
+                if sibhfs(offset_ohf+jj); continue; end
                 nvpf = 3+(jj<4);
                 vs = vs_elem(hf_pri(jj,1:nvpf));  % list of vertices of face
                 
@@ -284,17 +284,17 @@ for ii=1:nelems
                 for index = is_index_v( vs(1)):is_index_v( vs(1)+1)-1
                     if v2oe_v1(index) == vs(nvpf) && v2oe_v2(index) == vs(2) 
                         opp = v2hf(index);
-                        opphfs(offset_ohf+jj) = opp;
+                        sibhfs(offset_ohf+jj) = opp;
                         
                         k = is_index_o(hfid2cid(opp)) + hfid2lfid(opp);
-                        if opphfs(k)~=0
+                        if sibhfs(k)~=0
                             if nargin==3
                                 error( 'Input mesh is not oriented.');
                             else
-                                opphfs = zeros(0,1,'int32'); return;
+                                sibhfs = zeros(0,1,'int32'); return;
                             end
                         end
-                        opphfs(k) = clfids2hfid(ii,jj);
+                        sibhfs(k) = clfids2hfid(ii,jj);
                         
                         found = true;
                         break;
@@ -308,7 +308,7 @@ for ii=1:nelems
                             if nargin==3
                                 error( 'Input mesh is not oriented.');
                             else
-                                opphfs = zeros(0,1,'int32'); return;
+                                sibhfs = zeros(0,1,'int32'); return;
                             end
                         end
                     end
@@ -319,7 +319,7 @@ for ii=1:nelems
             vs_elem = elems(offset+1:offset+8);
             
             for jj=1:nfpE % local face ID
-                if opphfs(ii,jj); continue; end
+                if sibhfs(ii,jj); continue; end
                 vs = vs_elem(hf_hex(jj,:));     % list of vertices of face
                 
                 found = false;
@@ -327,17 +327,17 @@ for ii=1:nelems
                 for index = is_index_v( vs(1)):is_index_v( vs(1)+1)-1
                     if v2oe_v1(index) == vs(4) && v2oe_v2(index) == vs(2)
                         opp = v2hf(index);
-                        opphfs(offset_ohf+jj) = opp;
+                        sibhfs(offset_ohf+jj) = opp;
                         
                         k = is_index_o(hfid2cid(opp)) + hfid2lfid(opp);
-                        if opphfs(k)~=0
+                        if sibhfs(k)~=0
                             if nargin==3
                                 error( 'Input mesh is not oriented.');
                             else
-                                opphfs = zeros(0,1,'int32'); return;
+                                sibhfs = zeros(0,1,'int32'); return;
                             end
                         end
-                        opphfs(k) = clfids2hfid(ii,jj);
+                        sibhfs(k) = clfids2hfid(ii,jj);
                         
                         found = true;
                         break;
@@ -351,7 +351,7 @@ for ii=1:nelems
                             if nargin==3
                                 error( 'Input mesh is not oriented.');
                             else
-                                opphfs = zeros(0,1,'int32'); return;
+                                sibhfs = zeros(0,1,'int32'); return;
                             end
                         end
                     end
@@ -363,6 +363,6 @@ for ii=1:nelems
     end
     
     offset = offset + nvpE + 1;
-    opphfs(offset_ohf) = nfpE;
+    sibhfs(offset_ohf) = nfpE;
     offset_ohf = offset_ohf + nfpE + 1;
 end

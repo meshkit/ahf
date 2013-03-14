@@ -1,7 +1,7 @@
 function [b2v, bdedgs, edgmap] = extract_border_curv_tri...
-    (nv, tris, flabel, opphes, inwards) %#codegen
+    (nv, tris, flabel, sibhes, inwards) %#codegen
 %EXTRACT_BORDER_CURV_TRI Extract border vertices and edges. 
-% [B2V,BDEDGS,EDGMAP] = EXTRACT_BORDER_CURV_TRI(NV,TRIS,FLABEL,OPPHES,INWARDS)
+% [B2V,BDEDGS,EDGMAP] = EXTRACT_BORDER_CURV_TRI(NV,TRIS,FLABEL,SIBHES,INWARDS)
 % Extract border vertices and edges of triangle mesh. Return list of border 
 % vertex IDs and list of border edges. Edges between faces with different 
 % labels are also considered as border edges, and in this case only the 
@@ -10,12 +10,12 @@ function [b2v, bdedgs, edgmap] = extract_border_curv_tri...
 %
 % [B2V,BDEDGS,EDGMAP] = EXTRACT_BORDER_CURV_TRI(NV,TRIS)
 % [B2V,BDEDGS,EDGMAP] = EXTRACT_BORDER_CURV_TRI(NV,TRIS,FLABEL)
-% [B2V,BDEDGS,EDGMAP] = EXTRACT_BORDER_CURV_TRI(NV,TRIS,FLABEL,OPPHES)
-% [B2V,BDEDGS,EDGMAP] = EXTRACT_BORDER_CURV_TRI(NV,TRIS,FLABEL,OPPHES,INWARDS)
+% [B2V,BDEDGS,EDGMAP] = EXTRACT_BORDER_CURV_TRI(NV,TRIS,FLABEL,SIBHES)
+% [B2V,BDEDGS,EDGMAP] = EXTRACT_BORDER_CURV_TRI(NV,TRIS,FLABEL,SIBHES,INWARDS)
 % NV: specifies the number of vertices.
 % TRIS: contains the connectivity.
 % FLABEL: contains a label for each face.
-% OPPHES: contains the opposite half-edges.
+% SIBHES: contains the opposite half-edges.
 % INWARDS: specifies whether the edge normals should be inwards (false by default)
 % B2V: is a mapping from border-vertex ID to vertex ID.
 % BDEDGS: is connectivity of border edges.
@@ -35,14 +35,14 @@ else
 end
 
 if nargin<3; flabel=0; end
-if nargin<4; opphes = determine_opposite_halfedge_tri(nv, tris); end
+if nargin<4; sibhes = determine_opposite_halfedge_tri(nv, tris); end
 
 nbdedgs = 0; ntris=int32(size(tris,1));
 for ii=1:ntris
     if tris(ii,1)==0; ntris=ii-1; break; end
     for jj=1:3
-        if opphes(ii,jj) == 0 || size(flabel,1)>1 && ...
-                flabel(ii)~=flabel(heid2fid(opphes(ii,jj)))
+        if sibhes(ii,jj) == 0 || size(flabel,1)>1 && ...
+                flabel(ii)~=flabel(heid2fid(sibhes(ii,jj)))
             if(~visited(tris(ii,he_tri(jj,1))))
               visited(tris(ii,he_tri(jj,1)))=true;
               isborder( tris(ii,he_tri(jj,1))) = true; nbdedgs = nbdedgs +1;
@@ -85,8 +85,8 @@ if nargout>1
     count = int32(1);
     for ii=1:ntris
         for jj=1:3
-            if opphes(ii,jj) == 0 || size(flabel,1)>1 && ...
-                    flabel(ii)<flabel(heid2fid(opphes(ii,jj)))
+            if sibhes(ii,jj) == 0 || size(flabel,1)>1 && ...
+                    flabel(ii)<flabel(heid2fid(sibhes(ii,jj)))
                 
                 bdedgs(count, :) = v2b(tris(ii,he_tri(jj,:)));
 

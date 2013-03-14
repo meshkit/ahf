@@ -1,8 +1,8 @@
 function [ngbvs, nverts, vtags, etags, ngbes, nedges] = obtain_nring_curv( vid, ring, minpnts, ...
-        edgs, opphvs, v2hv, ngbvs, vtags, etags, ngbes) %#codegen 
+        edgs, sibhvs, v2hv, ngbvs, vtags, etags, ngbes) %#codegen 
 %OBTAIN_NRING_CURV Collect n-ring vertices and edges.
 % [NGBVS,NVERTS,VTAGS,ETAGS,NGBES,NEDGES] = OBTAIN_NRING_CURV(VID,RING, ...
-% MINPNTS,EDGS,OPPHVS,V2HV,NGBVS,VTAGS,ETAGS,NGBES) Collects n-ring 
+% MINPNTS,EDGS,SIBHVS,V2HV,NGBVS,VTAGS,ETAGS,NGBES) Collects n-ring 
 % vertices and edges of a vertex and saves into NGBVS and NGBES.
 %
 % See also OBTAIN_NRING_QUAD, OBTAIN_NRING_SURF, OBTAIN_NRING_VOL
@@ -33,19 +33,19 @@ ebuf = nullcopy(zeros(MAXNPNTS,1, 'int32'));
 v = edgs(eid, 3-lid);
 nverts = int32(1); ngbvs( nverts) = v;
 if ~onering_only;
-    hvbuf(1) = opphvs( eid, 3-lid);
+    hvbuf(1) = sibhvs( eid, 3-lid);
     ebuf(1) = eid;
 end
 nedges = int32(1);
 
-opp = opphvs(eid, lid);
+opp = sibhvs(eid, lid);
 if opp
     eid = hvid2eid(opp); lid = hvid2lvid(opp);
 
     v = edgs(eid, 3-lid); nverts = int32(2); ngbvs( nverts) = v;
     assert( v ~= ngbvs(1));
     if ~onering_only;
-        hvbuf(nverts) = opphvs(eid, 3-lid);
+        hvbuf(nverts) = sibhvs(eid, 3-lid);
         ebuf(2) = eid; nedges = int32(2);
     end
 end
@@ -83,7 +83,7 @@ while 1
                 nverts = nverts + 1; ngbvs( nverts) = v; vtags(v)=int32(1);
 
                 % Insert opposite halfvertex
-                hvbuf(nverts) = opphvs( eid, 3-lid);
+                hvbuf(nverts) = sibhvs( eid, 3-lid);
             else
                 assert( false);
             end

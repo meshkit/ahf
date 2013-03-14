@@ -1,13 +1,13 @@
 function [ngbvs, nverts] = obtain_1ring_curv...
-    ( vid, edgs, opphvs, v2hv) %#codegen 
+    ( vid, edgs, sibhvs, v2hv) %#codegen 
 %OBTAIN_1RING_CURV Collect 1-ring vertices and edges.
-% [NGBVS,NVERTS] = OBTAIN_1RING_CURV(VID,EDGS,OPPHVS,V2HV) Collects 1-ring 
+% [NGBVS,NVERTS] = OBTAIN_1RING_CURV(VID,EDGS,SIBHVS,V2HV) Collects 1-ring 
 % vertices and edges of a vertex and saves them into NGBVS and NGBES. 
 %
 % See also OBTAIN_1RING_SURF, OBTAIN_1RING_VOL
 
 assert( isa(vid, 'int32') && isa( edgs, 'int32') && ...
-    isa( opphvs, 'int32') && isa( v2hv,'int32'));
+    isa( sibhvs, 'int32') && isa( v2hv,'int32'));
 
 eid = hvid2eid(v2hv(vid));
 lid = hvid2lvid(v2hv(vid));
@@ -21,7 +21,7 @@ if ~eid; return; end
 v = edgs(eid, 3-lid);
 nverts = int32(1); ngbvs( nverts) = v;
 
-opp = opphvs(eid, lid);
+opp = sibhvs(eid, lid);
 if opp
     eid = hvid2eid(opp); lid = hvid2lvid(opp);
 

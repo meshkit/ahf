@@ -1,6 +1,6 @@
-function [elems_buf,elems_type,elems_offsets,reg_opphfs,live_elements]=...
+function [elems_buf,elems_type,elems_offsets,reg_sibhfs,live_elements]=...
     fill_hybflip_holes(nflips,elems_buf,elems_type,elems_offsets,...
-    reg_opphfs,inset,eltset)  %#codegen
+    reg_sibhfs,inset,eltset)  %#codegen
 %WE CANNOT SIMPLY MOVE ELEMENTS FROM THE TOP OF THE STACK INTO THE HOLES
 %BECAUSE THE ITETOFF AND JTETOFF ARRAYS ARE NOT NECESSARILY INTEGER
 %MULTIPLES OF FOUR NOR WILL EACH INCREMENT BE THE SAME. THIS SHOWS THE
@@ -64,15 +64,15 @@ for iset=1:ninset;
         %
         for i=1:nfpE;
             elems_buf(elems_offsets(it) + i)=elems_buf(elems_offsets(it2) + i);
-            if(reg_opphfs(it2,i)==0) ;
-                reg_opphfs(it,i)=0;
+            if(reg_sibhfs(it2,i)==0) ;
+                reg_sibhfs(it,i)=0;
             else
-                neighbor = hfid2cid(reg_opphfs(it2,i));
-                localface = hfid2lfid(reg_opphfs(it2,i));
+                neighbor = hfid2cid(reg_sibhfs(it2,i));
+                localface = hfid2lfid(reg_sibhfs(it2,i));
                 %THIS CORRECTS THE FACE ARRAY FOR IT BUT NOT FOR ITS NEIGHBOR
-                reg_opphfs(it,i) = reg_opphfs(it2,i);
+                reg_sibhfs(it,i) = reg_sibhfs(it2,i);
                 %HERE WE CORRECT FOR THE NEIGHBOR
-                reg_opphfs(neighbor,localface) = clfids2hfid(it, i);
+                reg_sibhfs(neighbor,localface) = clfids2hfid(it, i);
             end;
         end;
         itop=itop-1;
@@ -112,13 +112,13 @@ if(lbottomfil);
                     error('Unrecognized element type.');
             end
             for iface=1:nfpE;
-                if(reg_opphfs(it,iface)==0) ;
-                    reg_opphfs(last_element,iface)=0;
+                if(reg_sibhfs(it,iface)==0) ;
+                    reg_sibhfs(last_element,iface)=0;
                 else
-                    neighbor=hfid2cid(reg_opphfs(it,iface));
-                    localface=hfid2lfid(reg_opphfs(it,iface));
+                    neighbor=hfid2cid(reg_sibhfs(it,iface));
+                    localface=hfid2lfid(reg_sibhfs(it,iface));
                     neighbor=italiasinv(neighbor);
-                    reg_opphfs(it,iface) = clfids2hfid( neighbor, localface);
+                    reg_sibhfs(it,iface) = clfids2hfid( neighbor, localface);
                 end;
             end;
             elems_offsets(italiasinv(it))=itoff;

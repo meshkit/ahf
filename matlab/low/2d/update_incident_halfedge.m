@@ -1,13 +1,13 @@
-function heid = update_incident_halfedge(heid, elems, opphes) %#codegen 
+function heid = update_incident_halfedge(heid, elems, sibhes) %#codegen 
 % UPDATE_INCIDENT_HALFEDGE    Update the incident halfedge of a vertex.
 %
 %    It determines a unique incident halfedge ID of the origin vertex of
 %    heid. If the vertex is a border vertex, then a border halfedge is
 %    returned. Otherwise, the halfedge with the smallest ID is returned.
 %
-% HEID = UPDATE_INCIDENT_HALFEDGE(HEID, ELEMS, OPPHES)
+% HEID = UPDATE_INCIDENT_HALFEDGE(HEID, ELEMS, SIBHES)
 %     ELEMS is mx3 (for triangle mesh) or mx4 (for quadrilateral mesh).
-%     OPPHES is mx3 (for triangle mesh) or mx4 (for quadrilateral mesh).
+%     SIBHES is mx3 (for triangle mesh) or mx4 (for quadrilateral mesh).
 %     HEID is a half-edge ID, for whose origin vertex a (unique) incident 
 %          halfedge is determined. 
 %
@@ -23,7 +23,7 @@ fstart = heid2fid(heid); lstart=heid2leid(heid);
 f=fstart; l=lstart;
 
 while 1
-    opp = opphes(f,l);
+    opp = sibhes(f,l);
     
     if opp==0; heid = 4*f+l-1; return; end
     

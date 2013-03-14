@@ -1,15 +1,15 @@
-function v2he = determine_incident_halfedges(elems, opphes, v2he) %#codegen
+function v2he = determine_incident_halfedges(elems, sibhes, v2he) %#codegen
 %DETERMINE_INCIDENT_HALFEDGES Determine an incident halfedges.
-% DETERMINE_INCIDENT_HALFEDGES(ELEMS,OPPHES,V2HE) Determines incident
+% DETERMINE_INCIDENT_HALFEDGES(ELEMS,SIBHES,V2HE) Determines incident
 % halfedges of each vertex for a triangular, quadrilateral, or mixed mesh. 
 % It gives higher priorities to border edges. The following explains inputs
 % and outputs.
 %
-% V2HE = DETERMINE_INCIDENT_HALFEDGES(ELEMS,OPPHES)
-% V2HE = DETERMINE_INCIDENT_HALFEDGES(ELEMS,OPPHES,V2HE)
-% V2HE = DETERMINE_INCIDENT_HALFEDGES(ELEMS,OPPHES,V2HE)
+% V2HE = DETERMINE_INCIDENT_HALFEDGES(ELEMS,SIBHES)
+% V2HE = DETERMINE_INCIDENT_HALFEDGES(ELEMS,SIBHES,V2HE)
+% V2HE = DETERMINE_INCIDENT_HALFEDGES(ELEMS,SIBHES,V2HE)
 %     ELEMS is mx3 (for triangle mesh) or mx4 (for quadrilateral mesh).
-%     OPPHES is mx3 (for triangle mesh) or mx4 (for quadrilateral mesh).
+%     SIBHES is mx3 (for triangle mesh) or mx4 (for quadrilateral mesh).
 %     V2HE is an array of size equal to number of vertices.
 %          It is passed by reference.
 %
@@ -38,8 +38,8 @@ for kk=1:int32(size(elems,1))
     
     for lid=1:int32(size(elems,2))
         v = elems(kk,lid);
-        if v>0 && (v2he(v)==0 || opphes( kk,lid) == 0 || ...
-	     (opphes( int32( bitshift( uint32(v2he(v)),-2)), mod(v2he(v),4)+1) && opphes( kk, lid)<0))
+        if v>0 && (v2he(v)==0 || sibhes( kk,lid) == 0 || ...
+	     (sibhes( int32( bitshift( uint32(v2he(v)),-2)), mod(v2he(v),4)+1) && sibhes( kk, lid)<0))
             v2he(v) = 4*kk + lid - 1;
         end
     end

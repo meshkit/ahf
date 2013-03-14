@@ -1,14 +1,14 @@
-function allv_ngbvs = obtain_all_nring_surf( ring, nv, elems, opphes, v2he)
+function allv_ngbvs = obtain_all_nring_surf( ring, nv, elems, sibhes, v2he)
 % Obtain the nring-neighbors of all the vertices of a surface mesh
 % ALLV_NGBVS = OBTAIN_ALL_NRING_SURF( RING, NV, ELEMS)
-% ALLV_NGBVS = OBTAIN_ALL_NRING_SURF( RING, NV, ELEMS, OPPHES)
-% ALLV_NGBVS = OBTAIN_ALL_NRING_SURF( RING, NV, ELEMS, OPPHES, V2HE)
+% ALLV_NGBVS = OBTAIN_ALL_NRING_SURF( RING, NV, ELEMS, SIBHES)
+% ALLV_NGBVS = OBTAIN_ALL_NRING_SURF( RING, NV, ELEMS, SIBHES, V2HE)
 %
 % Input arguments
 %    RING: the desired size of the ring
 %    NV: number of vertices of curve
 %    ELEMS: element connectivity
-%    OPPHES: Opposite half-edges (optional)
+%    SIBHES: Opposite half-edges (optional)
 %    V2HE: Mapping from vertex to an incident half-edge (optional)
 %
 % Output arguments
@@ -21,8 +21,8 @@ function allv_ngbvs = obtain_all_nring_surf( ring, nv, elems, opphes, v2he)
 %#codegen -args {0, int32(0), coder.typeof(int32(0),[inf,4],[1,1]),
 %#codegen coder.typeof(int32(0),[inf,4],[1,1]), coder.typeof(int32(0),[inf,1])}
 
-if nargin<4; opphes = determine_opposite_halfedge( nv, elems); end
-if nargin<5; v2he = determine_incident_halfedges( elems, opphes); end
+if nargin<4; sibhes = determine_opposite_halfedge( nv, elems); end
+if nargin<5; v2he = determine_incident_halfedges( elems, sibhes); end
 
 switch int32(ring*2)
     case 2
@@ -53,7 +53,7 @@ allv_ngbvs = nullcopy(zeros( fix(nv*avepnts*1.1),1,'int32'));
 offset = int32(1);
 for i=1:nv
     [ngbvs, nverts,vtags,ftags] = obtain_nring_quad(i, ring, minpnts, ...
-        elems, opphes, v2he, ngbvs, vtags, ftags);
+        elems, sibhes, v2he, ngbvs, vtags, ftags);
 
     assert( offset +nverts + 1 <= numel(allv_ngbvs));
     allv_ngbvs(offset) = nverts;

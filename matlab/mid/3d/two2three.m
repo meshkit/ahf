@@ -1,6 +1,6 @@
 function [live_elements nflips elems_buf,elems_type,...
-    elems_offsets,reg_opphfs,ninset]=...
-    two2three(inset,eltset,elems_buf,elems_type,elems_offsets,reg_opphfs,...
+    elems_offsets,reg_sibhfs,ninset]=...
+    two2three(inset,eltset,elems_buf,elems_type,elems_offsets,reg_sibhfs,...
     xs_hyb,live_elements,ninset,nelements)  %#codegen
 
 % specifying input parameters types for eml
@@ -10,14 +10,14 @@ assert(isa(elems_buf,'int32')&&(size(elems_buf,2)==1)&&(size(elems_buf,1)>=1)); 
 assert(isa(elems_type,'int32')&&(size(elems_type,2)==1)&&(size(elems_type,1)>=1));              % elems_type is an integer column vector or scalar
 assert(isa(elems_offsets,'int32')&&(size(elems_offsets,2)==1)&&(size(elems_offsets,1)>=1));     % elems_offsets is an integer column vector or scalar
 
-assert(isa(reg_opphfs,'int32')&&(size(reg_opphfs,2)==4)&&(size(reg_opphfs,1)>=1));              % elems_offsets is an integer [nx4] matrix
+assert(isa(reg_sibhfs,'int32')&&(size(reg_sibhfs,2)==4)&&(size(reg_sibhfs,1)>=1));              % elems_offsets is an integer [nx4] matrix
 assert(isa(xs_hyb,'double')&&(size(xs_hyb,2)>=3)&&(size(xs_hyb,1)>=1));                         % xs_hyb is a double [nx4] matrix
 
 assert(isa(live_elements,'int32') && isscalar(live_elements));                                  % live_elements is an integer scalar
 assert(isa(ninset,'int32') && isscalar(ninset));                                                % ninsets is an integer scalar
 assert(isa(nelements,'int32') && isscalar(nelements));                                          % nelements is an integer scalar
 
-maxnef=int32(size(reg_opphfs,2));
+maxnef=int32(size(reg_sibhfs,2));
 tetface_nodes=[1 3 2;1 2 4;2 3 4;3 1 4];
 local_tets = [1 3 5 4; 3 2 5 4; 2 1 5 4]';
 %OPPFACE IS THE NODE OPPOSITE THE FACE
@@ -40,8 +40,8 @@ neighborhood1=nullcopy(zeros(4,2,'int32'));
 for iset=1:ninset;
     it=eltset(iset);
     if(elems_type(it)~=tet && inset(it)<=0);continue;end;
-    neighborhood1(1:4,1)=hfid2cid(reg_opphfs(it,1:4));
-    neighborhood1(1:4,2)=hfid2lfid(reg_opphfs(it,1:4));
+    neighborhood1(1:4,1)=hfid2cid(reg_sibhfs(it,1:4));
+    neighborhood1(1:4,2)=hfid2lfid(reg_sibhfs(it,1:4));
     nfpE = 4;
     for iface=1:nfpE
         isvisited=bitget(visited(it),iface);
@@ -60,7 +60,7 @@ for iset=1:ninset;
         i2=elems_buf(elems_offsets(it) + tetface_nodes(iface,2));
         i3=elems_buf(elems_offsets(it) + tetface_nodes(iface,3));
         i4=elems_buf(elems_offsets(it) + oppface(iface));
-        localface=hfid2lfid(reg_opphfs(it,iface));
+        localface=hfid2lfid(reg_sibhfs(it,iface));
         visited(it) = bitset( visited(it), iface, 1);
         visited(thisneighbor) = bitset( visited(thisneighbor), localface, 1);
         i5=elems_buf(elems_offsets(thisneighbor)+oppface(localface));
@@ -94,7 +94,7 @@ for iset=1:ninset;
             elems_type = [elems_type; nullcopy(zeros(inc,1,'int32'))];
             visited = [visited; zeros(inc,1, 'uint32')];
             elems_offsets = [elems_offsets; nullcopy(zeros(inc,1, 'int32'))];
-            reg_opphfs = [reg_opphfs; nullcopy(zeros(4*inc, maxnef, 'int32'))];
+            reg_sibhfs = [reg_sibhfs; nullcopy(zeros(4*inc, maxnef, 'int32'))];
             inset = [inset; nullcopy(zeros(inc,1, 'int32'))];
             eltset = [eltset; nullcopy(zeros(inc,1, 'int32'))];
         end;
@@ -112,9 +112,9 @@ for iset=1:ninset;
         % FLIP IT
         common1(1)=iface;common2(1)=iface;
         common1(2)=localface;common2(2)=localface;
-        [elems_buf,elems_offsets,reg_opphfs]=...
+        [elems_buf,elems_offsets,reg_sibhfs]=...
             fliphybnxm(2,3,ntets,elems_buf,elems_offsets,...
-            reg_opphfs,isort,common1,common2,tets_new,tempsort,itemp);
+            reg_sibhfs,isort,common1,common2,tets_new,tempsort,itemp);
         inset(ntets(3))=1;
         ninset=ninset+1;
         eltset(ninset)=it3;

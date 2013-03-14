@@ -1,8 +1,8 @@
 function [ngbvs, nverts, vtags, etags, ngbes, nelems] = obtain_1ring_vol...
-    ( vid, tets, opphfs, v2hf, ngbvs, vtags, etags, ngbes) %#codegen 
+    ( vid, tets, sibhfs, v2hf, ngbvs, vtags, etags, ngbes) %#codegen 
 %OBTAIN_1RING_VOL Collects 1-ring neighbor vertices and elements.
 % [NGBVS,NVERTS,VTAGS,ETAGS,NGBES,NELEMS] = OBTAIN_1RING_VOL(VID,TETS, ...
-% OPPHFS,V2HF,NGBVS,VTAGS,ETAGS,NGBES) Collects 1-ring neighbor vertices 
+% SIBHFS,V2HF,NGBVS,VTAGS,ETAGS,NGBES) Collects 1-ring neighbor vertices 
 % and elements of vertex VID and saves them into NGBVS and NGBES.  Note 
 % that NGBVS does not contain VID itself.  At input, VTAGS and ETAGS must 
 % be set to zeros. They will be reset to zeros at output.
@@ -28,7 +28,7 @@ vtags(vid) = true;
 stack = nullcopy(zeros(MAXTETS,1,'int32'));
 size_stack = int32(1); stack(1) = eid;
 
-opphfs_tet = int32([1, 2, 4; 1 2 3; 1 3 4; 2 3 4]);
+sibhfs_tet = int32([1, 2, 4; 1 2 3; 1 3 4; 2 3 4]);
 
 % Insert element itself into queue.
 while size_stack>0
@@ -52,7 +52,7 @@ while size_stack>0
 
     % Push unvisited neighbor tets onto stack
     for ii=int32(1):3
-        ngb = hfid2cid(opphfs(eid,opphfs_tet(lvid,ii)));
+        ngb = hfid2cid(sibhfs(eid,sibhfs_tet(lvid,ii)));
         if ngb && ~etags(ngb);
             size_stack = size_stack + 1; stack(size_stack) = ngb;
         end

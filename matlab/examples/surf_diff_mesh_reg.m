@@ -1,4 +1,4 @@
-function ps = surf_diff_mesh_reg(ps, tris, opphes, v2he)
+function ps = surf_diff_mesh_reg(ps, tris, sibhes, v2he)
 %#codegen -args {coder.typeof(double(0), [inf, 3]), coder.typeof(int32(0), [inf, 3]),
 %# coder.typeof(int32(0), [inf, 3]), coder.typeof(int32(0), [inf, 1])} 
 
@@ -12,7 +12,7 @@ prv=[3, 1, 2];
 
 for i=1:nv
     % Determine neighboring faces and vertices.
-    [~, ~, ngbfaces, nfaces] = obtain_1ring_surf( i, tris, opphes, v2he, zeros(10,1,'int32'), zeros(10,1, 'int32'));   
+    [~, ~, ngbfaces, nfaces] = obtain_1ring_surf( i, tris, sibhes, v2he, zeros(10,1,'int32'), zeros(10,1, 'int32'));   
     
     [face_norms, face_areas] = compute_face_normal_surf(ps, tris(ngbfaces(1:nfaces),:));
     

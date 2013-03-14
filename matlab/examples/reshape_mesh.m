@@ -11,11 +11,11 @@ function [ps_new, tris_new] = reshape_mesh(ps,tris,contract_param,split_param,fl
 [ps, tris] = flip_edge_surf_tri(flip_param, ps, tris);
 
 % % Obtain opphe and v2he matrices
-% opphes = determine_opposite_halfedge(size(ps,1), tris);
-% v2he=determine_incident_halfedges(tris, opphes);
+% sibhes = determine_opposite_halfedge(size(ps,1), tris);
+% v2he=determine_incident_halfedges(tris, sibhes);
 % 
 % % Use mesh regulation to redistribute the vertices
-% ps = surf_diff_mesh_reg(ps, tris, opphes, v2he);
+% ps = surf_diff_mesh_reg(ps, tris, sibhes, v2he);
 
 ps_new = ps;
 tris_new = tris;

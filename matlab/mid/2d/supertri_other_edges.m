@@ -1,4 +1,4 @@
-function [h2, h3, flist, vlist] = supertri_other_edges( h1, tris, opphes) %#codegen 
+function [h2, h3, flist, vlist] = supertri_other_edges( h1, tris, sibhes) %#codegen 
 % SUPERTRI_OTHER_EDGES
 % Given a halfedge, obtain the other two halfedges of its largest 
 %       "super-triangle" incident on it.
@@ -15,20 +15,20 @@ h2=int32(0); h3=int32(0); flist = zeros(0,1,'int32'); vlist = zeros(0,1,'int32')
 if h1==0; return; end
 
 [h2, h3, flist, vlist, ~, h2next, h3next] = ...
-    supertri_other_edges_helper( h1, tris, opphes);
+    supertri_other_edges_helper( h1, tris, sibhes);
 
 % Check whether h2next and h1 bound a supertriangle
 if h2next
-    [h3, flist, vlist] = supertri_3rd_edge( h1, h2next, tris, opphes);
+    [h3, flist, vlist] = supertri_3rd_edge( h1, h2next, tris, sibhes);
 end  
 
 % Check whether h3tmp and h1 bound a supertriangle
 if h3next
-    [h3, flist, vlist] = supertri_3rd_edge( h1, h2, tris, opphes);
+    [h3, flist, vlist] = supertri_3rd_edge( h1, h2, tris, sibhes);
 end  
 
 function [h2, h3, flist, vlist, h2next, h3next] = ...
-    supertri_other_edges_helper( h1, tris, opphes)
+    supertri_other_edges_helper( h1, tris, sibhes)
 prev = int32([3 1 2]); next = int32([2 3 1]);
 
 fid1 = heid2fid( h1);  leid1 = heid2leid(h1);
@@ -43,14 +43,14 @@ nv = int32(0);
 
 % Rotate around the origin of h1
 while true
-    opp = opphes( fid2, leid2);
+    opp = sibhes( fid2, leid2);
     if ~opp
         f2tmp = int32(0); l2tmp = int32(0); 
     else
         f2tmp = heid2fid(opp); l2tmp = next(heid2leid(opp));
     end
     
-    opp = opphes( fid3, leid3);
+    opp = sibhes( fid3, leid3);
     if ~opp
         f3tmp = int32(0); l3tmp = int32(0);
     else
@@ -105,17 +105,17 @@ function test %#ok<DEFNU>
 %!     6,9,8]);
 %! 
 %! nv = int32(size(xs,1)); nf=int32(size(tris,1));
-%! opphes = determine_opposite_halfedge(nv, tris);
-%! v2he = determine_incident_halfedges(tris, opphes);
-%! assert(verify_incident_halfedges(tris, opphes, v2he, nf));
+%! sibhes = determine_opposite_halfedge(nv, tris);
+%! v2he = determine_incident_halfedges(tris, sibhes);
+%! assert(verify_incident_halfedges(tris, sibhes, v2he, nf));
 %! flist = zeros(10,1,'int32'); vlist = zeros(10,1,'int32');
 %! 
 %! h1 = fleids2heid(3,1); 
-%! [h2, h3, flist, vlist] = supertri_other_edges( h1, tris, opphes);
+%! [h2, h3, flist, vlist] = supertri_other_edges( h1, tris, sibhes);
 %! assert( h2 == fleids2heid(3,2) && h3==fleids2heid(3,3) && ...
 %!       length(flist)==1 && flist(1) == 3 && length(vlist)==0);
 %! 
 %! h1 = fleids2heid(4,1); 
-%! [h2, h3, flist, vlist] = supertri_other_edges( h1, tris, opphes);
+%! [h2, h3, flist, vlist] = supertri_other_edges( h1, tris, sibhes);
 %! assert( h2 == fleids2heid(5,1) && h3==fleids2heid(6,1) && ...
 %!       length(flist)==3 && length(vlist)==1);

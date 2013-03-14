@@ -1,5 +1,5 @@
-function [nflips elems_buf,elems_type,elems_offsets,reg_opphfs]=...
-    four2four(inset,eltset,elems_buf,elems_type,elems_offsets,reg_opphfs,...
+function [nflips elems_buf,elems_type,elems_offsets,reg_sibhfs]=...
+    four2four(inset,eltset,elems_buf,elems_type,elems_offsets,reg_sibhfs,...
     xs_hyb,ninset) %#codegen
 
 
@@ -10,7 +10,7 @@ assert(isa(elems_buf,'int32')&&(size(elems_buf,2)==1)&&(size(elems_buf,1)>=1)); 
 assert(isa(elems_type,'int32')&&(size(elems_type,2)==1)&&(size(elems_type,1)>=1));              % elems_type is an integer column vector or scalar
 assert(isa(elems_offsets,'int32')&&(size(elems_offsets,2)==1)&&(size(elems_offsets,1)>=1));     % elems_offsets is an integer column vector or scalar
 
-assert(isa(reg_opphfs,'int32')&&(size(reg_opphfs,2)>=3)&&(size(reg_opphfs,1)>=1));              % elems_offsets is an integer [nx4] matrix
+assert(isa(reg_sibhfs,'int32')&&(size(reg_sibhfs,2)>=3)&&(size(reg_sibhfs,1)>=1));              % elems_offsets is an integer [nx4] matrix
 assert(isa(xs_hyb,'double')&&(size(xs_hyb,2)==3)&&(size(xs_hyb,1)>=1));                         % xs_hyb is a double [nx4] matrix
 
 assert(isa(ninset,'int32') && isscalar(ninset));                                                % ninsets is an integer scalar
@@ -46,8 +46,8 @@ for iset=1:ninset;
     breakout=false;
     if elems_type(it)~=tet || inset(it)<=0; continue; end
     
-    neighborhood1(1:4,1)=hfid2cid(reg_opphfs(it,1:4));
-    neighborhood1(1:4,2)=hfid2lfid(reg_opphfs(it,1:4));
+    neighborhood1(1:4,1)=hfid2cid(reg_sibhfs(it,1:4));
+    neighborhood1(1:4,2)=hfid2lfid(reg_sibhfs(it,1:4));
     nfpE = 4;
     for iface=1:nfpE
         %LOOP OVER ALL OF THE EDGES OF THE SHARED FACE
@@ -58,7 +58,7 @@ for iset=1:ninset;
             end;
             [ntets, elems_1ring, lvid_1ring,visited] = ...
                 obtain_tets_around_edge(it, iface, j, elems_buf, ...
-                elems_offsets, elems_type, inset, reg_opphfs,...     
+                elems_offsets, elems_type, inset, reg_sibhfs,...     
                 elms_1ring,lvid_1ring,MAX,visited,1);   
                 %elms_1ring,lvid_1ring,MAX);  
             if ntets~=4; continue; end
@@ -126,11 +126,11 @@ for iset=1:ninset;
                 common1(2)=neighborhood1(oppnode(lvid_1ring(1)),2);
                 common2(2)=oppnode(lvid_1ring(2));
                 
-                common1(3)=hfid2lfid(reg_opphfs(elems_1ring(2),...
+                common1(3)=hfid2lfid(reg_sibhfs(elems_1ring(2),...
                   oppnode(lvid_1ring(2))));%
                 common2(3)=oppnode(lvid_1ring(3));
                 
-                common1(4)=hfid2lfid(reg_opphfs(elems_1ring(3),...
+                common1(4)=hfid2lfid(reg_sibhfs(elems_1ring(3),...
                   oppnode(lvid_1ring(3))));
                 common2(4)=neighborhood1(iface,2);%
                 
@@ -145,9 +145,9 @@ for iset=1:ninset;
                 %THE MTET ARRAY HOLDS THE NEW CONNECTIONS
                 tet_new = vids_46(local_tets);
                 
-                [elems_buf,elems_offsets,reg_opphfs,visited]=...
+                [elems_buf,elems_offsets,reg_sibhfs,visited]=...
                     fliphybnxm(4,4,elems_1ring,elems_buf,elems_offsets,...
-                    reg_opphfs,isort,common1,common2,tet_new,tempsort,...
+                    reg_sibhfs,isort,common1,common2,tet_new,tempsort,...
                     itemp,visited);
                 
                 nflips=nflips+1;
@@ -156,9 +156,9 @@ for iset=1:ninset;
                 %THE MTET ARRAY HOLDS THE NEW CONNECTIONS
                 tet_new = vids_35(local_tets);
                 
-                [elems_buf,elems_offsets,reg_opphfs,visited]=...
+                [elems_buf,elems_offsets,reg_sibhfs,visited]=...
                     fliphybnxm(4,4,elems_1ring,elems_buf,elems_offsets,...
-                    reg_opphfs,isort,common1,common2,tet_new,tempsort,...
+                    reg_sibhfs,isort,common1,common2,tet_new,tempsort,...
                     itemp,visited);
                 
                 nflips=nflips+1;

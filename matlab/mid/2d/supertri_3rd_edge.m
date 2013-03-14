@@ -1,9 +1,9 @@
-function [h3, flist, vlist] = supertri_3rd_edge( h1, h2, tris, opphes) %#codegen 
+function [h3, flist, vlist] = supertri_3rd_edge( h1, h2, tris, sibhes) %#codegen 
 % SUPERTRI_3RD_EDGE
 % Given two halfedges, determine whether they bound a super-triangle.
 % If so, return the halfedge of the third halfedge of the super-triangle.
 %
-%  [H3, FLIST, VLIST] = SUPERTRI_3RD_EDGE( H1, H2, TRIS, OPPHES)
+%  [H3, FLIST, VLIST] = SUPERTRI_3RD_EDGE( H1, H2, TRIS, SIBHES)
 %
 % A "super-triangle" is a patch composed of the triangles that are bounded
 % by three edges and three vertices and are also incident on at least one
@@ -26,15 +26,15 @@ if fid1 == fid2
     flist = fid1; vlist = zeros(0,1,'int32');
     return;
 elseif tris(fid1,next(leid1))==tris(fid2,leid2)
-    [h3, flist, vlist] = get_3rd_edge( fid1, leid1, fid2, leid2, tris, opphes);
+    [h3, flist, vlist] = get_3rd_edge( fid1, leid1, fid2, leid2, tris, sibhes);
 elseif tris(fid1,leid1)==tris(fid2,next(leid2))
-    [h3, flist, vlist] = get_3rd_edge( fid2, leid2, fid1, leid1, tris, opphes);
+    [h3, flist, vlist] = get_3rd_edge( fid2, leid2, fid1, leid1, tris, sibhes);
 else
     h3 = int32(0); flist = zeros(0,1,'int32'); vlist = zeros(0,1,'int32');
     return;
 end
 
-function [h3, flist, vlist] = get_3rd_edge( fid1, leid1, fid2, leid2, tris, opphes)
+function [h3, flist, vlist] = get_3rd_edge( fid1, leid1, fid2, leid2, tris, sibhes)
 
 % Precondition: The tail of (fid1,leid1) is the same as the head of (fid2,leid2).
 MAXNF=20; MAXNV=20;
@@ -55,7 +55,7 @@ flist(1) = fid1_start; flist(2) = fid2;
 
 % Loop around the head of halfedge (fid1,leid).
 while true
-    if opphes(fid1,leid1)==h2;
+    if sibhes(fid1,leid1)==h2;
         h3=int32(0); break;
     end
     
@@ -71,7 +71,7 @@ while true
         warning('Buffer overflow for vlist.');
     end
     
-    h = opphes( fid1, leid1_prev);
+    h = sibhes( fid1, leid1_prev);
     
     fid1 = heid2fid( h); leid1 = heid2leid( h);
     if fid1<=0 || fid1==fid1_start
@@ -79,7 +79,7 @@ while true
     end
     
     % check whether the opposite face is incident on either v or vend
-    oppface = heid2fid( opphes( fid1, next(leid1)));
+    oppface = heid2fid( sibhes( fid1, next(leid1)));
     if oppface<=0 || all(tris(oppface,1:3)~=vstart) && all(tris(oppface,1:3)~=vend)
         break;
     end
@@ -97,7 +97,7 @@ if h3==0
 elseif nv>0
     % Add other faces incident on the two vertices of h2 info flist.
     % This part is not optimized, since it is called very rarely.
-    h = opphes( fid1_start, next(leid1_start));
+    h = sibhes( fid1_start, next(leid1_start));
     f = heid2fid(h);
     
     if f~=fid2
@@ -119,11 +119,11 @@ elseif nv>0
                 end
             end
             
-            h = opphes( f, leid);
+            h = sibhes( f, leid);
             f = heid2fid(h);
         end
         
-        h = opphes( fid2, next(leid2));
+        h = sibhes( fid2, next(leid2));
         f = heid2fid(h);  fid3 = heid2fid( h3);
         while f ~= fid3
             if nf>=length(flist)
@@ -141,7 +141,7 @@ elseif nv>0
                     warning('Buffer overflow for vlist.');
                 end
             end
-            h = opphes( f, leid);
+            h = sibhes( f, leid);
             f = heid2fid(h);
         end
     end
@@ -176,20 +176,20 @@ function test %#ok<DEFNU>
 %!     6,9,8]);
 %!
 %! nv = int32(size(xs,1)); nf=int32(size(tris,1));
-%! opphes = determine_opposite_halfedge(nv, tris);
-%! v2he = determine_incident_halfedges(tris, opphes);
-%! assert(verify_incident_halfedges(tris, opphes, v2he, nf));
+%! sibhes = determine_opposite_halfedge(nv, tris);
+%! v2he = determine_incident_halfedges(tris, sibhes);
+%! assert(verify_incident_halfedges(tris, sibhes, v2he, nf));
 %! flist = zeros(10,1,'int32'); vlist = zeros(10,1,'int32');
 %!
 %! h1 = fleids2heid(4,1); h2 = fleids2heid(4,2);
-%! [h3, flist, vlist] = supertri_3rd_edge( h1, h2, tris, opphes);
+%! [h3, flist, vlist] = supertri_3rd_edge( h1, h2, tris, sibhes);
 %! assert( h3==fleids2heid(4,3) && length(flist)==1 && flist(1) == 4 && isempty(vlist));
 %!
 %! h1 = fleids2heid(4,1); h2 = fleids2heid(3,2);
-%! [h3, flist, vlist] = supertri_3rd_edge( h1, h2, tris, opphes);
+%! [h3, flist, vlist] = supertri_3rd_edge( h1, h2, tris, sibhes);
 %! assert( h3==0 && isempty(flist) && isempty(vlist));
 %!
 %! h1 = fleids2heid(4,1); h2 = fleids2heid(6,1);
-%! [h3, flist, vlist] = supertri_3rd_edge( h1, h2, tris, opphes);
+%! [h3, flist, vlist] = supertri_3rd_edge( h1, h2, tris, sibhes);
 %! assert( h3==fleids2heid(5,1) && length(flist)==3 && length(vlist)==1);
 %!

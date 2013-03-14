@@ -1,5 +1,5 @@
 function [nTets, tets_1ring, leids_1ring] = obtain_tet_edges_around_edge...
-    (itet, iedge, tets, opphfs)
+    (itet, iedge, tets, sibhfs)
 % Given an edge ID (starting from 1) within a tetrahedron, extract the
 %     local edge IDs in all the tetrahedra incident on the edge.
 % 
@@ -10,7 +10,7 @@ function [nTets, tets_1ring, leids_1ring] = obtain_tet_edges_around_edge...
 %     itet:  element ID of a tetrahedron
 %     iedge: local edge ID within the tetrahedron
 %     tets:  element connectivity
-%     opphfs: opposite halffaces
+%     sibhfs: opposite halffaces
 % Output:
 %     nTets: number of neighboring tets.
 %     tets_1ring: array of element IDs of the tets in the 1-ring of edge
@@ -46,7 +46,7 @@ for i=int32(1):2
     
     while true
         % Obtain opposite halfface ID
-        opphfid = opphfs( itet_cur, tetedge_faces(iedge_cur,iedge_ver));
+        opphfid = sibhfs( itet_cur, tetedge_faces(iedge_cur,iedge_ver));
         itet_cur = hfid2cid(opphfid);
         
         % Finished the cycle.
@@ -84,11 +84,11 @@ leids_1ring = leids_1ring(1:nTets);
 %! tetedge_nodes = int32([1 2; 2 3; 3 1; 1 4; 2 4; 3 4]);
 %! get_meshdata('simple/simple/volmesh/Tets/Cube1.neu.cgns');
 %! [xs, tets] = readcgns('Cube1.neu.cgns');
-%! opphfs=determine_opposite_halfface(size(xs,1), tets);
+%! sibhfs=determine_opposite_halfface(size(xs,1), tets);
 %! for i=1:size(tets,1)
 %!     for j=1:6;
 %!         vsum = tets(i,tetedge_nodes(j,1))+tets(i,tetedge_nodes(j,2));
-%!         [nTets, tets_1ring, leids_1ring] = obtain_localedges_around_edge(i, j, tets, opphfs);
+%!         [nTets, tets_1ring, leids_1ring] = obtain_localedges_around_edge(i, j, tets, sibhfs);
 %!         assert(length(unique(tets_1ring(1:nTets))) == nTets);
 %!         for k=1:nTets
 %!             assert(vsum==tets(tets_1ring(k),tetedge_nodes(leids_1ring(k),1))+tets(tets_1ring(k),tetedge_nodes(leids_1ring(k),2)));

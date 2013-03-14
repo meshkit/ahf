@@ -15,6 +15,6 @@ function b = is_quadmesh(nv, elems) %#codegen
 if size(elems,2)~=4 || size(elems,2)==4 && ~all(elems(:,4))
     b = false;
 else    
-    opphfs = determine_opposite_halfface_tet( nv, elems);    
-    b = ~any(any(opphfs,2));
+    sibhfs = determine_opposite_halfface_tet( nv, elems);    
+    b = ~any(any(sibhfs,2));
 end

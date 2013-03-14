@@ -1,5 +1,5 @@
-function [tets,reg_opphfs,live_elements]=...
-  fill_tetflip_holes(nflips,tets,reg_opphfs,inset,eltset) %#codegen 
+function [tets,reg_sibhfs,live_elements]=...
+  fill_tetflip_holes(nflips,tets,reg_sibhfs,inset,eltset) %#codegen 
 
 %
 %PROPAGATE HOLES
@@ -35,15 +35,15 @@ for iset=1:ninset;
 %
     for i=1:4;
       tets(it,1)=tets(it2,i);
-      if(reg_opphfs(it2,i)==0) ;
-        reg_opphfs(it,i)=0;
+      if(reg_sibhfs(it2,i)==0) ;
+        reg_sibhfs(it,i)=0;
       else
-        neighbor=hfid2cid(reg_opphfs(it2,i));
-        localface=hfid2lfid(reg_opphfs(it2,i));
+        neighbor=hfid2cid(reg_sibhfs(it2,i));
+        localface=hfid2lfid(reg_sibhfs(it2,i));
         %THIS CORRECTS THE FACE ARRAY FOR IT BUT NOT FOR ITS NEIGHBOR 
-        reg_opphfs(it,i)=reg_opphfs(it2,i);
+        reg_sibhfs(it,i)=reg_sibhfs(it2,i);
         %HERE WE CORRECT FOR THE NEIGHBOR
-        reg_opphfs(neighbor,localface)=it*8+i-1;
+        reg_sibhfs(neighbor,localface)=it*8+i-1;
       end;
     end;
     itop=itop-1;

@@ -1,4 +1,4 @@
-function [edges, nxtpgs] = orient_edges( nv, edges) %#codegen 
+function [edges, sibhvs] = orient_edges( nv, edges)
 % Given a curve, make the edges oriented consistently.
 %
 %  edges = orient_edges( nv, edges)
@@ -10,10 +10,12 @@ function [edges, nxtpgs] = orient_edges( nv, edges) %#codegen
 %     edges: element connectivity (m-by-2)
 % Output arguments
 %     edges: re-oriented element connectivity (same size as input)
-%     nxtpgs: opposite half-vertices (or next half-vertices if nonmanifold)
+%     sibhvs: sibling half-vertices
 
-% First, compute nextpage.
-nxtpgs = determine_nextpage_curv( nv, edges);
+%#codegen -args {int32(0), coder.typeof( int32(0), inf, 2)}
+ 
+% First, compute sibling half-vertices.
+sibhvs = determine_sibling_halfvert( nv, edges);
 visited = false(size(edges,1),1);
 
 % Loop through edges to see whether some edges should be flipped
@@ -24,43 +26,43 @@ for i=1:int32(size(edges,1))
     
     % Starting from the ith edge, visited adjacent edges one by one.
     edg = i;
-    nxt = nxtpgs( edg,1);
+    nxt = sibhvs( edg,1);
     nxteid = hvid2eid( nxt); nxtlid = hvid2lvid( nxt);
     
     % Repeat if the first vertex has only two incident edges
-    while nxtpgs( nxteid, nxtlid) == elvids2hvid(edg,1)
+    while sibhvs( nxteid, nxtlid) == elvids2hvid(edg,1)
         visited(edg) = true;
         
         if hvid2lvid( nxt)~=2
             % Flip the next edge
             edges( nxteid,:) = edges( nxteid,[2 1]);
-            nxtpgs( nxteid,:) = nxtpgs( nxteid,[2 1]);
+            sibhvs( nxteid,:) = sibhvs( nxteid,[2 1]);
         end
         
         edg = nxteid;
         if edg == i; fullcircle = true; break; end
-        nxt = nxtpgs( edg,1);
+        nxt = sibhvs( edg,1);
         nxteid = hvid2eid( nxt); nxtlid = hvid2lvid( nxt);
     end
     
     if ~fullcircle
         edg = i;
-        nxt = nxtpgs( edg,2);
+        nxt = sibhvs( edg,2);
         nxteid = hvid2eid( nxt); nxtlid = hvid2lvid( nxt);
         
         % Repeat if the second vertex has only two incident edges
-        while nxtpgs( nxteid, nxtlid) == elvids2hvid(edg,2)
+        while sibhvs( nxteid, nxtlid) == elvids2hvid(edg,2)
             visited(edg) = true;
             
             if hvid2lvid( nxt)~=1
                 % Flip the next edge
                 edges( nxteid,:) = edges( nxteid,[2 1]);
-                nxtpgs( nxteid,:) = nxtpgs( nxteid,[2 1]);
+                sibhvs( nxteid,:) = sibhvs( nxteid,[2 1]);
             end
             
             edg = nxteid;
             if edg == i; break; end
-            nxt = nxtpgs( edg,2);
+            nxt = sibhvs( edg,2);
             nxteid = hvid2eid( nxt); nxtlid = hvid2lvid( nxt);
         end
     end

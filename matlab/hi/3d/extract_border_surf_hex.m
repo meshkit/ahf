@@ -1,19 +1,19 @@
 function [b2v, bdquads, facmap] = extract_border_surf_hex...
-    (nv, elems, elabel, opphfs, inwards) %#codegen
+    (nv, elems, elabel, sibhfs, inwards) %#codegen
 %EXTRACT_BORDER_SURF_HEX Extract border vertices and edges.
-% [B2V,BDQUADS,FACMAP] = EXTRACT_BORDER_SURF_HEX(NV,ELEMS,ELABEL,OPPHFS,INWARDS)
+% [B2V,BDQUADS,FACMAP] = EXTRACT_BORDER_SURF_HEX(NV,ELEMS,ELABEL,SIBHFS,INWARDS)
 % Extracts border vertices and edges of hexahedral mesh. Returns list of 
 % border vertex IDs and list of border faces. The following explains the
 % input and output arguments.
 %
 % [B2V,BDQUADS,FACMAP] = EXTRACT_BORDER_SURF_HEX(NV,ELEMS)
 % [B2V,BDQUADS,FACMAP] = EXTRACT_BORDER_SURF_HEX(NV,ELEMS,ELABEL)
-% [B2V,BDQUADS,FACMAP] = EXTRACT_BORDER_SURF_HEX(NV,ELEMS,ELABEL,OPPHFS)
-% [B2V,BDQUADS,FACMAP] = EXTRACT_BORDER_SURF_HEX(NV,ELEMS,ELABEL,OPPHFS,INWARDS)
+% [B2V,BDQUADS,FACMAP] = EXTRACT_BORDER_SURF_HEX(NV,ELEMS,ELABEL,SIBHFS)
+% [B2V,BDQUADS,FACMAP] = EXTRACT_BORDER_SURF_HEX(NV,ELEMS,ELABEL,SIBHFS,INWARDS)
 % NV: specifies the number of vertices.
 % ELEMS: contains the connectivity.
 % ELABEL: contains a label for each element.
-% OPPHFS: contains the opposite half-faces.
+% SIBHFS: contains the opposite half-faces.
 % INWARDS: specifies whether the face normals should be inwards (false by default)
 % B2V: is a mapping from border-vertex ID to vertex ID.
 % BDQUADS: is connectivity of border faces.
@@ -33,15 +33,15 @@ end
 isborder = false( nv,1);
 
 if nargin<3; elabel = 0; end
-if nargin<4; opphfs = determine_opposite_halfface_hex(nv, elems); end
+if nargin<4; sibhfs = determine_opposite_halfface_hex(nv, elems); end
 
 ngbquads = int32(0);
 ii=int32(1);
 while ii<=int32(size(elems,1))
     if elems(ii,1)==0; break; end
     for jj=1:nfpE
-        if opphfs(ii,jj) == 0 || size(elabel,1)>1 && ...
-                elabel(ii)~=elabel(hfid2cid(opphfs(ii,jj)))
+        if sibhfs(ii,jj) == 0 || size(elabel,1)>1 && ...
+                elabel(ii)~=elabel(hfid2cid(sibhfs(ii,jj)))
             isborder( elems(ii,hf_hex(jj,:))) = true; ngbquads = ngbquads +1;
         end
     end
@@ -69,8 +69,8 @@ if nargout>1
         if elems(ii,1)==0; break; end
 
         for jj=1:nfpE
-            if opphfs(ii,jj) == 0 || size(elabel,1)>1 && ...
-                elabel(ii)~=elabel(hfid2cid(opphfs(ii,jj)))
+            if sibhfs(ii,jj) == 0 || size(elabel,1)>1 && ...
+                elabel(ii)~=elabel(hfid2cid(sibhfs(ii,jj)))
                 bdquads(count, :) = v2b(elems(ii,hf_hex(jj,:)));
                 
                 if nargout>2; facmap(count)=clfids2hfid(ii,jj); end

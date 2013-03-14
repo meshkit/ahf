@@ -1,5 +1,5 @@
-function [elems_buf,elems_offsets,reg_opphfs,visited]=...
-  fliphybnxm(n,m,ntets,elems_buf,elems_offsets,reg_opphfs,isort,...
+function [elems_buf,elems_offsets,reg_sibhfs,visited]=...
+  fliphybnxm(n,m,ntets,elems_buf,elems_offsets,reg_sibhfs,isort,...
   common1,common2,mtet,tempsort,itemp,visited) %#codegen
 %
 % This routine performs the n-to-m flip
@@ -10,7 +10,7 @@ function [elems_buf,elems_offsets,reg_opphfs,visited]=...
 %  mtet - the connectivity of the m new tets
 %  elems_buf - the connectivity array
 %  elems_offsets - offset into the connectivity array
-%  reg_opphfs - the regularized face neighbor array
+%  reg_sibhfs - the regularized face neighbor array
 %  isort - a working array  
 %  common1,common2 - the two local face numbers of the single shared face
 %
@@ -18,7 +18,7 @@ function [elems_buf,elems_offsets,reg_opphfs,visited]=...
 %
 %  elems_buf - the updatedconnectivity array
 %  elems_offsets - updated offset into the connectivity array
-%  reg_opphfs - the updated regularized face neighbor array
+%  reg_sibhfs - the updated regularized face neighbor array
 %
 %
 
@@ -56,11 +56,11 @@ for i=1:n;
       tempsort(1)=elems_buf(elems_offsets(oldit)+hf_tet(iface,1));
       tempsort(2)=elems_buf(elems_offsets(oldit)+hf_tet(iface,2));
       tempsort(3)=elems_buf(elems_offsets(oldit)+hf_tet(iface,3));
-      if(reg_opphfs(oldit,iface)~=0);
+      if(reg_sibhfs(oldit,iface)~=0);
   %.... WHAT IS THE ID OF THE ELEMENT OPPOSITE THE FACE
-        oldjt=hfid2cid(reg_opphfs(oldit,iface));
+        oldjt=hfid2cid(reg_sibhfs(oldit,iface));
   %.....AND WHAT IS ITS LOCAL FACE NUMBER
-        oldjf=hfid2lfid(reg_opphfs(oldit,iface));
+        oldjf=hfid2lfid(reg_sibhfs(oldit,iface));
         ind=ind+1;
         [tempsort]=sort(tempsort);
         isort(1,ind)=tempsort(1);
@@ -105,11 +105,11 @@ end;
 [isort]=hpsortim(ind,5,7,itemp,isort);
 %
 i=1;
-%.....ESTABLISH NEW REG_OPPHFS ARRAY
+%.....ESTABLISH NEW REG_SIBHFS ARRAY
 while(i<=ind);
   %Our convention is as follows:
-  %(1) element's face is unique  ==>  opphfs = 0
-  %(2) face is shared by a pair of elements  ==> opphfs point at each
+  %(1) element's face is unique  ==>  sibhfs = 0
+  %(2) face is shared by a pair of elements  ==> sibhfs point at each
   %(3) If face is shared by more than two elements, this is an error
 
   nmatch=1;
@@ -125,7 +125,7 @@ while(i<=ind);
   if(nmatch==1) ;
     it=isort(7,i);
     iface=isort(6,i);
-    reg_opphfs(it,iface)=0;
+    reg_sibhfs(it,iface)=0;
     %Case (2)
   elseif(nmatch==2) ;
     it=isort(7,i); 
@@ -134,17 +134,17 @@ while(i<=ind);
     iface2=isort(6,i+1);
     if(isort(5,i)==0 && isort(5,i+1)==0) ;
       %This is an internal face
-      reg_opphfs(it,iface) = clfids2hfid(it2, iface2);
-      reg_opphfs(it2,iface2) = clfids2hfid(it, iface);
+      reg_sibhfs(it,iface) = clfids2hfid(it2, iface2);
+      reg_sibhfs(it2,iface2) = clfids2hfid(it, iface);
     else
       %This is an external face
-      reg_opphfs(it,iface) = clfids2hfid(it2, iface2);
-      reg_opphfs(it2,iface2) = clfids2hfid(it, iface);
+      reg_sibhfs(it,iface) = clfids2hfid(it2, iface2);
+      reg_sibhfs(it2,iface2) = clfids2hfid(it, iface);
     end;
   else
    %Case (3)
     %IN 3D THIS IS IMPOSSIBLE AND ONLY OCCURS 1) WHERE VOLUMES ARE
-    %SMALLER THAN EPSILONV; OR 2) WHERE OPPHFS ARRAY HAS BEEN CORRUPTED.
+    %SMALLER THAN EPSILONV; OR 2) WHERE SIBHFS ARRAY HAS BEEN CORRUPTED.
     %WHILE 2) IS EASIER TO COMPREHEND IS IS THE LESS LIKELY OF THE TWO.
     %THUS, THE BEST THING TO DO AT THIS POINT IS TO
     %REJECT THE FLIP AND RESET

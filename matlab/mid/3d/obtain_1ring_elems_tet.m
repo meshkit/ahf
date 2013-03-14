@@ -1,8 +1,8 @@
 function [ngbes, nelems, etags] = obtain_1ring_elems_tet( vid, ...
-    tets, opphfs, v2hf, ngbes, etags)  %#codegen
+    tets, sibhfs, v2hf, ngbes, etags)  %#codegen
 %OBTAIN_1RING_ELEMS_TET Collects 1-ring neighbor elements of tet mesh.
 % [NGBES, NELEMS, ETAGS] = OBTAIN_1RING_ELEMS_TET( VID, ...
-%         TETS, OPPHFS, V2HF, NGBES, ETAGS)
+%         TETS, SIBHFS, V2HF, NGBES, ETAGS)
 % Collects 1-ring neighbor elements of given vertex and saves them into 
 % NGBES. At input, ETAGS must be set to false. It is reset to false
 % at output.
@@ -18,7 +18,7 @@ nelems=int32(0);
 eid = hfid2cid(v2hf(vid));
 if ~eid; return; end
 
-opphfs_tet = int32([1 2 4; 1 2 3; 1 3 4; 2 3 4]);
+sibhfs_tet = int32([1 2 4; 1 2 3; 1 3 4; 2 3 4]);
 maxne = min(MAXTETS,length(ngbes));
 overflow = false;
 
@@ -46,7 +46,7 @@ while size_stack>0
 
     % Push unvisited neighbor tets onto stack
     for ii=1:3
-        ngb = hfid2cid(opphfs(eid,opphfs_tet(lvid,ii)));
+        ngb = hfid2cid(sibhfs(eid,sibhfs_tet(lvid,ii)));
         if ngb && ~etags(ngb);
             size_stack = size_stack + 1; stack(size_stack) = ngb;
         end

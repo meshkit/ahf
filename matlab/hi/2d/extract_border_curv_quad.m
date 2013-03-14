@@ -1,8 +1,8 @@
 function [b2v, bdedgs, edgmap] = extract_border_curv_quad...
-    (nv, elems, flabel, opphes, inwards) %#codegen 
+    (nv, elems, flabel, sibhes, inwards) %#codegen 
 %EXTRACT_BORDER_CURV_QUAD Extract border vertices and edges.
 % [B2V,BDEDGS,EDGMAP] = EXTRACT_BORDER_CURV_QUAD(NV,ELEMS,FLABEL, ...
-% OPPHES,INWARDS) Extracts border vertices and edges of a quadrilateral or
+% SIBHES,INWARDS) Extracts border vertices and edges of a quadrilateral or
 % mixed mesh. Return list of border vertex IDs and list of border edges.
 % Edges between faces with different labels are also considered as border
 % edges, and in this case only the halfedge with smaller label IDs are
@@ -10,12 +10,12 @@ function [b2v, bdedgs, edgmap] = extract_border_curv_quad...
 %
 % [B2V,BDEDGS,EDGMAP] = EXTRACT_BORDER_CURV_QUAD(NV,QUADS)
 % [B2V,BDEDGS,EDGMAP] = EXTRACT_BORDER_CURV_QUAD(NV,QUADS,FLABELS)
-% [B2V,BDEDGS,EDGMAP] = EXTRACT_BORDER_CURV_QUAD(NV,QUADS,FLABELS,OPPHES)
-% [B2V,BDEDGS,EDGMAP] = EXTRACT_BORDER_CURV_QUAD(NV,QUADS,FLABELS,OPPHES,INWARDS)
+% [B2V,BDEDGS,EDGMAP] = EXTRACT_BORDER_CURV_QUAD(NV,QUADS,FLABELS,SIBHES)
+% [B2V,BDEDGS,EDGMAP] = EXTRACT_BORDER_CURV_QUAD(NV,QUADS,FLABELS,SIBHES,INWARDS)
 % NV: specifies the number of vertices.
 % QUADS: contains the connectivity.
 % FLABEL: contains a label for each face.
-% OPPHES: contains the opposite half-edges.
+% SIBHES: contains the opposite half-edges.
 % NQUADS: is the number of elemets. If missing, it is set to nnz_elements(QUADS,1)
 % INWARDS: specifies whether the edge normals should be inwards (false by default)
 % B2V: is a mapping from border-vertex ID to vertex ID.
@@ -38,7 +38,7 @@ else
 end
 
 if nargin<3; flabel=0; end
-if nargin<4; opphes = determine_opposite_halfedge_quad(nv, elems); end
+if nargin<4; sibhes = determine_opposite_halfedge_quad(nv, elems); end
 
 nbdedgs = int32(0); nelems=int32(size(elems,1));
 for ii=1:nelems
@@ -46,8 +46,8 @@ for ii=1:nelems
     
     if elems(ii,4)==0
         for jj=1:3
-            if opphes(ii,jj) == 0 || size(flabel,1)>1 && ...
-                    flabel(ii)~=flabel(heid2fid(opphes(ii,jj)))
+            if sibhes(ii,jj) == 0 || size(flabel,1)>1 && ...
+                    flabel(ii)~=flabel(heid2fid(sibhes(ii,jj)))
                 if(~visited(elems(ii,he_tri(jj,1))))
                     visited(elems(ii,he_tri(jj,1)))=true;
                     isborder( elems(ii,he_tri(jj,1))) = true; nbdedgs = nbdedgs +1;
@@ -60,8 +60,8 @@ for ii=1:nelems
         end
     else
         for jj=1:4
-            if opphes(ii,jj) == 0 || size(flabel,1)>1 && ...
-                    flabel(ii)~=flabel(heid2fid(opphes(ii,jj)))
+            if sibhes(ii,jj) == 0 || size(flabel,1)>1 && ...
+                    flabel(ii)~=flabel(heid2fid(sibhes(ii,jj)))
                 if(~visited(elems(ii,he_quad(jj,1))))
                     visited(elems(ii,he_quad(jj,1)))=true;
                     isborder( elems(ii,he_quad(jj,1))) = true; nbdedgs = nbdedgs +1;
@@ -93,8 +93,8 @@ if nargout>1
     for ii=1:nelems
         if elems(ii,4)==0
             for jj=1:3
-                if opphes(ii,jj) == 0 || ...
-                        size(flabel,1)>1 && flabel(ii)<flabel(heid2fid(opphes(ii,jj)))
+                if sibhes(ii,jj) == 0 || ...
+                        size(flabel,1)>1 && flabel(ii)<flabel(heid2fid(sibhes(ii,jj)))
                     bdedgs(count, :) = v2b(elems(ii,he_tri(jj,:)));
                     
                     if nargout>2; edgmap(count) = ii*4+jj-1; end
@@ -103,8 +103,8 @@ if nargout>1
             end
         else
             for jj=1:4
-                if opphes(ii,jj) == 0 || ...
-                        size(flabel,1)>1 && flabel(ii)<flabel(heid2fid(opphes(ii,jj)))
+                if sibhes(ii,jj) == 0 || ...
+                        size(flabel,1)>1 && flabel(ii)<flabel(heid2fid(sibhes(ii,jj)))
                     bdedgs(count, :) = v2b(elems(ii,he_quad(jj,:)));
                     
                     if nargout>2; edgmap(count) = ii*4+jj-1; end
