@@ -18,17 +18,6 @@ end
 
 function test  %#ok<DEFNU>
 %!test
-%! xs = [1,1,0;
-%!     2,1,0;
-%!     3,1,0;
-%!     1,2,0;
-%!     2,2,0;
-%!     3,2,0;
-%!     1,3,0;
-%!     2,3,0;
-%!     3,3,0;
-%!     4,2,0];
-%!
 %! tris = int32([5,4,1;
 %!     1,2,5;
 %!     5,2,3;
@@ -39,7 +28,7 @@ function test  %#ok<DEFNU>
 %!     6,9,8;
 %!     10,6,3]);
 %!
-%! nv = int32(size(xs,1)); nf=int32(size(tris,1));
+%! nv = int32(10); nf=int32(size(tris,1));
 %! [sibhes,v2he,manifold,oriented] = construct_halfedges(nv, tris);
 %! assert( verify_incident_halfedges(tris, sibhes, v2he, nf));
 %! assert( manifold && oriented);

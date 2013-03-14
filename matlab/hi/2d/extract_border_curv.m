@@ -14,7 +14,7 @@ function [b2v, bdedgs, edgmap] = extract_border_curv...
 % NV: specifies the number of vertices.
 % ELEMS: contains the connectivity.
 % FLABEL: contains a label for each face.
-% SIBHES: contains the opposite half-edges.
+% SIBHES: contains the sibling half-edges.
 % INWARDS: specifies whether the edge normals should be inwards (false by default)
 % B2V: is a mapping from border-vertex ID to vertex ID.
 % BDEDGS: is connectivity of border edges.
