@@ -21,7 +21,7 @@ function isborder = determine_border_vertices_vol(nv, elems, sibhfs, isborder, q
 %#codegen coder.typeof(int32(0), [inf,6],[1,1]),coder.typeof(false, [inf,1])}
 
 if nargin<3 || isempty(sibhfs)
-    sibhfs = determine_opposite_halfface(nv, elems);
+    sibhfs = determine_sibling_halffaces(nv, elems);
 end
 if nargin<4 || isempty(isborder)
     isborder = false(nv,1);

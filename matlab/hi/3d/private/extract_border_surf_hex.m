@@ -13,7 +13,7 @@ function [b2v, bdquads, facmap] = extract_border_surf_hex...
 % NV: specifies the number of vertices.
 % ELEMS: contains the connectivity.
 % ELABEL: contains a label for each element.
-% SIBHFS: contains the opposite half-faces.
+% SIBHFS: contains the sibling half-faces.
 % INWARDS: specifies whether the face normals should be inwards (false by default)
 % B2V: is a mapping from border-vertex ID to vertex ID.
 % BDQUADS: is connectivity of border faces.
@@ -33,7 +33,7 @@ end
 isborder = false( nv,1);
 
 if nargin<3; elabel = 0; end
-if nargin<4; sibhfs = determine_opposite_halfface_hex(nv, elems); end
+if nargin<4; sibhfs = determine_sibling_halffaces(nv, elems); end
 
 ngbquads = int32(0);
 ii=int32(1);

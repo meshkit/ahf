@@ -1,16 +1,18 @@
-function nxtpg = determine_nextpage_tet( nv, elems, nxtpg) %#codegen
-%DETERMINE_OPPOSITE_HALFFACE_TET Determine the opposite half-face.
-% DETERMINE_NEXTPAGE_TET(NV,ELEMS,NXTPG) Determines the opposite
+function [sibhfs,manifold,oriented] = determine_nextpage_tet( nv, elems, varargin)
+%DETERMINE_NEXTPAGE_TET Determine sibing half-faces.
+% DETERMINE_NEXTPAGE_TET(NV,ELEMS,NXTPG) Determines the sibling
 % half-face. The following explains the input and output arguments
 %
-% NXTPG = DETERMINE_OPPOSITE_HALFFACE_TET(NV,ELEMS)
-% NXTPG = DETERMINE_OPPOSITE_HALFFACE_TET(NV,ELEMS,NXTPG)
+% SIBHFS = determine_nextpage_tet(NV,ELEMS)
+% SIBHFS = determine_nextpage_tet(NV,ELEMS,SIBHFS)
 % Computes mapping from each half-face to its opposite half-face.
 %
 % See also DETERMINE_OPPOSITE_HALFFACE_TET.
 
 % Note: See http://www.grc.nasa.gov/WWW/cgns/CGNS_docs_current/sids/conv.html 
 %       for numbering convention of faces.
+
+%#codegen -args {int32(0), coder.typeof( int32(0), [inf, inf])}
 
 % Table for vertices of each face.
 hf_tet    = int32([1 3 2; 1 2 4; 2 3 4; 3 1 4]);
@@ -21,6 +23,8 @@ v2f_tet   = int32([2 4 1; 1 3 2; 3 1 4; 4 2 3]);
 
 next = int32([2,3,1]);
 prev = int32([3 1 2]);
+
+manifold=true; oriented=true;
 
 %% First, build is_index to store starting position for each vertex.
 is_index = zeros(nv+1,1, 'int32');
@@ -35,9 +39,7 @@ for ii=1:nelems
     end
 end
 is_index(1) = 1;
-for ii=1:nv
-    is_index(ii+1) = is_index(ii) + is_index(ii+1);
-end
+for ii=1:nv; is_index(ii+1) = is_index(ii) + is_index(ii+1); end
 
 % Store dimensions of objects.
 nf = nelems*12;
@@ -65,42 +67,52 @@ end
 for ii=nv-1:-1:1; is_index(ii+1) = is_index(ii); end
 is_index(1)=1;
 
-% Fill in nxtpg for each half-face.
-if nargin<3 || isempty(nxtpg)
-    nxtpg = zeros(size(elems), 'int32');
+% Fill in sibhfs for each half-face.
+if nargin<3 || isempty(varargin{1})
+    sibhfs = zeros(size(elems), 'int32');
 else
-    assert( size(nxtpg,1)>=nelems && size(nxtpg,2)>=4);
-    nxtpg(:,:) = 0;
+    sibhfs = varargin{1};
+    assert( size(sibhfs,1)>=nelems && size(sibhfs,2)>=4);
+    sibhfs(:,:) = 0;
 end
 
 for ii=1:nelems
     for jj=1:4 % local face ID
-        if nxtpg(ii,jj); continue; end
+        if sibhfs(ii,jj); continue; end
         vs = elems(ii, hf_tet(jj,:));     % list of vertices of face
         [v,imax] = max( vs, [], 2);
         
-        first_pageid = clfids2hfid(ii,jj);
-        prev_pageid = first_pageid;
+        first_hfid = clfids2hfid(ii,jj);
+        prev_hfid = first_hfid;
+        nhfs = int32(0);
         
         % Search for opposite half-face.
         for index = is_index( v):is_index( v+1)-1
             if v2oe_v1(index) == vs(prev(imax)) && v2oe_v2(index) == vs(next(imax))
-                nxtpg(hfid2cid(prev_pageid),hfid2lfid(prev_pageid)) = v2hf(index);
-                prev_pageid = v2hf(index);
+                sibhfs(hfid2cid(prev_hfid),hfid2lfid(prev_hfid)) = v2hf(index);
+                prev_hfid = v2hf(index);
+                nhfs = nhfs+1;
             end
         end
         
+        % Check for halfedges in the same orientation
         for index = is_index( v):is_index( v+1)-1
             if v2oe_v1(index) == vs(next(imax)) && v2oe_v2(index) == vs(prev(imax)) && ...
                     hfid2cid(v2hf(index))~=ii
-                nxtpg(hfid2cid(prev_pageid),hfid2lfid(prev_pageid)) = v2hf(index);
-                prev_pageid = v2hf(index);
+                sibhfs(hfid2cid(prev_hfid),hfid2lfid(prev_hfid)) = v2hf(index);
+                prev_hfid = v2hf(index);
+                nhfs = nhfs+1;
+                oriented = false;
             end
         end
         
-        if prev_pageid ~= first_pageid
+        if prev_hfid ~= first_hfid
             % Close up the cycle
-            nxtpg(hfid2cid(prev_pageid),hfid2lfid(prev_pageid)) = first_pageid;
+            sibhfs(hfid2cid(prev_hfid),hfid2lfid(prev_hfid)) = first_hfid;
+        end
+        
+        if nargout>1 && manifold && nhfs>2
+            manifold = false; oriented = false;
         end
     end
 end

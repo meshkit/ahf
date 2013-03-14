@@ -13,7 +13,7 @@ function [b2v, bdtris, facmap] = extract_border_surf_tet...
 % NV: specifies the number of vertices.
 % TETS: contains the connectivity.
 % ELABEL: contains a label for each element.
-% SIBHFS: contains the opposite half-faces.
+% SIBHFS: contains the sibling half-faces.
 % INWARDS: specifies whether the face normals should be inwards (false by default)
 % B2V: is a mapping from border-vertex ID to vertex ID.
 % BDTRIS: is connectivity of border faces.
@@ -33,7 +33,7 @@ isborder = false( nv,1);
 if nargin<3; elabel = 0; end
 if nargin<4;
     sibhfs = nullcopy(zeros(size(tets),'int32'));
-    sibhfs = determine_opposite_halfface_tet(nv, tets, sibhfs);
+    sibhfs = determine_sibling_halffaces(nv, tets, sibhfs);
 end
 
 ngbtris = int32(0);
