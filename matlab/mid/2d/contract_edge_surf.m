@@ -174,7 +174,7 @@ function test %#ok<DEFNU>
 %! 
 %! nv = int32(size(xs,1)); nf=int32(size(tris,1));
 %! sibhes = determine_opposite_halfedge(nv, tris);
-%! v2he = determine_incident_halfedges(tris, sibhes);
+%! v2he = determine_incident_halfedges(nv, tris, sibhes);
 %! assert(verify_incident_halfedges(tris, sibhes, v2he, nf));
 %! 
 %! tris = [tris; zeros(2,3,'int32')];
@@ -190,7 +190,7 @@ function test %#ok<DEFNU>
 %!         if ~isequal(sibhes2(1:nf2,:),determine_opposite_halfedge(nv2,tris2(1:nf2,:)))
 %!             error('Failed checking');
 %!         end
-%!         if ~isequal( v2he2, determine_incident_halfedges(tris2,sibhes2))
+%!         if ~isequal( v2he2, determine_incident_halfedges(nv2, tris2,sibhes2))
 %!             error('Failed checking');
 %!         end
 %!         

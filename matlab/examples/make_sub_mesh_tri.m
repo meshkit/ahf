@@ -189,9 +189,9 @@ end
 
 function [tempnodes,temptris]=split_patch(tempnodes,temptris)
 ne=int32(size(tempnodes,1));
-sibhes_tmp = determine_opposite_halfedge_tri( ne, temptris);
-v2he = nullcopy(zeros(ne,1,'int32'));
-v2he = determine_incident_halfedges(temptris, sibhes_tmp, v2he);
+sibhes_tmp = determine_sibling_halfedges( ne, temptris);
+v2he = determine_incident_halfedges(ne, temptris, sibhes_tmp);
+
 ntris=int32(size(temptris,1));
 ntris_start=ntris;
 map=[1 2;2 3;3 1];
@@ -223,9 +223,8 @@ end
 end
 
 function temptris=surface_tension(ne, temptris,tempnodes,ntri)
-sibhes_tmp = determine_opposite_halfedge_tri( ne, temptris);
-v2he = nullcopy(zeros(ne,1,'int32'));
-v2he = determine_incident_halfedges(temptris, sibhes_tmp, v2he);
+sibhes_tmp = determine_sibling_halfedges( ne, temptris);
+v2he = determine_incident_halfedges(ne, temptris, sibhes_tmp);
 notchanged=false;
 
 while(~notchanged)

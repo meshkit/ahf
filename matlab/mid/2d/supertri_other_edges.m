@@ -106,7 +106,7 @@ function test %#ok<DEFNU>
 %! 
 %! nv = int32(size(xs,1)); nf=int32(size(tris,1));
 %! sibhes = determine_opposite_halfedge(nv, tris);
-%! v2he = determine_incident_halfedges(tris, sibhes);
+%! v2he = determine_incident_halfedges(nv, tris, sibhes);
 %! assert(verify_incident_halfedges(tris, sibhes, v2he, nf));
 %! flist = zeros(10,1,'int32'); vlist = zeros(10,1,'int32');
 %! 

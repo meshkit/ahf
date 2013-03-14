@@ -1,13 +1,15 @@
-function sibhvs = determine_sibling_halfverts(nv, edges, varargin)
+function [sibhvs,manifold,oriented] = determine_sibling_halfverts(nv, edges, varargin)
 % DETERMINE_SIBLING_HALFVERTS determines the sibling half-vertices for each vertex.
 %
-% SIBHVS = DETERMINE_SIBLING_HALFVERTS(NV, EDGES)
-% SIBHVS = DETERMINE_SIBLING_HALFVERTS(NV, EDGES, SIBHVS)
+% [SIBHVS,MANIFOLD,ORIENTED] = DETERMINE_SIBLING_HALFVERTS(NV, EDGES)
+% [SIBHVS,MANIFOLD,ORIENTED] = DETERMINE_SIBLING_HALFVERTS(NV, EDGES, SIBHVS)
 %
 % Computes mapping from each half-vertex to a sibling half-vertex for a
 % non-oriented or non-manifold curve. The sibling half-vertices are in
 % a cyclic order. If SIBHVS is not given at input, it is allocated
 % by the function.
+% At output, it returns SIBHES, and also logical variable indicating
+% whether the mesh is a manifold, and if so whether it is oriented.
 %
 % Usage:
 %  The following function calls set up the extended half-vertex data structure:
@@ -60,16 +62,27 @@ else
     sibhvs(:,:) = 0;
 end
 
+manifold = true; oriented = true;
+
 for v=1:nv
     last = is_index(v+1)-1;
     
     if last > is_index(v)
         % The vertex has two or more incident halfedges
         hvid_prev = v2hv(last);
+        
         for ii = is_index(v):last
             hvid = v2hv(ii);
             sibhvs( hvid2eid( hvid_prev), hvid2lvid( hvid_prev)) = hvid;
             hvid_prev = hvid;
+        end
+        
+        if nargout>1 && manifold
+            if last-is_index(v) > 2;
+                manifold = false; oriented = false;
+            elseif nargout>2 && oriented
+                oriented = hvid2lvid(v2hv(is_index(v))) ~= hvid2lvid(hvid_prev);
+            end
         end
     end
 end

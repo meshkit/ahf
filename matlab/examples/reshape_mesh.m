@@ -12,7 +12,7 @@ function [ps_new, tris_new] = reshape_mesh(ps,tris,contract_param,split_param,fl
 
 % % Obtain opphe and v2he matrices
 % sibhes = determine_opposite_halfedge(size(ps,1), tris);
-% v2he=determine_incident_halfedges(tris, sibhes);
+% v2he=determine_incident_halfedges(size(ps,1), tris, sibhes);
 % 
 % % Use mesh regulation to redistribute the vertices
 % ps = surf_diff_mesh_reg(ps, tris, sibhes, v2he);
