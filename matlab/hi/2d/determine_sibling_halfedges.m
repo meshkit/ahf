@@ -90,7 +90,7 @@ for ii=int32(1):nelems
 
         first_heid = fleids2heid(ii, jj);
         prev_heid = first_heid;
-        nhes = 0;
+        nhes = int32(0);
 
         % LOCATE: Locate index in v2nv(first:last)
         for index = is_index(vn):is_index(vn+1)-1

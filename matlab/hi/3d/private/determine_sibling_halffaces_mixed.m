@@ -1,4 +1,4 @@
-function sibhfs = determine_sibling_halfface_mixed( nv, elems, sibhfs) %#codegen
+function sibhfs = determine_sibling_halffaces_mixed( nv, elems, sibhfs) %#codegen
 % Determine the sibling half-faces of a mixed mesh.
 %
 % SIBHFS = DETERMINE_SIBLING_HALFFACE_MIXED(NV,ELEMS)

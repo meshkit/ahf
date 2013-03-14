@@ -1,6 +1,6 @@
-function sibhfs = determine_sibling_halfface_hex( nv, elems, sibhfs) %#codegen
-%DETERMINE_SIBLING_HALFFACE_HEX Determine the sibling half-face.
-% DETERMINE_SIBLING_HALFFACE_HEX( NV, ELEMS, SIBHFS) Determines the
+function sibhfs = determine_sibling_halffaces_hex( nv, elems, sibhfs) %#codegen
+%DETERMINE_SIBLING_HALFFACES_HEX Determine the sibling half-face.
+% DETERMINE_SIBLING_HALFFACES_HEX( NV, ELEMS, SIBHFS) Determines the
 % sibling half-face.
 %
 % SIBHFS = DETERMINE_SIBLING_HALFFACE_HEX(NV,ELEMS)

@@ -18,9 +18,9 @@ end
 
 function test  %#ok<DEFNU>
 %!test
-%! tets = int32([1,2,3,4; 1,4,2,5; 1,3,2,6]);
+%! tets = int32([1,2,3,4; 1,2,4,5; 1,3,2,6]);
 %!
-%! nv = int32(6); nc=int32(size(tets,1));
+%! nv = int32(6);
 %! [sibhes,v2he,manifold,oriented] = construct_halffaces(nv, tets);
 %! assert( manifold && oriented);
 

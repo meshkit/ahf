@@ -1,18 +1,19 @@
-function [sibhfs,manifold,oriented] = determine_nextpage_tet( nv, elems, varargin)
-%DETERMINE_NEXTPAGE_TET Determine sibing half-faces.
-% DETERMINE_NEXTPAGE_TET(NV,ELEMS,NXTPG) Determines the sibling
-% half-face. The following explains the input and output arguments
+function [sibhfs,manifold,oriented] = determine_sibling_halffaces_tet( nv, elems, varargin)
+%DETERMINE_SIBLING_HALFFACE_TET Determine the sibling half-faces.
+% DETERMINE_SIBLING_HALFFACE_TET(NV,ELEMS,SIBHFS) Determines the
+% sibling half-faces.
 %
-% SIBHFS = determine_nextpage_tet(NV,ELEMS)
-% SIBHFS = determine_nextpage_tet(NV,ELEMS,SIBHFS)
-% Computes mapping from each half-face to its opposite half-face.
+%    SIBHFS = DETERMINE_SIBLING_HALFFACE_TET(NV,ELEMS)
+%    SIBHFS = DETERMINE_SIBLING_HALFFACE_TET(NV,ELEMS,SIBHFS)
+% computes mapping from each half-face to its sibling half-face.
 %
-% See also DETERMINE_OPPOSITE_HALFFACE_TET.
+% We assign three bits to local_face_id.
 
-% Note: See http://www.grc.nasa.gov/WWW/cgns/CGNS_docs_current/sids/conv.html 
+% Note: See http://www.grc.nasa.gov/WWW/cgns/CGNS_docs_current/sids/conv.html
 %       for numbering convention of faces.
 
-%#codegen -args {int32(0), coder.typeof( int32(0), [inf, inf])}
+%#codegen -args {int32(0), coder.typeof(int32(0), [inf,17],[1,1]),
+%#codegen coder.typeof(int32(0), [inf,4],[1,1])}
 
 % Table for vertices of each face.
 hf_tet    = int32([1 3 2; 1 2 4; 2 3 4; 3 1 4]);
@@ -86,7 +87,7 @@ for ii=1:nelems
         prev_hfid = first_hfid;
         nhfs = int32(0);
         
-        % Search for opposite half-face.
+        % Search for half-face in the opposite orientation
         for index = is_index( v):is_index( v+1)-1
             if v2oe_v1(index) == vs(prev(imax)) && v2oe_v2(index) == vs(next(imax))
                 sibhfs(hfid2cid(prev_hfid),hfid2lfid(prev_hfid)) = v2hf(index);
@@ -95,7 +96,7 @@ for ii=1:nelems
             end
         end
         
-        % Check for halfedges in the same orientation
+        % Check for halfface in the same orientation
         for index = is_index( v):is_index( v+1)-1
             if v2oe_v1(index) == vs(next(imax)) && v2oe_v2(index) == vs(prev(imax)) && ...
                     hfid2cid(v2hf(index))~=ii
@@ -109,6 +110,7 @@ for ii=1:nelems
         if prev_hfid ~= first_hfid
             % Close up the cycle
             sibhfs(hfid2cid(prev_hfid),hfid2lfid(prev_hfid)) = first_hfid;
+            nhfs = nhfs+1;
         end
         
         if nargout>1 && manifold && nhfs>2
