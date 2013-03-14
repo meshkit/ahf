@@ -4,7 +4,7 @@ compile is_quadmesh
 compile is_2dmesh
 compile determine_border_vertices
 compile determine_border_vertices_vol
-compile determine_opposite_halfface
+compile determine_sibling_halffaces
 compile extract_border_surf
 
 compile nnz_elements

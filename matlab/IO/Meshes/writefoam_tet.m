@@ -102,7 +102,7 @@ fclose(points);
 % DETERMINE THE FACE PAIRS
 ntets=size(tets,1);
 fprintf(1,'Determining half-face data structure ...\n');tic
-sibhfs = determine_opposite_halfface_mex( nv, tets);
+sibhfs = determine_sibling_halffaces( nv, tets);
 fprintf(1, 'Done in %e seconds.\n', toc);
 fprintf(1,'Sorting and writing the ascii file ...\n');tic
 nfaces=4*ntets;

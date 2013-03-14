@@ -8,13 +8,13 @@ function b = is_quadmesh(nv, elems) %#codegen
 % valid quadrilateral mesh. Returns 0 if it is not quadrilateral mesh but 
 % returns 1 otherwise.
 %
-% See also determine_opposite_halfface_tet
+% See also determine_sibling_halffaces
 
 %#codegen -args {int32(0), coder.typeof(int32(0), [inf,27],[1,1])}
 
 if size(elems,2)~=4 || size(elems,2)==4 && ~all(elems(:,4))
     b = false;
 else    
-    sibhfs = determine_opposite_halfface_tet( nv, elems);    
+    sibhfs = determine_sibling_halffaces( nv, elems);    
     b = ~any(any(sibhfs,2));
 end

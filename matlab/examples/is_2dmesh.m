@@ -16,7 +16,7 @@ switch size(elems,2)
         elseif size(elems_out,2)<4 || any(elems_out(:,end)==0)
             b=true;
         else
-            sibhfs = determine_opposite_halfface_tet( nv, elems_out);
+            sibhfs = determine_sibling_halffaces( nv, elems_out);
             b = ~any(any(sibhfs,2));
         end
     case 3
@@ -28,14 +28,14 @@ switch size(elems,2)
             % If mesh contains triangles, then it cannot be tet mesh
             b = true;
         else
-            sibhfs = determine_opposite_halfface_tet( nv, elems);
+            sibhfs = determine_sibling_halffaces( nv, elems);
             b = ~any(any(sibhfs,2));
         end
     case 6
-        sibhfs = determine_opposite_halfface_prism( nv, elems);
+        sibhfs = determine_sibling_halffaces( nv, elems);
         b = ~any(any(sibhfs,2));
     case 8
-        sibhfs = determine_opposite_halfface_hex( nv, elems);
+        sibhfs = determine_sibling_halffaces( nv, elems);
         b = ~any(any(sibhfs,2));
     case 9
         b = true;

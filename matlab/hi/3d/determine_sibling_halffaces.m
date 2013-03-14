@@ -8,9 +8,7 @@ function [sibhfs,manifold,oriented] = determine_sibling_halffaces( nv, elems, va
 %
 % See also DETERMINE_INCIDENT_HALFFACES
 
-%#codegen -args {int32(0), coder.typeof(int32(0), [inf,inf]),
-%#codegen coder.typeof(int32(0), [inf,6],[1,1])} determine_sibling_halffaces_v1
-%#codegen -args {int32(0), coder.typeof(int32(0), [inf,27],[1,1])}
+%#codegen -args {int32(0), coder.typeof(int32(0), [inf,inf])}
 
 manifold = true; oriented = true;
 
