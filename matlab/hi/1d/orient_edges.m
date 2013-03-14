@@ -12,7 +12,7 @@ function [edges, sibhvs] = orient_edges( nv, edges)
 %     edges: re-oriented element connectivity (same size as input)
 %     sibhvs: sibling half-vertices
 
-%#codegen -args {int32(0), coder.typeof( int32(0), inf, 2)}
+%#codegen -args {int32(0), coder.typeof( int32(0), [inf, 2])}
  
 % First, compute sibling half-vertices.
 sibhvs = determine_sibling_halfvert( nv, edges);

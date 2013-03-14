@@ -12,7 +12,7 @@ function v2hv = determine_incident_halfverts(nv, edgs, varargin)
 %
 % See also DETERMINE_SIBLING_HALFVERT, DETERMINE_INCIDENT_HALFEDGES, DETERMINE_INCIDENT_HALFFACES
 
-%#codegen -args {int32(0), coder.typeof( int32(0), inf, 2)}
+%#codegen -args {int32(0), coder.typeof( int32(0), [inf, 2])}
 
 nedgs = int32(size(edgs,1));
 
