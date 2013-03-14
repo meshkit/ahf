@@ -16,7 +16,7 @@ function isborder = determine_border_vertices_curv(nv, edgs, varargin)
 %#codegen -args {int32(0), coder.typeof( int32(0), [inf, 2])}
 
 if nargin<3; 
-    sibhvs = determine_sibling_halfvert(nv, edgs); 
+    sibhvs = determine_sibling_halfverts(nv, edgs); 
 else
     sibhvs = varargin{1};
 end

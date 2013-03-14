@@ -35,7 +35,7 @@ for ii=1:nb
 end
 
 % Construct half-vertex data structure
-sibhvs = determine_sibling_halfvert(nb, bdedgs);
+sibhvs = determine_sibling_halfverts(nb, bdedgs);
 b2hv = determine_incident_halfverts(nv, bdedgs);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

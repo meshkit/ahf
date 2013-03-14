@@ -10,7 +10,7 @@ function v2hv = determine_incident_halfverts(nv, edgs, varargin)
 % Output: V2HV:    integer array of size nx1, storing mapping from each
 %                  vertex to an incident half-vertex.
 %
-% See also DETERMINE_SIBLING_HALFVERT, DETERMINE_INCIDENT_HALFEDGES, DETERMINE_INCIDENT_HALFFACES
+% See also DETERMINE_SIBLING_HALFVERTS
 
 %#codegen -args {int32(0), coder.typeof( int32(0), [inf, 2])}
 

@@ -110,7 +110,7 @@ if(closed)
     end
 
     % Construct half-vertex data structure
-    sibhvs = determine_sibling_halfvert(nb, bdedgs);
+    sibhvs = determine_sibling_halfverts(nb, bdedgs);
     b2hv = determine_incident_halfverts(nb, bdedgs);
     % Arrange border edges into individual curves and fill the holes.
     verts_curv = nullcopy(zeros( nb,1,'int32'));

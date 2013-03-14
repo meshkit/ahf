@@ -15,7 +15,7 @@ function [edges, sibhvs] = orient_edges( nv, edges)
 %#codegen -args {int32(0), coder.typeof( int32(0), [inf, 2])}
  
 % First, compute sibling half-vertices.
-sibhvs = determine_sibling_halfvert( nv, edges);
+sibhvs = determine_sibling_halfverts( nv, edges);
 visited = false(size(edges,1),1);
 
 % Loop through edges to see whether some edges should be flipped

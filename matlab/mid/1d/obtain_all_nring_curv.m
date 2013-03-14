@@ -21,7 +21,7 @@ function allv_ngbvs = obtain_all_nring_curv( ring, nv, edges, varargin)
 %#codegen -args {0, int32(0), coder.typeof( int32(0), inf, 2)}
 
 if nargin<4
-    sibhvs = determine_sibling_halfvert(nv, edges);
+    sibhvs = determine_sibling_halfverts(nv, edges);
 else
     sibhvs = varargin{1};
 end

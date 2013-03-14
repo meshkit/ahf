@@ -1,5 +1,7 @@
 *.o
 *~
+*.mex*
+*.bak
 *.dll
 *.exe
 *.o

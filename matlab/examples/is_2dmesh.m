@@ -21,7 +21,7 @@ switch size(elems,2)
         end
     case 3
         % Allow triangles to be non-oriented
-        sibhes = determine_nextpage_surf( nv, elems);
+        sibhes = determine_sibling_halfedges( nv, elems);
         b = any(any(sibhes,2));
     case 4
         if any(elems(elems(:,1)~=0,4)==0)
