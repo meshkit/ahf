@@ -39,7 +39,7 @@ for ii=1:nedgs
     is_index(edges(ii,2)+1) = is_index(edges(ii,2)+1) + 1;
 end
 is_index(1) = 1;
-for ii=1:nv
+for ii=int32(1):nv
     is_index(ii+1) = is_index(ii) + is_index(ii+1);
 end
 
@@ -47,8 +47,10 @@ nhv = nedgs*2;
 v2hv = nullcopy(zeros( nhv,1, 'int32'));  % Vertex to half-vertex.
 
 for ii=1:nedgs
-    v2hv( is_index( edges(ii,1:2))) = 2*ii+int32([0,1]);
-    is_index( edges(ii,1:2)) = is_index( edges(ii,1:2)) + 1;
+    for j=int32(1):2
+        v2hv( is_index( edges(ii,j))) = elvids2hvid( ii, j);
+        is_index( edges(ii,j)) = is_index( edges(ii,j)) + 1;
+    end
 end
 for ii=nv-1:-1:1; is_index(ii+1) = is_index(ii); end
 is_index(1)=1;
@@ -78,7 +80,7 @@ for v=1:nv
         end
         
         if nargout>1 && manifold
-            if last-is_index(v) > 2;
+            if is_index(v+1)-is_index(v) > 2;
                 manifold = false; oriented = false;
             elseif nargout>2 && oriented
                 oriented = hvid2lvid(v2hv(is_index(v))) ~= hvid2lvid(hvid_prev);

@@ -10,3 +10,4 @@ function [sibhfs, v2hf] = construct_halffaces(nv, elems)
 
 sibhfs = determine_sibling_halffaces(nv, elems);
 v2hf = determine_incident_halffaces(nv, elems, sibhfs);
+
