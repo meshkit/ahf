@@ -321,15 +321,15 @@ In addition, we have some optional auxiliary cache for intermediate-dimensional
 \end_layout
 
 \begin_layout Enumerate
-bf2hf: boundary face ID to a half-face ID;
+f2hf: boundary face ID to a half-face ID;
 \end_layout
 
 \begin_layout Enumerate
-be2hf: boundary edge ID to a half-face ID;
+e2hf: boundary edge ID to a half-face ID;
 \end_layout
 
 \begin_layout Enumerate
-be2he: boundary edge ID to a boundary half-edge ID.
+e2he: boundary edge ID to a boundary half-edge ID.
 \end_layout
 
 \begin_layout Standard
