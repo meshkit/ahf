@@ -1,11 +1,10 @@
 function heid = hv2he(hvid, mesh, mode)
 %%HV2HE : map half-vertex <hvid> to incident half-edge
-%   hv2he(hvid,mesh) is id of some half-edge starting at the vertex
-%       corresponding to <hvid>, 0, if there is no such edge in <mesh>
 %   hv2he(hvid,mesh,mode) 
-%       mode == 'any'   : default
-%       mode == 'match' : id of half_edge which matches edge to which
-%           <hvid> belongs. 
+%       mode == 'any'   : id of some half-edge starting at the vertex
+%                         corresponding to <hvid>, 0, if there is no such edge in <mesh>
+%       mode == 'match' : id of half_edge which matches edge to which <hvid> belongs. 
+%   hv2he(hvid,mesh) is hv2he(hvid,mesh,'match')    
 
 %%
 % Insert mapping from hv to an incident he
@@ -19,7 +18,7 @@ function heid = hv2he(hvid, mesh, mode)
 
 % half-vertex - (edge_id,index), half-edge - (face_id,index)
 % => hv->he=hv->edge->vertex->he
-if (nargin<3);  mode='any';  end; 
+if (nargin<3);  mode='match';  end; 
 NEIGHBORHOOD_MAXSIZE=100;
 eid = hvid2eid( hvid);     % obtain edge ID from half-vertex ID
 lvid = hvid2lvid( hvid);   % obtain local vertex ID within an edge from half-vertex ID
