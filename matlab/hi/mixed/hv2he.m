@@ -18,6 +18,8 @@ function heid = hv2he(hvid, mesh, mode)
 
 % half-vertex - (edge_id,index), half-edge - (face_id,index)
 % => hv->he=hv->edge->vertex->he
+
+if (hvid<=size(mesh.hv2he,1) && mesh.hv2he(hvid)~=0); heid=mesh.hv2he(hvid); return;  end;
 if (nargin<3);  mode='match';  end; 
 NEIGHBORHOOD_MAXSIZE=100;
 eid = hvid2eid( hvid);     % obtain edge ID from half-vertex ID
@@ -46,6 +48,7 @@ if strcmp(mode,'match')
         % half-edge <heid_next> originates at <hvid> 
         if terminal_vertex(mesh.faces, heid_next)==other_gvid
             heid=heid_next;
+            mesh.hv2he(hvid)=heid;
             return;
         end
         
@@ -53,6 +56,7 @@ if strcmp(mode,'match')
         heid_prev=prev_heid_tri(heid);
         if origin_vertex(mesh.faces, heid_prev)==other_gvid
             heid=heid_prev;
+            mesh.hv2he(hvid)=heid;
             return;
         end
         
