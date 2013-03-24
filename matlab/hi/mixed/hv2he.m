@@ -49,7 +49,6 @@ if strcmp(mode,'match')
         % half-edge <heid_next> originates at <hvid> 
         if terminal_vertex(mesh.faces, heid_next)==other_gvid
             heid=heid_next;
-            mesh.hv2he(hvid)=heid;
             return;
         end
         
@@ -57,7 +56,6 @@ if strcmp(mode,'match')
         heid_prev=prev_heid_tri(heid);
         if origin_vertex(mesh.faces, heid_prev)==other_gvid
             heid=heid_prev;
-            mesh.hv2he(hvid)=heid;
             return;
         end
         
