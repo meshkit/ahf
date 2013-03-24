@@ -27,7 +27,7 @@ lvid = hvid2lvid( hvid);   % obtain local vertex ID within an edge from half-ver
 
 % mesh.edges(eid,lvid) - vertex id
 heid=mesh.v2he(mesh.edges(eid,lvid));  % half edge starting at this vertex
-if strcmp(mode,'any'); return; end;
+if strcmp(mode,'any');  return;  end;
 
 %% Find if edge <hvid> comes from is also embedded in at least one of the faces
 if strcmp(mode,'match')
@@ -40,6 +40,7 @@ if strcmp(mode,'match')
     hequeue(1)=heid;
     hequeue_top=1;
     hequeue_size=1;
+    
     while hequeue_top<=hequeue_size
         heid_next=hequeue(hequeue_top);
         hequeue_top=hequeue_top+1;
@@ -60,8 +61,10 @@ if strcmp(mode,'match')
             return;
         end
         
-        hequeue_size=hequeue_size+1;
         heid_next = mesh.sibhes( heid2fid(heid_prev), heid2leid(heid_prev));
+        if (heid_next==heid); continue; end;
+        hequeue_size=hequeue_size+1;
         hequeue(hequeue_size)=heid_next;
     end
+    heid=0;
 end
