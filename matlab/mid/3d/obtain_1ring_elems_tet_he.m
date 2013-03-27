@@ -46,14 +46,14 @@ while queue_top<=queue_size
             if v==terminal_vertex
                 % found tetrahedra containing edge <vid,terminal_vertex>
                 found=true;
-                ltv=v;
+                ltv=ii;
             end
         end
     end
      
     if found
-        hfid=clfids2hfid(cid,lookup_lfid(lvid,ltv));
-        etags(ngbes(1:nelems)) = false;
+        hfid=clfids2hfid(eid,lookup_lfid(lvid,ltv));
+        etags(queue(1:queue_size)) = false;
         return;
     end
     
