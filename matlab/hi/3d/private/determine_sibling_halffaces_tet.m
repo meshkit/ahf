@@ -7,7 +7,9 @@ function [sibhfs,manifold,oriented] = determine_sibling_halffaces_tet( nv, elems
 %    SIBHFS = DETERMINE_SIBLING_HALFFACE_TET(NV,ELEMS,SIBHFS)
 % computes mapping from each half-face to its sibling half-face.
 %
-% We assign three bits to local_face_id.
+%    SIBHFS = DETERMINE_SIBLING_HALFFACE_TET(NV,ELEMS,USESTRUCT)
+% It will use struct for sibhfs if a logical variable USESTRUCT is present.
+%  Otherwise, it uses integers for SIBHFS, and we assign three bits to local_face_id.
 
 % Note: See http://www.grc.nasa.gov/WWW/cgns/CGNS_docs_current/sids/conv.html
 %       for numbering convention of faces.
@@ -46,7 +48,8 @@ for ii=1:nv; is_index(ii+1) = is_index(ii) + is_index(ii+1); end
 nf = nelems*12;
 
 % v2hf stores mapping from each vertex to half-face ID.
-v2hf = nullcopy(zeros(nf,1, 'int32'));
+v2hf_cid = nullcopy(zeros(nf,1, 'int32'));
+v2hf_lfid = nullcopy(zeros(nf,1, 'int8'));
 v2oe_v1 = nullcopy(zeros(nf, 1, 'int32'));
 v2oe_v2 = nullcopy(zeros(nf, 1, 'int32'));
 
@@ -59,7 +62,8 @@ for ii=1:nelems
             if v>av(kk) && v>av(next(kk))
                 v2oe_v1(is_index(v)) = av(kk);
                 v2oe_v2(is_index(v)) = av(next(kk));
-                v2hf(is_index(v)) = clfids2hfid(ii,v2f_tet(jj,kk));
+                v2hf_cid(is_index(v)) = ii; 
+                v2hf_lfid(is_index(v)) = v2f_tet(jj,kk);
                 is_index(v) = is_index(v) + 1;
             end
         end
@@ -69,8 +73,11 @@ for ii=nv-1:-1:1; is_index(ii+1) = is_index(ii); end
 is_index(1)=1;
 
 % Fill in sibhfs for each half-face.
-if nargin<3 || isempty(varargin{1})
+if nargin<3 || isempty(varargin{1}) || ~islogical(varargin{1})
     sibhfs = zeros(size(elems), 'int32');
+elseif islogical(varargin{1})
+    sibhfs = struct( 'cid', zeros(size(elems), 'int32'), ...
+        'lfid', zeros(size(elems), 'int8'));
 else
     sibhfs = varargin{1};
     assert( size(sibhfs,1)>=nelems && size(sibhfs,2)>=4);
@@ -78,20 +85,30 @@ else
 end
 
 for ii=1:nelems
-    for jj=1:4 % local face ID
-        if sibhfs(ii,jj); continue; end
+    for jj=int32(1):4 % local face ID
+        if isstruct(sibhfs) && sibhfs.cid(ii,jj) || ...
+                ~isstruct(sibhfs) && sibhfs(ii,jj); 
+            continue; 
+        end
+        
         vs = elems(ii, hf_tet(jj,:));     % list of vertices of face
         [v,imax] = max( vs, [], 2);
         
-        first_hfid = clfids2hfid(ii,jj);
-        prev_hfid = first_hfid;
+        first_cid = ii; first_lfid = int8(jj);
+        prev_cid = first_cid; prev_lfid = first_lfid; 
         nhfs = int32(0);
         
         % Search for half-face in the opposite orientation
         for index = is_index( v):is_index( v+1)-1
             if v2oe_v1(index) == vs(prev(imax)) && v2oe_v2(index) == vs(next(imax))
-                sibhfs(hfid2cid(prev_hfid),hfid2lfid(prev_hfid)) = v2hf(index);
-                prev_hfid = v2hf(index);
+                if isstruct(sibhfs)
+                    sibhfs.cid(prev_cid, prev_lfid) = v2hf_cid(index);
+                    sibhfs.lfid(prev_cid,prev_lfid) = v2hf_lfid(index);
+                else
+                    sibhfs( prev_cid, prev_lfid) = ...
+                        clfids2hfid( v2hf_cid(index),v2hf_lfid(index));
+                end
+                prev_cid = v2hf_cid(index); prev_lfid = v2hf_lfid(index);
                 nhfs = nhfs+1;
             end
         end
@@ -99,17 +116,30 @@ for ii=1:nelems
         % Check for halfface in the same orientation
         for index = is_index( v):is_index( v+1)-1
             if v2oe_v1(index) == vs(next(imax)) && v2oe_v2(index) == vs(prev(imax)) && ...
-                    hfid2cid(v2hf(index))~=ii
-                sibhfs(hfid2cid(prev_hfid),hfid2lfid(prev_hfid)) = v2hf(index);
-                prev_hfid = v2hf(index);
+                    v2hf_cid(index)~=ii                
+                if isstruct(sibhfs)
+                    sibhfs.cid(prev_cid, prev_lfid) = v2hf_cid(index);
+                    sibhfs.lfid(prev_cid,prev_lfid) = v2hf_lfid(index);
+                else
+                    sibhfs( prev_cid, prev_lfid) = ...
+                        clfids2hfid( v2hf_cid(index),v2hf_lfid(index));
+                end
+                
+                prev_cid = v2hf_cid(index); prev_lfid = v2hf_lfid(index);
                 nhfs = nhfs+1;
                 oriented = false;
             end
         end
         
-        if prev_hfid ~= first_hfid
+        if prev_cid ~= first_cid
             % Close up the cycle
-            sibhfs(hfid2cid(prev_hfid),hfid2lfid(prev_hfid)) = first_hfid;
+            if isstruct(sibhfs)
+                sibhfs.cid(prev_cid, prev_lfid) = first_cid;
+                sibhfs.lfid(prev_cid,prev_lfid) = first_lfid;
+            else
+                sibhfs( prev_cid, prev_lfid) = clfids2hfid( first_cid,first_lfid);
+            end
+
             nhfs = nhfs+1;
         end
         
