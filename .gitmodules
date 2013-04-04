@@ -1,3 +1,0 @@
-[submodule "util/CodeGen"]
-	path = util/CodeGen
-	url = git@bitbucket.org:numgeom/codegenutil.git
