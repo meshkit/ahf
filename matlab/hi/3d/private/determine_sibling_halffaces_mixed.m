@@ -16,7 +16,6 @@ function sibhfs = determine_sibling_halffaces_mixed( nv, elems, sibhfs) %#codege
 %
 % See also DETERMINE_INCIDENT_HALFFACES, DETERMINE_OFFSETS_MIXED_ELEMS, 
 
-
 % Note: See http://www.grc.nasa.gov/WWW/cgns/CGNS_docs_current/sids/conv.html for numbering
 %       convention of faces.
 

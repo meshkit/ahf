@@ -1,0 +1,15 @@
+<pre class="code">
+<span class="srcline"><span class="lineno"><a href="13,1" id="srcline1"> 1</a></span><span class="line"><span class="keyword">function</span> <span class="var type1" id="S2T16U3">B</span> = nullcopy(<span class="var type1" id="S3T16U6">A</span>) <span class="comment">%#codegen</span></span></span>
+<span class="srcline"><span class="lineno"><a href="13,2" id="srcline2"> 2</a></span><span class="line"></span></span>
+<span class="srcline"><span class="lineno"><a href="13,3" id="srcline3"> 3</a></span><span class="line"><span class="keyword">if</span> isempty(coder.target)</span></span>
+<span class="srcline"><span class="lineno"><a href="13,4" id="srcline4"> 4</a></span><span class="line">    <span class="keyword">if</span> isfloat( <span class="var type2" id="S3T0U18">A</span>)</span></span>
+<span class="srcline"><span class="lineno"><a href="13,5" id="srcline5"> 5</a></span><span class="line">        <span class="var type2" id="S2T0U21">B</span> = nan( size(<span class="var type2" id="S3T0U26">A</span>), class(<span class="var type2" id="S3T0U29">A</span>));</span></span>
+<span class="srcline"><span class="lineno"><a href="13,6" id="srcline6"> 6</a></span><span class="line">    <span class="keyword">elseif</span> isinteger( <span class="var type2" id="S3T0U33">A</span>)</span></span>
+<span class="srcline"><span class="lineno"><a href="13,7" id="srcline7"> 7</a></span><span class="line">        <span class="var type2" id="S2T0U36">B</span> = repmat( intmax(class(<span class="var type2" id="S3T0U43">A</span>)), size(<span class="var type2" id="S3T0U46">A</span>));</span></span>
+<span class="srcline"><span class="lineno"><a href="13,8" id="srcline8"> 8</a></span><span class="line">    <span class="keyword">elseif</span> islogical( <span class="var type2" id="S3T0U50">A</span>)</span></span>
+<span class="srcline"><span class="lineno"><a href="13,9" id="srcline9"> 9</a></span><span class="line">        <span class="var type2" id="S2T0U53">B</span> = true( size(<span class="var type2" id="S3T0U58">A</span>));</span></span>
+<span class="srcline"><span class="lineno"><a href="13,10" id="srcline10">10</a></span><span class="line">    <span class="keyword">end</span></span></span>
+<span class="srcline"><span class="lineno"><a href="13,11" id="srcline11">11</a></span><span class="line"><span class="keyword">else</span></span></span>
+<span class="srcline"><span class="lineno"><a href="13,12" id="srcline12">12</a></span><span class="line">    <span class="mxinfo" id="T16:U3"><span class="var type1" id="S2T16U62">B</span> = coder.nullcopy(<span class="var type1" id="S3T16U67">A</span>)</span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="13,13" id="srcline13">13</a></span><span class="line"><span class="keyword"><span class="keyword">end</span></span></span></span>
+</pre>

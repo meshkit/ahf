@@ -1,4 +1,4 @@
-function sibhfs = determine_sibling_halffaces_hex( nv, elems, sibhfs) %#codegen
+function sibhfs = determine_sibling_halffaces_hex( nv, elems, varargin) %#codegen
 %DETERMINE_SIBLING_HALFFACES_HEX Determine the sibling half-face.
 % DETERMINE_SIBLING_HALFFACES_HEX( NV, ELEMS, SIBHFS) Determines the
 % sibling half-face.
@@ -11,6 +11,8 @@ function sibhfs = determine_sibling_halffaces_hex( nv, elems, sibhfs) %#codegen
 
 % Note: See http://www.grc.nasa.gov/WWW/cgns/CGNS_docs_current/sids/conv.html for numbering
 %       convention of faces.
+%#codegen -args {int32(0), coder.typeof(int32(0), [inf,17],[1,1]),
+%#codegen coder.typeof(int32(0), [inf,6],[1,1])}
 
 % Table for vertices of each face.
 hf_hex    = int32([1,4,3,2; 1,2,6,5; 2,3,7,6; 3,4,8,7; 1,5,8,4; 5,6,7,8]);
@@ -36,7 +38,9 @@ for ii=1:nv; is_index(ii+1) = is_index(ii) + is_index(ii+1); end
 % v2hf stores mapping from each vertex to half-face ID.
 % v2oe stores mapping from each vertex to the encoding of the sibling
 %     edges of each half-face.
-v2hf = nullcopy(zeros(is_index(nv+1),1,'int32'));
+%v2hf = nullcopy(zeros(is_index(nv+1),1,'int32'));
+v2hf_cid = nullcopy(zeros(is_index(nv+1),1,'int32'));
+v2hf_lfid = nullcopy(zeros(is_index(nv+1),1,'int8'));
 v2oe_v1 = nullcopy(zeros(is_index(nv+1),1, 'int32'));
 v2oe_v2 = nullcopy(zeros(is_index(nv+1),1, 'int32'));
 
@@ -47,7 +51,9 @@ for ii=1:nelems
         
         v2oe_v1(is_index(v)) = vs( next(kk));
         v2oe_v2(is_index(v)) = vs( prev(kk));
-        v2hf(is_index(v)) = clfids2hfid(ii,jj);
+        %v2hf(is_index(v)) = clfids2hfid(ii,jj);
+        v2hf_cid(is_index(v))=ii;
+        v2hf_lfid(is_index(v))=jj;
         is_index(v) = is_index(v)+1;
     end
 end
@@ -55,16 +61,23 @@ for ii=nv-1:-1:1; is_index(ii+1) = is_index(ii); end
 is_index(1)=1;
 
 % Fill in sibhfs for each half-face.
-if nargin<3 || isempty(sibhfs)
-    sibhfs = zeros(size(elems,1), 6, 'int32');
+if nargin<3 || isempty(varargin{1}) || ~islogical(varargin{1})
+    sibhfs = zeros(size(elems), 'int32');
+elseif islogical(varargin{1})
+    sibhfs = struct( 'cid', zeros(size(elems), 'int32'), ...
+        'lfid', zeros(size(elems), 'int8'));
 else
-    assert( size(sibhfs,1)>=nelems && size(sibhfs,2)>=6);
-    sibhfs(:) = int32(0);
+    sibhfs = varargin{1};
+    assert( size(sibhfs,1)>=nelems && size(sibhfs,2)==6);
+    sibhfs(:,:) = 0;
 end
 
 for ii=1:nelems
     for jj=int32(1):6 % local face ID
-        if sibhfs(ii,jj); continue; end
+        if isstruct(sibhfs) && sibhfs.cid(ii,jj) || ...
+                ~isstruct(sibhfs) && sibhfs(ii,jj); 
+            continue; 
+        end
         vs = elems(ii, hf_hex(jj,:));     % list of vertices of face
         [v,imax] = max( vs, [], 2);
         
@@ -73,11 +86,16 @@ for ii=1:nelems
         % Search for sibling half-face.
         for index = is_index( v):is_index( v+1)-1
             if v2oe_v1(index) == v1 && v2oe_v2(index) == v2
-                sib = v2hf(index);
-                sibhfs(ii,jj) = sib;
-                
-                sibhfs(hfid2cid(sib),hfid2lfid(sib)) = clfids2hfid(ii,jj);
-                
+                if ~usestruct
+                    sibhfs(ii,jj) = clfids2hfid(v2hf_cid(index),v2hf_lfid(index));
+                    sibhfs(v2hf_cid(index),v2hf_lfid(index)) = clfids2hfid(ii,jj);
+                else
+                    sibhfs.lfid(ii,jj) = v2hf_lfid(index);
+                    sibhfs.cid(ii,jj) = v2hf_cid(index);
+                    
+                    sibhfs.lfid(v2hf_cid(index),v2hf_lfid(index)) = jj;
+                    sibhfs.cid(v2hf_cid(index),v2hf_lfid(index)) = ii;
+                end
                 found = true;
                 break;
             end
@@ -86,11 +104,16 @@ for ii=1:nelems
         if ~found
             for index = is_index( v):is_index( v+1)-1
                 if v2oe_v1(index) == v2 && v2oe_v2(index)==v1 && ...
-                        hfid2cid(v2hf(index))~=ii
+                        v2hf_cid(index)~=ii
                     if nargin==3
                         error( 'Input mesh is not oriented.');
                     else
-                        sibhfs = zeros(0, 6, 'int32'); return;
+                        if ~usestruct
+                            sibhfs = zeros(0, 6, 'int32'); return;
+                        else
+                            sibhfs.lfid = zeros(size(elems), 'int8');
+                            sibhfs.fid = zeros(size(elems), 'int32');
+                        end
                     end
                 end
             end
