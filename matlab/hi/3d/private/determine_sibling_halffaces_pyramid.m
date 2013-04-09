@@ -64,13 +64,11 @@ for ii=nv-1:-1:1; is_index(ii+1) = is_index(ii); end
 is_index(1)=1;
 
 % Fill in sibhfs for each half-face.
-usestruct=false;
 if nargin<3 || isempty(varargin{1}) || ~islogical(varargin{1})
     sibhfs = zeros(size(elems), 'int32');
 elseif islogical(varargin{1})
     sibhfs = struct( 'cid', zeros(size(elems), 'int32'), ...
         'lfid', zeros(size(elems), 'int8'));
-    usestruct=true;
 else
     sibhfs = varargin{1};
     assert( size(sibhfs,1)>=nelems && size(sibhfs,2)==5);
@@ -93,7 +91,7 @@ for ii=1:nelems
         for index = is_index( v):is_index( v+1)-1
             if v2oe_v1(index) == v1 && v2oe_v2(index) == v2 
                 
-                if (usestruct)
+                if isstruct(sibhfs)
                     sibhfs.lfid(ii,jj) = v2hf_lfid(index);
                     sibhfs.cid(ii,jj) = v2hf_cid(index);
                     
@@ -115,7 +113,7 @@ for ii=1:nelems
                     if nargin==3
                         error( 'Input mesh is not oriented.');
                     else
-                        if ~usestruct
+                        if ~isstruct(sibhfs)
                             sibhfs = zeros(0, 5, 'int32'); return;
                         else
                             sibhfs.lfid = zeros(size(elems), 'int8');

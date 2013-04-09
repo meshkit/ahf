@@ -86,7 +86,7 @@ for ii=1:nelems
         % Search for sibling half-face.
         for index = is_index( v):is_index( v+1)-1
             if v2oe_v1(index) == v1 && v2oe_v2(index) == v2
-                if ~usestruct
+                if ~isstruct(sibhfs)
                     sibhfs(ii,jj) = clfids2hfid(v2hf_cid(index),v2hf_lfid(index));
                     sibhfs(v2hf_cid(index),v2hf_lfid(index)) = clfids2hfid(ii,jj);
                 else
@@ -108,7 +108,7 @@ for ii=1:nelems
                     if nargin==3
                         error( 'Input mesh is not oriented.');
                     else
-                        if ~usestruct
+                        if ~isstruct(sibhfs)
                             sibhfs = zeros(0, 6, 'int32'); return;
                         else
                             sibhfs.lfid = zeros(size(elems), 'int8');
