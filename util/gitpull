@@ -1,9 +1,1 @@
-#!/bin/bash
-
-# This is a helper script to update all the submodules
-#    (including util/CodeGen and patents).
-
-git pull origin master
-git checkout master
-git submodule init
-git submodule update util/CodeGen && (cd util/CodeGen; git checkout master; git pull)
+../bin/gitpull
