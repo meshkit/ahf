@@ -46,9 +46,8 @@ for kk=1:int32(size(elems,1))
         if ~isstruct(sibhes) && (v>0 && (v2he(v)==0 || sibhes( kk,lid) == 0 || ...
 	     (sibhes( heid2fid(v2he(v)), heid2leid(v2he(v))) && sibhes( kk, lid)<0)))
             v2he(v) = 4*kk + lid - 1;
-        elseif v>0 && ((v2he.fid(v)==0 && v2he.leid(v)==0) || (sibhes.fid(kk,lid)==0 && sibhes.leid(kk,lid)==0))
-            v2he.fid(v) = kk;
-            v2he.leid(v)=int8(lid);
+        elseif v>0 && (v2he(v)==0 || sibhes( kk,lid) == 0 || ...
+	     (sibhes( heid2fid(v2he(v)), heid2leid(v2he(v))) && sibhes( kk, lid)<0))
         end
     end
 end
