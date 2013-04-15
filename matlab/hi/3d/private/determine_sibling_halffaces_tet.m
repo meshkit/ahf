@@ -16,7 +16,8 @@ function [sibhfs,manifold,oriented] = determine_sibling_halffaces_tet( nv, elems
 
 %#codegen -args {int32(0), coder.typeof(int32(0), [inf,17],[1,1]),
 %#codegen coder.typeof(int32(0), [inf,4],[1,1])}
-
+%#codegen determine_sibling_halffaces_tet_usestruct -args
+%#codegen {int32(0), coder.typeof(int32(0), [inf,17],[1,1]), false}
 % Table for vertices of each face.
 hf_tet    = int32([1 3 2; 1 2 4; 2 3 4; 3 1 4]);
 % Table for mapping each vertex to adjacent vertices.
