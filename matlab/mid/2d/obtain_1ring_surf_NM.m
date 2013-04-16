@@ -1,5 +1,9 @@
 function [ngbvs, nverts, vtags, ftags, ngbfs, nfaces] = obtain_1ring_surf_NM...
     ( vid, tris, sibhes, v2he, ngbvs, vtags, ftags, ngbfs) %#codegen
+
+%function [ngbvs, nverts, vtags, ftags, ngbfs, nfaces] = obtain_nring_surf...
+%( vid, ring, minpnts, tris, sibhes, v2he, ngbvs, vtags, ftags, ngbfs) %#codegen
+
 coder.extrinsic('warning');
 
 MAXNPNTS = int32(128);
@@ -83,8 +87,13 @@ end
 end
 
 function [he2,fid]=another_halfedge(vid,he,faces)
-fid=heid2fid(he);
-lid=heid2leid(he);
+if ~isstruct(he)
+    fid=heid2fid(he);
+    lid=heid2leid(he);
+else
+    fid=he.fid;
+    lid=he.lid;
+end
 next=[2,3,1];
 prev=[3,1,2];
 if (faces(fid,lid)==vid)
