@@ -13,8 +13,8 @@ function [sibhvs, v2hv,manifold,oriented] = construct_halfverts(nv, edgs)
 
 [sibhvs,manifold,oriented] = determine_sibling_halfverts(nv, edgs);
 if nargout>1
-    %v2hv = determine_incident_halfverts(nv, edgs);
-    v2hv = determine_incident_halfverts(edgs, sibhvs);
+    v2hv = determine_incident_halfverts(nv, edgs);
+   % v2hv = determine_incident_halfverts(edgs, sibhvs);
 end
 
 function test %#ok<DEFNU>
