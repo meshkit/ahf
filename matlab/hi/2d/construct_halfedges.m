@@ -13,7 +13,7 @@ function [sibhes, v2he, manifold, oriented] = construct_halfedges(nv, elems)
 
 [sibhes,manifold,oriented] = determine_sibling_halfedges(nv, elems);
 if nargout>1
-    v2he = determine_incident_halfedges(elems, sibhes);
+    v2he = determine_incident_halfedges(nv, elems, sibhes);
 end
 
 function test  %#ok<DEFNU>
