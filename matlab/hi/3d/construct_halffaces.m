@@ -13,7 +13,7 @@ function [sibhfs, v2hf,manifold,oriented] = construct_halffaces(nv, elems)
  
 [sibhfs,manifold,oriented] = determine_sibling_halffaces(nv, elems);
 if nargout>1
-    v2hf = determine_incident_halffaces(elems, sibhfs);
+    v2hf = determine_incident_halffaces(nv,elems, sibhfs);
 end
 
 function test  %#ok<DEFNU>
