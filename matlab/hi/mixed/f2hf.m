@@ -1,10 +1,19 @@
-function [hf, etags] = f2hf(fid,faces,tets,sibhfs, v2hf, etags)
+function [hf, etags] = f2hf(fid,faces,tets,sibhfs, v2hf, etags) %#codegen
+%#codegen -args {int32(0), coder.typeof(int32(0), [inf,3]),coder.typeof(int32(0), [inf,4]),coder.typeof(int32(0), [inf,4]),coder.typeof(int32(0), [inf,1]),coder.typeof(false, [inf,4])}
+%%%#codegen determine_sibling_halffaces_usestruct -args
+%%%#codegen {int32(0), coder.typeof(int32(0), [inf,inf]), false}
+
+
+
 % For every face, obtain adjacent cells
 vid1=faces(fid,1);
 vid2=faces(fid,2);
 vid3=faces(fid,3);
 [found,fid,lvid1,lvid2,lvid3, etags] = examine_1ring_elems_tet_hf( vid1, vid2, vid3, tets, sibhfs, v2hf, etags);
-hf=0;
+hf=int32(0);
+for i = 1 : size(etags,1)
+    etags(i,1)=false;
+end
 if (found)
     hf=match_halfface(fid,lvid1,lvid2,lvid3);
 end
@@ -57,7 +66,7 @@ while size_stack>0
     % Pop the element from top of stack
     eid = stack(size_stack); size_stack = size_stack-1;
     etags(eid) = true;
-    for ii=1:4
+    for ii=int32(1):4
         v = tets(eid,ii);
         if v==vid1; lvid1 = ii; end
         if v==vid2; lvid2 = ii; end;
@@ -67,7 +76,7 @@ while size_stack>0
     if (lvid2 && lvid3)
         % found matching face
         found = true;
-        etags(:) = false;
+        etags(stack(1:size_stack,1),1) = false;
         return;
     end
     
@@ -79,4 +88,4 @@ while size_stack>0
         end
     end
 end
-etags(:) = false;
+etags(stack(1:size_stack,1),1);
