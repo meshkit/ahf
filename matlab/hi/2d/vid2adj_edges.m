@@ -1,10 +1,10 @@
 function [edge_list, nedges] = vid2adj_edges(vid,v2hv,sibhvs,varargin) %#codegen
 
 %#codegen -args {int32(0), coder.typeof( int32(0), [inf, 1]),
-%#codegen        coder.typeof( int32(0), [inf, 2], [1,1])}
-%#codegen vid2adj_edges_buffer -args
-%#codegen {int32(0), coder.typeof( int32(0), [inf, 1]),
-%#codegen        coder.typeof( int32(0), [inf, 2], [1,1]), coder.typeof( int32(0),[inf,1])}
+%#codegen        coder.typeof( int32(0), [inf, 2])}
+%%#codegen vid2adj_edges_buffer -args
+%%#codegen {int32(0), coder.typeof( int32(0), [inf, 1]),
+%%#codegen        coder.typeof( int32(0), [inf, 2]), false}
 
 starting_half_vertex=v2hv(vid);
 hvid=starting_half_vertex;
