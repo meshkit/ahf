@@ -3,7 +3,7 @@ function passed = test_eid2adj_faces
 %% Test function eid2adj_faces on different non-manifold meshes
 
 %% two "disks" intersecting in the middle. Each disk consist of 8 faces. Edges [8,9] and [4,9] are shared between disks.
-tris =    [1,2,9;   % 1
+tris=int32([1,2,9;   % 1
            2,3,9;   % 2
            3,4,9;   % 3
            4,5,9;   % 4
@@ -19,13 +19,13 @@ tris =    [1,2,9;   % 1
            9,4,13;  % 13
            9,13,14; % 14
            9,14,15; % 15
-           9,15,8]; % 16
+           9,15,8]); % 16
        
-edges = [ 8,9;
+edges = int32([ 8,9;
           4,9;
           2,3;
           1,9;
-        ];
+        ]);
        
 ftags=false(size(tris,1),1);
 vtags=false(15,1);
@@ -37,7 +37,7 @@ vtags=false(15,1);
 %  Interior manifold edge [1,8] eid=4. 
 %  Adjacent faces are [1,8]
 
-eid=4;
+eid=int32(4);
 [flist, nfaces, ftags]=eid2adj_faces(eid,edges,tris,v2he,sibhes,ftags);
 
 passed=nfaces==2;
@@ -51,7 +51,7 @@ if ~passed; warning('MATLAB:test','test 1 failed'); end;
 
 %% Test 2
 %  non-manifold interior edge [8,9] eid=1. 
-eid=1;
+eid=int32(1);
 [flist, nfaces, ftags]=eid2adj_faces(eid,edges,tris,v2he,sibhes,ftags);
 
 passed=passed&&(nfaces==4);
@@ -65,7 +65,7 @@ if ~passed; warning('MATLAB:test','test 1 failed'); end;
 
 %% Test 3
 %  manifold boundary edge [2,3] eid=3. 
-eid=3;
+eid=int32(3);
 [flist, nfaces, ftags]=eid2adj_faces(eid,edges,tris,v2he,sibhes,ftags);
 passed=passed&&(nfaces==1);
 
@@ -77,7 +77,7 @@ passed=passed&&(~any(ftags));
 if ~passed; warning('MATLAB:test','test 3: non-manifold interior vertex 9 failed'); end;
 
 %% One of the disks misses a face along intersection. 
-test_mesh=[1,2,9;
+test_mesh=int32([1,2,9;
            2,3,9;
            3,4,9;
            4,5,9;
@@ -94,7 +94,7 @@ test_mesh=[1,2,9;
            9,13,14;
            9,14,15;
            %9,15,8
-           ];
+           ]);
        
 ftags=false(size(test_mesh,1),1);
 [sibhes,v2he] = construct_halfedges( 15, test_mesh);
@@ -102,7 +102,7 @@ ftags=false(size(test_mesh,1),1);
 
 %% Test 4
 %  non-manifold boundary edge [8,9] eid=1
-eid=1;
+eid=int32(1);
 [flist, nfaces, ftags]=eid2adj_faces(eid,edges,tris,v2he,sibhes,ftags);
 
 passed=passed&&(nfaces==3);
