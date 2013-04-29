@@ -1,4 +1,4 @@
-function passed = test_f2hf
+function passed = test_h2hf
 
 faces=int32([1,2,3;  % boundary face
        2,3,4;  % interior face
@@ -37,7 +37,7 @@ passed=passed && hf==0;
 passed = passed && ~any(etags);
 
 %% Test 4: vertices not in the volume mesh
-fid=int32(4);
+fid=4;
 [hf, etags] = f2hf(fid,faces,tets,sibhfs, v2hf, etags);
 passed=passed && hf==0;
 passed = passed && ~any(etags);
