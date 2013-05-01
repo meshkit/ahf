@@ -5,7 +5,8 @@ function [ngbvs, nverts] = obtain_1ring_curv_NM...
 % vertices and edges of a vertex and saves them into NGBVS and NGBES. 
 %
 % See also OBTAIN_1RING_SURF, OBTAIN_1RING_VOL
-
+%#codegen -args {int32(0), coder.typeof(int32(0), [inf,2]),coder.typeof(int32(0), [inf,2]),coder.typeof(int32(0), [inf,1])}
+coder.extrinsic('warning');
 assert( isa(vid, 'int32') && isa( edges, 'int32') && ...
     isa( sibhvs, 'int32') && isa( v2hv,'int32'));
 

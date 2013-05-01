@@ -39,4 +39,4 @@ vid=int32(1);
 compare_to=int32(2);
 
 [ngbvs, nverts] = obtain_1ring_curv_NM( vid, test_case, sibhvs, v2hv);
-works=works && (nverts==2) && (sum(compare_to-sort(ngbvs(1:nverts,1),1))==0);
+works=works && (nverts==1) && (sum(compare_to-sort(ngbvs(1:nverts,1),1))==0);
