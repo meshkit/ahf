@@ -7,7 +7,7 @@ sibhe=sibhes(fid,lid);
 while sibhe 
     fid = heid2fid(sibhe); 
     assert(fid~=0); % fid can not be zero if the algorithm is correct
-    if ~ftags(fid)   
+    if ~ftags(fid,1)   
         % face have not been visited yet, add he to queue
         queue_size=queue_size+1;
         queue(queue_size)=sibhe;  
