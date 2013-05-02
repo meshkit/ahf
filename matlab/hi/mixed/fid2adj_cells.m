@@ -1,6 +1,6 @@
-function [clist,etags]=fid2adj_cells(fid,mesh,etags)
+function [clist,etags]=fid2adj_cells(fid,faces,tets,sibhfs, v2hf, etags)
 
-[hf, etags] = f2hf(fid,mesh.faces,mesh.tets,mesh.sibhfs, mesh.v2hf, etags);
+[hf, etags] = f2hf(fid,faces,tets,sibhfs,v2hf, etags);
 hf_opp=mesh.sibhfs(hfid2cid(hf),hfid2lfid(hf));
 
 if (hf_opp>0)
