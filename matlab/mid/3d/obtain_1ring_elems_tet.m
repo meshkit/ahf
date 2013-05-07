@@ -7,6 +7,9 @@ function [ngbes, nelems, etags] = obtain_1ring_elems_tet( vid, ...
 % NGBES. At input, ETAGS must be set to false. It is reset to false
 % at output.
 
+%#codegen -args {int32(0), coder.typeof(int32(0), [inf,4]),coder.typeof(int32(0), [inf,4]),coder.typeof(int32(0), [inf,1]),
+%#codegen     coder.typeof(int32(0), [inf,1]), coder.typeof(false, [inf,1])}
+
 coder.extrinsic('warning');
 
 MAXTETS = 1024;
@@ -39,7 +42,7 @@ while size_stack>0
     end
 
     lvid = int32(0); % Stores which vertex vid is within the tetrahedron.
-    for ii=1:4
+    for ii=int32(1):4
         v = tets(eid,ii);
         if v==vid; lvid = ii; end
     end
