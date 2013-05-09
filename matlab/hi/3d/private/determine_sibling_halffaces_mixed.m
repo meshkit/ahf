@@ -1,4 +1,4 @@
-function sibhfs = determine_sibling_halffaces_mixed( nv, elems, sibhfs) %#codegen
+function sibhfs = determine_sibling_halffaces_mixed( nv, elems, varargin) %#codegen
 % Determine the sibling half-faces of a mixed mesh.
 %
 % SIBHFS = DETERMINE_SIBLING_HALFFACE_MIXED(NV,ELEMS)
@@ -10,14 +10,18 @@ function sibhfs = determine_sibling_halffaces_mixed( nv, elems, sibhfs) %#codege
 % At output, SIBHFS is a column vector, with format
 %     [e1_nf, e1_opphf1,e1_opphf2,..., e2_nf, e2_opphf1, e2_opphf2, ...].
 %
+%    SIBHFS = DETERMINE_SIBLING_HALFFACE_MIXED(NV,ELEMS,USESTRUCT)
+% It will use struct for sibhfs if a logical variable USESTRUCT is present.
+%  Otherwise, it uses integers for SIBHFS, and we assign three bits to local_face_id.
+%
 % A half-face ID is a two-tuple <element_ID,local_face_ID-1> encoded 
 %     in an integer. The element_ID uses the higher bits and
 %     (local_face_ID-1) uses the last three bits.
 %
 % See also DETERMINE_INCIDENT_HALFFACES, DETERMINE_OFFSETS_MIXED_ELEMS, 
 
-% Note: See http://www.grc.nasa.gov/WWW/cgns/CGNS_docs_current/sids/conv.html for numbering
-%       convention of faces.
+% Note: See http://www.grc.nasa.gov/WWW/cgns/CGNS_docs_current/sids/conv.html 
+%       for numbering convention of faces.
 
 %% Tetrahedral element
 % Table for vertices of each face.
@@ -51,9 +55,15 @@ v2av_hex  = int32([2,5,4; 3,6,1; 4,7,2; 1,8,3; 6,8,1; 7,5,2; 8,6,3; 5,7,4]);
 % Table for local IDs of incident faces of each vertex.
 v2f_hex   = int32([2,5,1; 3,2,1; 4,3,1; 5,4,1; 6,5,2; 6,2,3; 6,3,4; 6,4,5]);
 
-if nargin<3; 
+% Fill in sibhfs for each half-face.
+if nargin<3 || isempty(varargin{1}) || ~islogical(varargin{1})
     sibhfs = zeros(size(elems,1),1,'int32'); 
+elseif islogical(varargin{1})
+    sibhfs = struct( 'cid', zeros(size(elems), 'int32'), ...
+        'lfid', zeros(size(elems), 'int8'));
 else
+    sibhfs = varargin{1};
+    assert( size(sibhfs,1)>=nnz_elements(elems) && size(sibhfs,2)>=4);
     sibhfs(:) = 0;
 end
 

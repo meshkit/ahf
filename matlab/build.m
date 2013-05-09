@@ -1,15 +1,12 @@
-function build
+function build(varargin)
 
-compile is_quadmesh
-compile is_2dmesh
-compile determine_border_vertices
-compile determine_border_vertices_vol
-compile determine_sibling_halffaces
-compile extract_border_surf
+files = {'is_quadmesh', 'is_2dmesh', 'determine_border_vertices', ...
+         'determine_border_vertices_vol', 'determine_sibling_halffaces', ...
+         'extract_border_surf', 'nnz_elements', 'split_mixed_elems', ...
+         'determine_offsets_mixed_elems', 'linearize_mixed_elems', ...
+         'regularize_mixed_elems', 'merge_mixed_elems'};
 
-compile nnz_elements
-compile split_mixed_elems
-compile determine_offsets_mixed_elems
-compile linearize_mixed_elems
-compile regularize_mixed_elems
-compile merge_mixed_elems
+for j=1:length(files)
+    file = files{j};
+    compile('-noinf', file, varargin{:})
+end

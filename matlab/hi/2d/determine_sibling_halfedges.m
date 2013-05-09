@@ -60,7 +60,6 @@ for ii=1:nv; is_index(ii+1) = is_index(ii) + is_index(ii+1); end
 
 ne = nelems*nepE;
 v2nv = nullcopy(zeros( ne,1,'int32'));  % Vertex to next vertex in each halfedge.
-%v2he = nullcopy(zeros( ne,1,'int32'));  % Vertex to halfedge.
 v2he_fid = nullcopy(zeros( ne,1,'int32'));  % Vertex to halfedge.
 v2he_leid = nullcopy(zeros( ne,1,'int8'));  % Vertex to halfedge.
 
@@ -70,7 +69,6 @@ for ii=1:nelems
         k = elems(ii,j);
         
         v2nv(is_index( k)) = elems(ii,next(j+int32(hasthree & j==3)));
-        %v2he(is_index( k)) = fleids2heid(ii, j);
         v2he_fid(is_index( k)) = ii;  % Vertex to halfedge.
         v2he_leid(is_index( k)) = j;  % Vertex to halfedge.
         is_index(k) = is_index(k) + 1;
@@ -96,16 +94,16 @@ manifold = true; oriented = true;
 for ii=int32(1):nelems
     hasthree = nepE~=4 || ~elems(ii,4);
     for jj=1:4-int32(hasthree)
+        % Process each edge only once
+        if ~isstruct(sibhes) && sibhes(ii,jj) || ...
+                isstruct(sibhes) && sibhes.fid(ii,jj)
+            continue;
+        end
         v = elems(ii,jj); vn = elems(ii,next(jj+int32(hasthree & jj==3)));
-        if vn<v; continue; end
-        
-        %first_heid = fleids2heid(ii, jj);
-        
+                
         first_heid_fid=ii;
         first_heid_leid=jj;
-        
-        %prev_heid = first_heid;
-        
+                
         prev_heid_fid=ii;
         prev_heid_leid=jj;
         
@@ -114,7 +112,6 @@ for ii=int32(1):nelems
         % LOCATE: Locate index in v2nv(first:last)
         for index = is_index(vn):is_index(vn+1)-1
             if v2nv(index)==v
-                %sibhes(heid2fid(prev_heid),heid2leid(prev_heid)) = v2he(index);
                 if ~isstruct(sibhes)
                     sibhes(prev_heid_fid,prev_heid_leid) = fleids2heid(v2he_fid(index), v2he_leid(index));
                 else
@@ -132,15 +129,12 @@ for ii=int32(1):nelems
         % Check for halfedges in the same orientation
         for index = is_index(v):is_index(v+1)-1
             if v2nv(index)==vn && v2he_fid(index)~=ii
-                %if v2nv(index)==vn && heid2fid(v2he(index))~=ii
-                %sibhes(heid2fid(prev_heid),heid2leid(prev_heid)) = v2he(index);
                 if ~isstruct(sibhes)
                     sibhes(prev_heid_fid,prev_heid_leid) = fleids2heid(v2he_fid(index), v2he_leid(index));
                 else
                     sibhes.fid(prev_heid_fid,prev_heid_leid) = v2he_fid(index);
                     sibhes.leid(prev_heid_fid,prev_heid_leid) = v2he_leid(index);
                 end
-                %prev_heid = v2he(index);
                 
                 prev_heid_fid=v2he_fid(index);
                 prev_heid_leid=int32(v2he_leid(index));
@@ -150,10 +144,8 @@ for ii=int32(1):nelems
             end
         end
         
-        %         if prev_heid ~= first_heid
-        if (prev_heid_fid ~= first_heid_fid)&&(prev_heid_leid ~= first_heid_leid)
+        if prev_heid_fid ~= first_heid_fid && prev_heid_leid ~= first_heid_leid
             % Close up the cycle
-            %sibhes(heid2fid(prev_heid),heid2leid(prev_heid)) = first_heid;
             if ~isstruct(sibhes)
                 sibhes(prev_heid_fid,prev_heid_leid) = fleids2heid(first_heid_fid, first_heid_leid);
             else
