@@ -144,7 +144,7 @@ for ii=int32(1):nelems
             end
         end
         
-        if prev_heid_fid ~= first_heid_fid && prev_heid_leid ~= first_heid_leid
+        if prev_heid_fid ~= first_heid_fid
             % Close up the cycle
             if ~isstruct(sibhes)
                 sibhes(prev_heid_fid,prev_heid_leid) = fleids2heid(first_heid_fid, first_heid_leid);
