@@ -27,5 +27,9 @@ switch size(elems,2)
         if size(elems,2)~=1
             error('Unsupported element type.');
         end
-        sibhfs = determine_sibling_halffaces_mixed(nv, elems, varargin{:});
+        if isempty(coder.target) || isempty( varargin)
+            sibhfs = determine_sibling_halffaces_mixed(nv, elems, varargin{:});
+        else
+            error('determine_sibling_halffaces_mixed does not support struct yet.');
+        end
 end
