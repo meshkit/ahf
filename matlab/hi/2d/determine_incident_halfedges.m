@@ -15,26 +15,17 @@ function v2he = determine_incident_halfedges(nv, elems, sibhes, varargin)
 % See also DETERMINE_INCIDENT_HALFFACES, DETERMINE_INCIDENT_HALFVERTS
 
 %#codegen -args {int32(0), coder.typeof( int32(0), [inf, inf]),
-%#codegen        coder.typeof( int32(0), [inf, 4], [1,1])}
+%#codegen        coder.typeof( int32(0), [inf, 3])}
+%#codegen determine_incident_halfedges_usestruct -args {int32(0), coder.typeof( int32(0), [inf, inf]),
+%#codegen        struct('fid',coder.typeof( int32(0), [inf, 3]),'leid',coder.typeof( int8(0), [inf, 3])), false}
  
 coder.inline('never');
 
-if nargin<4 || isempty(varargin{1})
-    if ~isstruct(sibhes)
-        % Set nv to maximum value in elements
+if nargin<4 || isempty(varargin{1}) || ~islogical(varargin{1})
         v2he = zeros( nv, 1, 'int32');
-    else
+else
         v2he = struct( 'fid', zeros(nv, 1, 'int32'), ...
         'leid', zeros(nv, 1, 'int8'));
-    end
-else
-    v2he = varargin{1}; 
-    if ~isstruct(v2he)
-        v2he(:) = 0;
-    else
-        v2he.fid(:)=int32(0);
-        v2he.leid(:)=int8(0);
-    end
 end
 
 for kk=1:int32(size(elems,1))
@@ -43,12 +34,12 @@ for kk=1:int32(size(elems,1))
     for lid=1:int32(size(elems,2))
         v = elems(kk,lid);
         
-        if ~isstruct(sibhes)
+        if nargin<4 || isempty(varargin{1}) || ~islogical(varargin{1})
             if v>0 && (v2he(v)==0 || sibhes( kk,lid) == 0 || ...
                 (sibhes( heid2fid(v2he(v)), heid2leid(v2he(v))) && sibhes( kk, lid)<0))
                 v2he(v) = 4*kk + lid - 1;
             end
-        elseif v>0 && ((v2he.fid(v)==0 && v2he.leid(v)==0) || (sibhes.fid(kk,lid)==0 && sibhes.leid(kk,lid)==0))
+        elseif v>0 && ((v2he.fid(v)==0) || (sibhes.fid(kk,lid)==0))
             v2he.fid(v) = kk;
             v2he.leid(v)=int8(lid);
         end
