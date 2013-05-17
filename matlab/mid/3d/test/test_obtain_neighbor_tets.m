@@ -21,3 +21,19 @@ ngbtets = obtain_neighbor_tets(int32(2),sibhfs);
 
 passed=passed && (size(ngbtets,1)==1);
 passed=passed && ngbtets==1;
+
+
+[sibhfs]=determine_sibling_halffaces(8,tets,true);
+
+
+%% Test 3. Tetrahedrah in the middle, has four neighbors
+ngbtets = obtain_neighbor_tets(int32(1),sibhfs,true); 
+
+passed=passed && size(ngbtets,1)==4;
+passed=passed && (sum(sort(ngbtets,1)-[2,3,4,5]',1)==0);
+
+%% Test 4. Tetrahedrah on the boundary, has one neighbor
+ngbtets = obtain_neighbor_tets(int32(2),sibhfs,true); 
+
+passed=passed && (size(ngbtets,1)==1);
+passed=passed && ngbtets==1;

@@ -1,5 +1,5 @@
 function [ngbes, nelems, etags] = obtain_1ring_elems_tet( vid, ...
-    tets, sibhfs, v2hf, ngbes, etags)  %#codegen
+    tets, sibhfs, v2hf, ngbes, etags, varargin)  %#codegen
 %OBTAIN_1RING_ELEMS_TET Collects 1-ring neighbor elements of tet mesh.
 % [NGBES, NELEMS, ETAGS] = OBTAIN_1RING_ELEMS_TET( VID, ...
 %         TETS, SIBHFS, V2HF, NGBES, ETAGS)
@@ -10,6 +10,12 @@ function [ngbes, nelems, etags] = obtain_1ring_elems_tet( vid, ...
 %#codegen -args {int32(0), coder.typeof(int32(0), [inf,4]),coder.typeof(int32(0), [inf,4]),coder.typeof(int32(0), [inf,1]),
 %#codegen     coder.typeof(int32(0), [inf,1]), coder.typeof(false, [inf,1])}
 
+%#codegen obtain_1ring_elems_tet_usestruct -args {int32(0), coder.typeof(int32(0), [inf,4]),
+%#codegen struct('cid',coder.typeof(int32(0), [inf,4]),'lfid',coder.typeof(int8(0), [inf,4])),
+%#codegen struct('cid',coder.typeof(int32(0), [inf,1]),'lfid',coder.typeof(int8(0), [inf,1])),
+%#codegen     coder.typeof(int32(0), [inf,1]), coder.typeof(false, [inf,1]),false}
+
+
 coder.extrinsic('warning');
 
 MAXTETS = 1024;
@@ -18,7 +24,11 @@ assert( numel(ngbes) <= MAXTETS);
 nelems=int32(0);
 
 % Obtain incident tetrahedron of vid.
-eid = hfid2cid(v2hf(vid));
+if nargin < 7 || isempty(varargin{1}) || ~islogical(varargin{1})
+    eid = hfid2cid(v2hf(vid));
+else
+    eid = v2hf.eid(vid);
+end
 if ~eid; return; end
 
 sibhfs_tet = int32([1 2 4; 1 2 3; 1 3 4; 2 3 4]);
@@ -48,10 +58,19 @@ while size_stack>0
     end
 
     % Push unvisited neighbor tets onto stack
-    for ii=1:3
-        ngb = hfid2cid(sibhfs(eid,sibhfs_tet(lvid,ii)));
-        if ngb && ~etags(ngb);
-            size_stack = size_stack + 1; stack(size_stack) = ngb;
+    if nargin < 7 || isempty(varargin{1}) || ~islogical(varargin{1})
+        for ii=1:3
+            ngb = hfid2cid(sibhfs(eid,sibhfs_tet(lvid,ii)));
+            if ngb && ~etags(ngb);
+                size_stack = size_stack + 1; stack(size_stack) = ngb;
+            end
+        end
+    else
+        for ii=1:3
+            ngb = sibhfs.cid(eid,sibhfs_tet(lvid,ii));
+            if ngb && ~etags(ngb);
+                size_stack = size_stack + 1; stack(size_stack) = ngb;
+            end
         end
     end
 end
