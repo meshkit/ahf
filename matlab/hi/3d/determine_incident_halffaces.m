@@ -21,15 +21,20 @@ v2f_pyr   = int32([2,5,1,0; 3,2,1,0; 4,3,1,0; 5,4,1,0; 2,3,4,5]);
 v2f_pri   = int32([1,3,4; 2,1,4; 3,2,4; 3,1,5; 1,2,5; 2,3,5]);
 v2f_hex   = int32([2,5,1; 3,2,1; 4,3,1; 5,4,1; 6,5,2; 6,2,3; 6,3,4; 6,4,5]);
 
-if nargin<4
+if nargin<4 || isempty(varargin{1}) || ~islogical(varargin{1})
     v2hf = zeros( nv, 1, 'int32');
 else
-    v2hf = varargin{1}; v2hf(:) = 0;
+    v2hf = struct('cid',zeros( nv, 1, 'int32'),'lfid',zeros( nv, 1, 'int8'));
 end
 
 % We use three bits for local-face ID.
 if size(elems,2)==1
-    assert( size(sibhfs,2)==1);
+    if nargin<4 || isempty(varargin{1}) || ~islogical(varargin{1})
+        assert( size(sibhfs,2)==1);
+    else
+        assert( size(sibhfs.cid,2)==1);
+        assert( size(sibhfs.lfid,2)==1);
+    end
     % Mixed elements
     
     isborder = determine_border_vertices_vol(nv, elems, sibhfs);
