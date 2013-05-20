@@ -1,75 +1,75 @@
-function comprehensive_test(mesh)
+function comprehensive_test(mesh) 
 
-
-time_1ring_curv=0;
-time_vid2adj_edges=0;
-time_1ring_surf=0;
-time_1ring_elems=0;
+%#codegen -args { struct('xs', coder.typeof(0,[inf,3]),
+%#codegen 'edges', coder.typeof(int32(0),[inf,2]),
+%#codegen 'faces', coder.typeof(int32(0),[inf,inf]),
+%#codegen 'cells', coder.typeof(int32(0),[inf,inf]), 
+%#codegen 'v2hv', coder.typeof(int32(0),[inf,inf]),
+%#codegen 'v2he', coder.typeof(int32(0),[inf,inf]),
+%#codegen 'v2hf', coder.typeof(int32(0),[inf,inf]),
+%#codegen 'sibhvs', coder.typeof(int32(0),[inf,inf]),
+%#codegen 'sibhes', coder.typeof(int32(0),[inf,inf]),
+%#codegen 'sibhfs', coder.typeof(int32(0),[inf,inf])) }
 
 ftags=false(size(mesh.faces,1),1);
 vtags=false(size(mesh.xs,1),1);
 etags=false(size(mesh.faces,1),1);
+ngbes = int32( zeros(1024,1));
 
-
+t1=wtime;
 for vid = int32(1) : size(mesh.v2hv,1)
-    tic;
     [~, ~] = obtain_1ring_curv_NM( vid, mesh.edges, mesh.sibhvs, mesh.v2hv);
-    time_1ring_curv=time_1ring_curv+toc;
-    tic;
+end
+time_1ring_curv=(wtime-t1)/size(mesh.v2hv,1);
+msg_printf('Average 1 ring curve neighborhood: %g ',time_1ring_curv);
+
+t1=wtime;
+for vid = int32(1) : size(mesh.v2hv,1)
     [~, ~] = vid2adj_edges(vid,mesh.v2hv,mesh.sibhvs);
-    time_vid2adj_edges=time_vid2adj_edges+toc;
-    tic;
+end
+time_vid2adj_edges=(wtime-t1)/size(mesh.v2hv,1);
+msg_printf('Average adjacent edges: %g ',time_vid2adj_edges);
+
+t1=wtime;
+for vid = int32(1) : size(mesh.v2hv,1)
     [~,~,vtags,ftags] = obtain_1ring_surf_nmanfld( vid, mesh.faces, mesh.sibhes, mesh.v2he, vtags, ftags);
-    time_1ring_surf=time_1ring_surf+toc;
-    tic;
+end
+time_1ring_surf=(wtime-t1)/size(mesh.v2hv,1);
+msg_printf('Average 1 ring surface neighborhood: %g ',time_1ring_surf);
+
+t1=wtime;
+for vid = int32(1) : size(mesh.v2hv,1)
     [~, ~, etags] = obtain_1ring_elems_tet( vid, mesh.cells, mesh.sibhfs, mesh.v2hf, ngbes, etags);
-    time_1ring_elems=time_1ring_elems+toc;
 end
-
-time_1ring_curv=time_1ring_curv/size(mesh.v2hv,1);
-time_vid2adj_edges=time_vid2adj_edges/size(mesh.v2hv,1);
-time_1ring_surf=time_1ring_surf/size(mesh.v2hv,1);
-time_1ring_elems=time_1ring_elems/size(mesh.v2hv,1);
-
-fprintf('Average 1 ring curve neighborhood: %g ',time_1ring_curv);
-fprintf('Average adjacent edges: %g ',time_vid2adj_edges);
-fprintf('Average 1 ring surface neighborhood: %g ',time_1ring_surf);
-fprintf('Average 1 ring surface neighborhood: %g ',time_1ring_elems);
+time_1ring_elems=(wtime-t1)/size(mesh.v2hv,1);
+msg_printf('Average 1 ring surface neighborhood: %g ',time_1ring_elems);
 
 
-time_fid2adj_cells=0;
-time_obtain_neighbor_faces=0;
-
+t1 = wtime;
 for fid = int32(1) : size(mesh.faces,1)
-    tic;
-    [~,etags]=fid2adj_cells(fid,mesh.faces,mesh.tets,mesh.sibhfs, mesh.v2hf, etags);
-    time_fid2adj_cells=time_fid2adj_cells+toc;
-    tic;
+    [~,etags]=fid2adj_cells(fid,mesh.faces,mesh.cells, mesh.sibhfs, mesh.v2hf, etags);
+end
+time_fid2adj_cells= (wtime - t1) / size(mesh.faces,1);
+msg_printf('Average adjacent cells: %g ',time_fid2adj_cells);
+
+t1 = wtime;
+for fid = int32(1) : size(mesh.faces,1)
     obtain_neighbor_faces(fid,mesh.faces,mesh.sibhes);
-    time_obtain_neighbor_faces=time_obtain_neighbor_faces+toc;
 end
-time_fid2adj_cells=time_fid2adj_cells/size(mesh.faces,1);
-time_obtain_neighbor_faces=time_obtain_neighbor_faces/size(mesh.faces,1);
-
-fprintf('Average adjacent cells: %g ',time_fid2adj_cells);
-fprintf('Average neighbor faces: %g ',time_obtain_neighbor_faces);
+time_obtain_neighbor_faces = (wtime - t1) / size(mesh.faces,1);
+msg_printf('Average neighbor faces: %g ',time_obtain_neighbor_faces);
 
 
-time_eid2adj_faces=0;
-
+t1 = wtime;
 for eid = int32(1) : size(mesh.edges,1)
-    tic;
     [~, ~, ftags]=eid2adj_faces(eid,mesh.edges,mesh.faces,mesh.v2he,mesh.sibhes,ftags);
-    time_eid2adj_faces=time_eid2adj_faces+toc;
 end
-time_eid2adj_faces=time_eid2adj_faces/size(mesh.edges,1);
-fprintf('Average adjacent faces: %g',time_eid2adj_faces);
+time_eid2adj_faces =(wtime - t1) / size(mesh.edges,1);
+msg_printf('Average adjacent faces: %g',time_eid2adj_faces);
 
-time_neighbor_tets=0;
+t1 = wtime;
 for cid = int32(1) : size(mesh.cells,1)
-    tic;
     obtain_neighbor_tets(cid,mesh.sibhfs);
-    time_neighbor_tets=time_neighbor_tets+toc;
 end
-time_neighbor_tets=time_neighbor_tets/size(mesh.cells,1);
-fprintf('Average neigbor tets: %g',time_neighbor_tets);
+time_neighbor_tets = (wtime - t1) / size(mesh.edges,1);
+msg_printf('Average neigbor tets: %g',time_neighbor_tets);
