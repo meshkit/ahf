@@ -80,7 +80,7 @@ while queue_top<=queue_size && counter < 500
     else
         if (nargin>6)
             if faces(he.fid,he.leid)==vid
-                if faces(he.fid,he.leid)==second_vid
+                if faces(he.fid,next(he.leid))==second_vid
                     return;
                 end
             elseif faces(he.fid,he.leid)==second_vid
