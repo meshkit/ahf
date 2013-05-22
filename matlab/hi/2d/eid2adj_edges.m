@@ -1,12 +1,12 @@
-function [edge_list, nedges] = eid2adj_edges(eid,edges,v2hv,sibhvs,varargin) %#codegen
+function [edge_list, nedges] = eid2adj_edges(eid,edges,v2hv,sibhvs,edge_list,varargin) %#codegen
 
 %#codegen -args {int32(0), coder.typeof( int32(0), [inf, 2]), coder.typeof( int32(0), [inf, 1]),
-%#codegen        coder.typeof( int32(0), [inf, 2])}
+%#codegen        coder.typeof( int32(0), [inf, 2]), coder.typeof( int32(0), [inf, 1])}
 %%#codegen eid2adj_edges_usestruct -args
 %%#codegen {int32(0), coder.typeof( int32(0), [inf, 2]), struct('eid',coder.typeof( int32(0), [inf, 1]),'lvid',coder.typeof( int8(0), [inf, 1])),
-%%#codegen        coder.typeof( int32(0), [inf, 2]),'lvid',coder.typeof( int8(0), [inf, 2])), false}
-MAXNEDGES=50;
-edge_list=zeros(MAXNEDGES,1,'int32');
+%%#codegen        coder.typeof( int32(0), [inf, 2]),'lvid',coder.typeof( int8(0), [inf, 2])), coder.typeof( int32(0), [inf, 1]), false}
+%MAXNEDGES=50;
+%edge_list=zeros(MAXNEDGES,1,'int32');
 vid1=edges(eid,1);    
 [edge_list, nedges1] = vid2adj_edges_local(vid1,v2hv,sibhvs,0,edge_list);
 vid2=edges(eid,2);    

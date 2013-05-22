@@ -80,7 +80,7 @@ t1 = wtime;
 MAXEDGES=100;
 elist=zeros(MAXEDGES,1,'int32');
 for eid = int32(1) : size(mesh.edges,1)
-    [elist, nedges, ftags]=eid2adj_edges(eid,mesh.edges,mesh.faces,mesh.v2hv,mesh.sibhvs,elist);
+    [elist, nedges]=eid2adj_edges(eid,mesh.edges,mesh.v2hv,mesh.sibhvs,elist);
     elist = refv( elist); nfaces = refv( nedges);
     elist(1:MAXEDGES,1)=int32(0);
 end
