@@ -6,7 +6,7 @@ else
     [fid, lfid, etags] = f2hf(fid,faces,tets,sibhfs,v2hf, etags, true);
 end
 if fid==0
-    clist=0;
+    clist=int32(0);
     return;
 end
 if ~isstruct(sibhfs)
@@ -15,7 +15,7 @@ if ~isstruct(sibhfs)
     if (hf_opp>0)
         clist=[fid;hfid2cid(hf_opp)];
     else
-        clist(1,1)=fid;
+        clist=fid;
     end
 else
     fid2=sibhfs.cid(fid,lfid);
@@ -23,8 +23,6 @@ else
     if (fid2>0)
         clist=[fid;fid2];
     else
-        clist(1,1)=fid;
-    end
-    
+        clist=fid;
+    end    
 end
-
