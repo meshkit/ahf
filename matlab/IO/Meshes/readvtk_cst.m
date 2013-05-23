@@ -31,5 +31,5 @@ end
 fields = fieldnames( cells);
 
 for i=1:length(fields)
-    cells.(fields{i})(sizes.(fields{i})+1:end)=[];
+    cells.(fields{i})(sizes.(fields{i})+1:end,:)=[];
 end
