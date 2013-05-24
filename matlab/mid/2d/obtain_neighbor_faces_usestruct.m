@@ -1,2 +1,2 @@
-function ngbfaces = obtain_neighbor_faces_usestruct(fid,tris,sibhes,usestruct)
-ngbfaces = obtain_neighbor_faces(fid,tris,sibhes,usestruct);
+function [ngbfaces, nfaces, ftags] = obtain_neighbor_faces_usestruct(fid,sibhes,ftags,usestruct)
+[ngbfaces, nfaces, ftags] = obtain_neighbor_faces(fid,sibhes,ftags,usestruct);
