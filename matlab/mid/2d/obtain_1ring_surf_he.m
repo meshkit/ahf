@@ -18,11 +18,22 @@ end
 if ~fid; return; end;
 
 MAXQUEUE=100;
-queue=zeros(MAXQUEUE,1,'int32');
+if isstruct(v2he)
+    queue=struct('fid',zeros(MAXQUEUE,1,'int32'), 'leid',zeros(MAXQUEUE,1,'int8'));
+else
+    queue=zeros(MAXQUEUE,1,'int32');
+end
 [queue,tris,queue_size,ftags]=start(vid,v2he,sibhes,tris,queue,ftags);
 %fprintf('starting collect_n_compare...\n');
 [heid,ftags]=collect_n_compare(vid,sibhes,queue,queue_size,tris,ftags,second_vid);
 %fprintf('done\n');
+if isstruct(queue)
+    ftags(queue.fid(1:queue_size,1),1)=false;
+else
+    for i = 1 : queue_size
+        ftags(heid2fid(queue(i,1)),1)=false;
+    end
+end
 end
 
 function [queue,faces,queue_size,ftags]=start(vid,v2he,sibhes,faces,queue,ftags)

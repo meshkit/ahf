@@ -1,7 +1,7 @@
-function ngbfaces = obtain_neighbor_faces(fid,tris,sibhes,varargin) %#codegen
-%#codegen -args {int32(0), coder.typeof(int32(0), [inf,3]),coder.typeof(int32(0), [inf,3])}
-%#codegen obtain_neighbor_faces_usestruct -args {int32(0), coder.typeof(int32(0), [inf,3]),
-%#codegen struct('fid',coder.typeof(int32(0), [inf,3]),'leid',coder.typeof(int8(0), [inf,3])), false}
+function [ngbfaces, nfaces, ftags] = obtain_neighbor_faces(fid,sibhes,ftags,varargin) %#codegen
+%#codegen -args {int32(0), coder.typeof(int32(0), [inf,3]), coder.typeof(false, [inf,1])}
+%#codegen obtain_neighbor_faces_usestruct -args {int32(0), 
+%#codegen struct('fid',coder.typeof(int32(0), [inf,3]),'leid',coder.typeof(int8(0), [inf,3])), coder.typeof(false, [inf,1]), false}
 % For every face, obtain neighbor faces
 coder.extrinsic('fprintf');
 if nargin<4 || isempty(varargin{1}) || ~islogical(varargin{1})
@@ -9,18 +9,18 @@ if nargin<4 || isempty(varargin{1}) || ~islogical(varargin{1})
 else
     n_edges=size(sibhes.fid,2);
 end
-MAXQUEUESIZE=50;
+MAXQUEUESIZE=100;
 queue_size=0;
 if nargin<4 || isempty(varargin{1}) || ~islogical(varargin{1})
-    queue=zeros(1,MAXQUEUESIZE);
+    queue=zeros(MAXQUEUESIZE,1);
 else
-    queue=struct('fid',zeros(1,MAXQUEUESIZE),'leid',zeros(1,MAXQUEUESIZE));
+    queue=struct('fid',zeros(MAXQUEUESIZE,1),'leid',zeros(MAXQUEUESIZE,1));
 end
-ftags=false(size(tris,1),1);
+%ftags=false(size(tris,1),1);
 ftags(fid,1)=true;
 nfaces=0;
 ngbfaces=zeros(MAXQUEUESIZE,1);
-coder.varsize('ngbfaces');
+%coder.varsize('ngbfaces');
 for leid = 1 : n_edges
     if nargin<4 || isempty(varargin{1}) || ~islogical(varargin{1})
         heid=sibhes(fid,leid);
@@ -50,4 +50,12 @@ for i = 1 : queue_size
         ngbfaces(nfaces,1)=queue.fid(i);
     end
 end
-ngbfaces(nfaces+1:end,:)=[];
+%ngbfaces(nfaces+1:end,:)=[];
+ftags(fid,1)=false; 
+if nargin<4 || isempty(varargin{1}) || ~islogical(varargin{1})
+    for i =  1 : queue_size
+        ftags(heid2fid(queue(i,1)),1)=false;
+    end
+else
+    ftags(queue.fid(1:queue_size,1),1)=false;
+end

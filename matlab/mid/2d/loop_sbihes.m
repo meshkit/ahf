@@ -23,7 +23,7 @@ if nargin<6 || isempty(varargin{1}) || ~islogical(varargin{1})
         if ~ftags(fid,1)
             % face have not been visited yet, add he to queue
             queue_size=queue_size+1;
-            queue(queue_size)=sibhe;
+            queue(queue_size,1)=sibhe;
         end
         lid = heid2leid(sibhe);
         assert(lid~=0);
@@ -37,8 +37,8 @@ else
         if ~ftags(fid,1)
             % face have not been visited yet, add he to queue
             queue_size=queue_size+1;
-            queue.fid(queue_size)=sibhe.fid;
-            queue.leid(queue_size)=sibhe.leid;
+            queue.fid(queue_size,1)=sibhe.fid;
+            queue.leid(queue_size,1)=sibhe.leid;
         end
         leid = sibhe.leid;
         assert(leid~=0);
