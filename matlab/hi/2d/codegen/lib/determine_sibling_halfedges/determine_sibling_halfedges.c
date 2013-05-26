@@ -1,5 +1,19 @@
+#include "rt_nonfinite.h"
 #include "determine_sibling_halfedges.h"
 #include "m2c.h"
+#ifndef struct_emxArray__common
+#define struct_emxArray__common
+
+typedef struct emxArray__common
+{
+  void *data;
+  int32_T *size;
+  int32_T allocatedSize;
+  int32_T numDimensions;
+  boolean_T canFreeData;
+} emxArray__common;
+
+#endif
 
 static define_emxInit(b_emxInit_int32_T, int32_T)
 static define_emxInit(b_emxInit_int8_T, int8_T)
@@ -44,7 +58,7 @@ void determine_sibling_halfedges(int32_T nv, const emxArray_int32_T *elems,
   nelems = elems->size[0];
   ii = 0;
   exitg1 = FALSE;
-  while ((exitg1 == FALSE) && (ii + 1 <= nelems)) {
+  while ((exitg1 == 0U) && (ii + 1 <= nelems)) {
     if (elems->data[ii] == 0) {
       nelems = ii;
       exitg1 = TRUE;
@@ -55,7 +69,7 @@ void determine_sibling_halfedges(int32_T nv, const emxArray_int32_T *elems,
         b0 = FALSE;
       }
 
-      i0 = 4 - b0;
+      i0 = 4 - (int32_T)b0;
       for (nvpE = 1; nvpE <= i0; nvpE++) {
         k = elems->data[ii + elems->size[0] * (nvpE - 1)];
         is_index->data[k]++;
@@ -90,7 +104,7 @@ void determine_sibling_halfedges(int32_T nv, const emxArray_int32_T *elems,
       hasthree = FALSE;
     }
 
-    i0 = 4 - hasthree;
+    i0 = 4 - (int32_T)hasthree;
     for (nvpE = 0; nvpE + 1 <= i0; nvpE++) {
       v2nv->data[is_index->data[elems->data[ii + elems->size[0] * nvpE] - 1] - 1]
         = elems->data[ii + elems->size[0] * (iv0[nvpE + (hasthree && (nvpE + 1 ==
@@ -112,8 +126,8 @@ void determine_sibling_halfedges(int32_T nv, const emxArray_int32_T *elems,
   sibhes->size[0] = nelems;
   sibhes->size[1] = nepE;
   emxEnsureCapacity((emxArray__common *)sibhes, i0, (int32_T)sizeof(int32_T));
-  nvpE = nelems * nepE;
-  for (i0 = 0; i0 < nvpE; i0++) {
+  nvpE = nelems * nepE - 1;
+  for (i0 = 0; i0 <= nvpE; i0++) {
     sibhes->data[i0] = 0;
   }
 
@@ -126,7 +140,7 @@ void determine_sibling_halfedges(int32_T nv, const emxArray_int32_T *elems,
       hasthree = FALSE;
     }
 
-    i0 = 4 - hasthree;
+    i0 = 4 - (int32_T)hasthree;
     for (nvpE = 0; nvpE + 1 <= i0; nvpE++) {
       if (sibhes->data[ii + sibhes->size[0] * nvpE] != 0) {
       } else {
@@ -163,7 +177,7 @@ void determine_sibling_halfedges(int32_T nv, const emxArray_int32_T *elems,
           }
         }
 
-        if ((k + 1 != ii + 1) && (prev_heid_leid + 1 != nvpE + 1)) {
+        if (k + 1 != ii + 1) {
           sibhes->data[k + sibhes->size[0] * prev_heid_leid] = ((ii + 1) << 2) +
             nvpE;
           nhes++;
@@ -185,6 +199,7 @@ void determine_sibling_halfedges(int32_T nv, const emxArray_int32_T *elems,
 
 void determine_sibling_halfedges_initialize(void)
 {
+  rt_InitInfAndNaN(8U);
 }
 
 void determine_sibling_halfedges_terminate(void)
@@ -236,7 +251,7 @@ void determine_sibling_halfedges_usestruct(int32_T nv, const emxArray_int32_T
   nelems = elems->size[0];
   ii = 0;
   exitg1 = FALSE;
-  while ((exitg1 == FALSE) && (ii + 1 <= nelems)) {
+  while ((exitg1 == 0U) && (ii + 1 <= nelems)) {
     if (elems->data[ii] == 0) {
       nelems = ii;
       exitg1 = TRUE;
@@ -247,7 +262,7 @@ void determine_sibling_halfedges_usestruct(int32_T nv, const emxArray_int32_T
         b1 = FALSE;
       }
 
-      i2 = 4 - b1;
+      i2 = 4 - (int32_T)b1;
       for (nvpE = 1; nvpE <= i2; nvpE++) {
         k = elems->data[ii + elems->size[0] * (nvpE - 1)];
         is_index->data[k]++;
@@ -282,7 +297,7 @@ void determine_sibling_halfedges_usestruct(int32_T nv, const emxArray_int32_T
       hasthree = FALSE;
     }
 
-    i2 = 4 - hasthree;
+    i2 = 4 - (int32_T)hasthree;
     for (nvpE = 0; nvpE + 1 <= i2; nvpE++) {
       v2nv->data[is_index->data[elems->data[ii + elems->size[0] * nvpE] - 1] - 1]
         = elems->data[ii + elems->size[0] * (iv1[nvpE + (hasthree && (nvpE + 1 ==
@@ -314,8 +329,8 @@ void determine_sibling_halfedges_usestruct(int32_T nv, const emxArray_int32_T
   i2 = sibhes->fid->size[0] * sibhes->fid->size[1];
   sibhes->fid->size[1] = (int32_T)uv0[1];
   emxEnsureCapacity((emxArray__common *)sibhes->fid, i2, (int32_T)sizeof(int32_T));
-  nvpE = (int32_T)uv0[0] * (int32_T)uv0[1];
-  for (i2 = 0; i2 < nvpE; i2++) {
+  nvpE = (int32_T)uv0[0] * (int32_T)uv0[1] - 1;
+  for (i2 = 0; i2 <= nvpE; i2++) {
     sibhes->fid->data[i2] = 0;
   }
 
@@ -325,8 +340,8 @@ void determine_sibling_halfedges_usestruct(int32_T nv, const emxArray_int32_T
   i2 = sibhes->leid->size[0] * sibhes->leid->size[1];
   sibhes->leid->size[1] = (int32_T)uv1[1];
   emxEnsureCapacity((emxArray__common *)sibhes->leid, i2, (int32_T)sizeof(int8_T));
-  nvpE = (int32_T)uv1[0] * (int32_T)uv1[1];
-  for (i2 = 0; i2 < nvpE; i2++) {
+  nvpE = (int32_T)uv1[0] * (int32_T)uv1[1] - 1;
+  for (i2 = 0; i2 <= nvpE; i2++) {
     sibhes->leid->data[i2] = 0;
   }
 
@@ -339,7 +354,7 @@ void determine_sibling_halfedges_usestruct(int32_T nv, const emxArray_int32_T
       hasthree = FALSE;
     }
 
-    i2 = 4 - hasthree;
+    i2 = 4 - (int32_T)hasthree;
     for (nvpE = 0; nvpE + 1 <= i2; nvpE++) {
       if (sibhes->fid->data[ii + sibhes->fid->size[0] * nvpE] != 0) {
       } else {
@@ -380,7 +395,7 @@ void determine_sibling_halfedges_usestruct(int32_T nv, const emxArray_int32_T
           }
         }
 
-        if ((k + 1 != ii + 1) && (prev_heid_leid + 1 != nvpE + 1)) {
+        if (k + 1 != ii + 1) {
           sibhes->fid->data[k + sibhes->fid->size[0] * prev_heid_leid] = ii + 1;
           sibhes->leid->data[k + sibhes->leid->size[0] * prev_heid_leid] =
             (int8_T)(nvpE + 1);

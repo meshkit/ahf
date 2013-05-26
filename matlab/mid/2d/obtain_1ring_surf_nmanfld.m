@@ -1,27 +1,46 @@
 function [ngbvs, nverts, vtags, ftags, ngbfs, nfaces] = obtain_1ring_surf_nmanfld...
-    ( vid, tris, sibhes, v2he, vtags, ftags) %#codegen
+    ( vid, tris, sibhes, v2he, vtags, ftags, varargin) %#codegen
 
-%function [ngbvs, nverts, vtags, ftags, ngbfs, nfaces] = obtain_nring_surf...
-%( vid, ring, minpnts, tris, sibhes, v2he, ngbvs, vtags, ftags, ngbfs) %#codegen
 %#codegen -args {int32(0), coder.typeof(int32(0), [inf,3]),coder.typeof(int32(0), [inf,3]),coder.typeof(int32(0), [inf,1]),
 %#codegen     coder.typeof(false, [inf,1]),coder.typeof(false, [inf,1])}
+
+%#codegen obtain_1ring_surf_nmanfld_usestruct -args {int32(0), coder.typeof(int32(0),[inf,3]),
+%#codegen struct('fid',coder.typeof(int32(0), [inf,3]),'leid',coder.typeof(int32(0), [inf,3])),
+%#codegen struct('fid',coder.typeof(int32(0), [inf,1]),'leid',coder.typeof(int8(0), [inf,1])),
+%#codegen coder.typeof(false, [inf,1]),coder.typeof(false, [inf,1]),false}
+
+
 coder.extrinsic('warning');
+
+
 
 MAXNPNTS = int32(128);
 
-fid = heid2fid(v2he(vid)); 
+if nargin<7 || isempty(varargin{1}) || ~islogical(varargin{1})
+    fid = heid2fid(v2he(vid));
+else
+    fid = v2he.fid(vid);
+end
+
 nverts=int32(0); nfaces=int32(0);
 
 ngbvs=zeros(MAXNPNTS,1,'int32');   coder.varsize('ngbvs');
 
-maxnf = 2*MAXNPNTS; ngbfs = zeros(maxnf,1, 'int32'); 
-coder.varsize('ngbfs');  
+maxnf = 2*MAXNPNTS; ngbfs = zeros(maxnf,1, 'int32');
+coder.varsize('ngbfs');
 if ~fid; return; end;
 
 MAXQUEUE=maxnf;
-queue=zeros(MAXQUEUE,1,'int32');
-[queue,tris,queue_size,ftags,ngbfs]=start(vid,v2he,sibhes,tris,queue,ftags,ngbfs);
-[ngbfs,nfaces,ftags]=collect(vid,sibhes,queue,queue_size,tris,ftags,ngbfs);
+if nargin<7 || isempty(varargin{1}) || ~islogical(varargin{1})
+    queue=zeros(MAXQUEUE,1,'int32');
+    [queue,tris,queue_size,ftags,ngbfs]=start(vid,v2he,sibhes,tris,queue,ftags,ngbfs);
+    [ngbfs,nfaces,ftags]=collect(vid,sibhes,queue,queue_size,tris,ftags,ngbfs);
+else
+    queue.fid=zeros(MAXQUEUE,1,'int32');
+    queue.leid=zeros(MAXQUEUE,1,'int8');
+    [queue,tris,queue_size,ftags,ngbfs]=start(vid,v2he,sibhes,tris,queue,ftags,ngbfs);
+    [ngbfs,nfaces,ftags]=collect(vid,sibhes,queue,queue_size,tris,ftags,ngbfs);
+end
 [ngbvs,nverts,ngbfs,vtags,ftags]=ngbfs2ngbvs(vid,ngbfs,nfaces,ngbvs,vtags,ftags,tris);
 ngbfs(nfaces+1,:)=[];
 ngbvs(nverts+1,:)=[];
@@ -50,13 +69,21 @@ end
 function [queue,faces,queue_size,ftags,ngbfs]=start(vid,v2he,sibhes,faces,queue,ftags,ngbfs)
 %% start the cycle
 %  collect all the sibling half-edges around initial half-edge
-he=v2he(vid);
+if isstruct(v2he)
+    he.fid=v2he.fid(vid);    he.leid=v2he.leid(leid);
+else
+    he=v2he(vid);
+end
 he2=another_halfedge(vid,he,faces);
 queue_size=0;
 %queue(queue_size)=he2;
-ftags(heid2fid(he))=true;
-
-ngbfs(1)=heid2fid(he);
+if isstruct(v2he)
+    ftags(he.fid)=true;
+    ngbfs(1)=he.fid;
+else
+    ftags(heid2fid(he))=true;
+    ngbfs(1)=heid2fid(he);
+end
 
 [queue,queue_size,ftags]=loop_sbihes(he,sibhes,queue,queue_size,ftags);
 [queue,queue_size,ftags]=loop_sbihes(he2,sibhes,queue,queue_size,ftags);
@@ -71,13 +98,13 @@ while queue_top<=queue_size
     he=queue(queue_top);
     queue_top=queue_top+1;
     [he2,fid]=another_halfedge(vid,he,faces);
-    if ftags(fid); continue; end;    
+    if ftags(fid); continue; end;
     ftags(fid)=true;
     
     [queue,queue_size,ftags]=loop_sbihes(he2,sibhes,queue,queue_size,ftags);
     
     ngbfs_size=ngbfs_size+1;
-    ngbfs(ngbfs_size)=fid;   
+    ngbfs(ngbfs_size)=fid;
 end
 end
 
@@ -96,26 +123,63 @@ if (faces(fid,lid)==vid)
 else
     lid2=next(lid);
 end
-he2=fleids2heid(fid, lid2);
+if isstruct(he)
+    he2.fid=fid; he2.leid=lid2;
+else
+    he2=fleids2heid(fid, lid2);
+end
 end
 
 function [queue,queue_size,ftags]=loop_sbihes(he,sibhes,queue,queue_size,ftags)
-fid=heid2fid(he);
-lid=heid2leid(he);
-if (lid==0); return; end;
-sibhe=sibhes(fid,lid);
 
-while sibhe 
-    fid = heid2fid(sibhe); 
+if ~isstruct(he)
+    fid=heid2fid(he);
+    lid=heid2leid(he);
+else
+    fid=he.fid;
+    lid=he.leid;
+end
+
+if (lid==0); return; end;
+if ~isstruct(sibhes)
+    sibhe=sibhes(fid,lid);
+else
+    sibhe.fid=sibhes.fid(fid,lid);
+    sibhe.leid=sibhes.leid(fid,lid);
+end
+
+while sibhe
+    if isstruct(sibhe)
+        fid = sibhe.fid;
+    else
+        fid = heid2fid(sibhe);
+    end
     assert(fid~=0); % fid can not be zero if the algorithm is correct
-    if ~ftags(fid)   
+    if ~ftags(fid)
         % face have not been visited yet, add he to queue
         queue_size=queue_size+1;
-        queue(queue_size)=sibhe;  
+        if isstruct(sibhe)
+            queue.fid(queue_size)=sibhe.fid;
+        else
+            queue(queue_size)=sibhe;
+        end
     end
-    lid = heid2leid(sibhe);
+    if isstruct(sibhe)
+        lid = sibhe.leid;
+    else
+        lid = heid2leid(sibhe);
+    end
     assert(lid~=0);
-    if (sibhes(fid,lid)==he); break; end; 
-    sibhe=sibhes(fid,lid);
+    if isstruct(sibhes)
+        if (sibhes.fid(fid,lid)==he.fid || sibhes.leid(fid,lid)==he.leid); break; end;
+    else
+        if (sibhes(fid,lid)==he); break; end;
+    end
+    
+    if isstruct(sibhes)
+        sibhe.fid=sibhes.fid(fid,lid);    sibhe.leid=sibhes.leid(fid,lid);
+    else
+        sibhe=sibhes(fid,lid);
+    end
 end
 end

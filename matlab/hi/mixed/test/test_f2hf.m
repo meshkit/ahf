@@ -13,6 +13,9 @@ tets = int32([1,2,3,4;
    
 [sibhfs,v2hf] = construct_halffaces( 11, tets);
 
+sibhfs_struct = determine_sibling_halffaces_tet( 11, tets, true);
+
+
 
 etags=false(size(tets,1),1);
 % order of vertices in tetrahedra
@@ -20,28 +23,48 @@ etags=false(size(tets,1),1);
 
 %% Test 1: boundary face
 fid=int32(1);
-[hf, etags] = f2hf(fid,faces,tets,sibhfs, v2hf, etags);
-passed=(hfid2cid(hf)==1) && (hfid2lfid(hf)==1);
+[cid, lfid, etags] = f2hf(fid,faces,tets,sibhfs, v2hf, etags);
+passed=(cid==1) && (lfid==1);
 passed = passed && ~any(etags);
+
+
+[cid, lfid, etags] = f2hf(fid,faces,tets,sibhfs_struct, v2hf_struct, etags, true);
+passed=passed && (cid==1) && (lfid==1);
+passed = passed && ~any(etags);
+
 
 %% Test 2: interior face
 fid=int32(2);
-[hf, etags] = f2hf(fid,faces,tets,sibhfs, v2hf, etags);
-passed=passed && ((hfid2cid(hf)==2 && hfid2lfid(hf)==1) || (hfid2cid(hf)==1 && hfid2lfid(hf)==3));
+[cid, lfid, etags] = f2hf(fid,faces,tets,sibhfs, v2hf, etags);
+passed=passed && ((cid==2 && lfid==1) || (cid==1 && lfid==3));
 passed = passed && ~any(etags);
+
+
+[cid, lfid, etags] = f2hf(fid,faces,tets,sibhfs_struct, v2hf_struct, etags, true);
+passed=passed && ((cid==2 && lfid==1) || (cid==1 && lfid==3));
+passed = passed && ~any(etags);
+
 
 %% Test 3: face not embedded into the volume mesh
 fid=int32(3);
-[hf, etags] = f2hf(fid,faces,tets,sibhfs, v2hf, etags);
-passed=passed && hf==0;
+[cid, lfid, etags] = f2hf(fid,faces,tets,sibhfs, v2hf, etags);
+passed=passed && cid==0;
+passed = passed && ~any(etags);
+
+
+[cid, lfid, etags] = f2hf(fid,faces,tets,sibhfs_struct, v2hf_struct, etags, true);
+passed=passed && cid==0;
 passed = passed && ~any(etags);
 
 %% Test 4: vertices not in the volume mesh
 fid=int32(4);
-[hf, etags] = f2hf(fid,faces,tets,sibhfs, v2hf, etags);
-passed=passed && hf==0;
+[cid, lfid, etags] = f2hf(fid,faces,tets,sibhfs, v2hf, etags);
+passed=passed && cid==0;
 passed = passed && ~any(etags);
 
 
+[cid, lfid, etags] = f2hf(fid,faces,tets,sibhfs_struct, v2hf_struct, etags, true);
+passed=passed && cid==0;
+passed = passed && ~any(etags);
 
 

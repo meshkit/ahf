@@ -25,6 +25,21 @@ vtags=false(15,1);
 
 [sibhes,v2he] = construct_halfedges( 15, test_mesh);
 
+% 
+% for i = 1 : size(v2hv,1)
+%    passed=passed && (hvid2eid(v2hv(i))==v2hv_struct.eid(i)) && (hvid2lvid(v2hv(i))==v2hv_struct.lvid(i));
+% end
+% 
+% for i = 1 : size(sibhvs,1)
+%    for j = 1 :  size(sibhvs,2)
+%        
+%     passed=passed && (hvid2eid(sibhvs(i,j))==sibhvs_struct.eid(i,j)) && (hvid2eid(sibhvs(i,j))==0 || (hvid2lvid(sibhvs(i,j))==sibhvs_struct.lvid(i,j)));
+%    end
+% end
+
+
+
+
 %% Test 1, border vertex.
 %  manifold boundary vertex 1. 
 %  Incident vertices are [2,8,9]

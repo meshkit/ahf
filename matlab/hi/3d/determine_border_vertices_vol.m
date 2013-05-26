@@ -1,4 +1,4 @@
-function isborder = determine_border_vertices_vol(nv, elems, sibhfs, isborder, quadratic)
+function isborder = determine_border_vertices_vol(nv, elems, sibhfs, isborder, quadratic, varargin)
 % DETERMINE_BORDER_VERTICES_VOL Determine border vertices of a volume mesh.
 %
 % ISBORDER = DETERMINE_BORDER_VERTICES_VOL(NV,ELEMS)

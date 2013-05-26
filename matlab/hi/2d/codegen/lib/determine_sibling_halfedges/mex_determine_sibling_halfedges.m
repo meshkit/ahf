@@ -5,8 +5,8 @@ if ~isnewer( ['../../../determine_sibling_halfedges.' mexext], 'determine_siblin
 
 
     if exist('octave_config_info', 'builtin'); output = '-o'; else output = '-largeArrayDims -output'; end
-    cmd = ['mex'  ' ' dbopts ' -I"' dir 'include" -I. '  'determine_sibling_halfedges_mex.c  ' output ' ../../../determine_sibling_halfedges ' ];
-    disp( 'run hi/2d/codegen/lib/determine_sibling_halfedges/mex_determine_sibling_halfedges.m');
+    cmd = ['mex'  ' ' dbopts ' -I"' dir 'include" -I. '  'determine_sibling_halfedges_mex.c  rtGetInf.c rtGetNaN.c rt_nonfinite.c ' output ' ../../../determine_sibling_halfedges ' ];
+    disp( 'run hi\2d\codegen/lib/determine_sibling_halfedges/mex_determine_sibling_halfedges.m');
     eval(cmd);
 else
     fprintf( 'determine_sibling_halfedges.%s is up to date.\n', mexext);
