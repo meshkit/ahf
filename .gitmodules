@@ -1,3 +1,3 @@
 [submodule "util/CodeGen"]
         path = util/CodeGen
-        url = git@bitbucket.org:paralab/m2c_dist.git
+        url = git@bitbucket.org:numgeom/codegenutil.git
