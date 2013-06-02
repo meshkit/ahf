@@ -7,15 +7,15 @@ function [edge_list, nedges] = eid2adj_edges(eid,edges,v2hv,sibhvs,edge_list,var
 %%#codegen        coder.typeof( int32(0), [inf, 2]),'lvid',coder.typeof( int8(0), [inf, 2])), coder.typeof( int32(0), [inf, 1]), false}
 %MAXNEDGES=50;
 %edge_list=zeros(MAXNEDGES,1,'int32');
-vid1=edges(eid,1);    
-[edge_list, nedges1] = vid2adj_edges_local(vid1,v2hv,sibhvs,0,edge_list);
-vid2=edges(eid,2);    
-[edge_list, nedges] = vid2adj_edges_local(vid2,v2hv,sibhvs,nedges1,edge_list);
+vid1=1;%edges(eid,1);    
+[edge_list, nedges1] = vid2adj_edges_local(vid1,eid,v2hv,sibhvs,0,edge_list);
+vid2=2;%edges(eid,2);    
+[edge_list, nedges] = vid2adj_edges_local(vid2,eid,v2hv,sibhvs,nedges1,edge_list);
 
 
-function [edge_list, nedges] = vid2adj_edges_local(vid,v2hv,sibhvs,nedges,edge_list)
+function [edge_list, nedges] = vid2adj_edges_local(lvid,eid,v2hv,sibhvs,nedges,edge_list)
 if ~isstruct(v2hv)
-    starting_half_vertex=v2hv(vid);
+    starting_half_vertex = elvids2hvid(eid, lvid); %v2hv(vid);
     hvid=starting_half_vertex;
     
     while hvid
@@ -25,8 +25,8 @@ if ~isstruct(v2hv)
         edge_list(nedges,1)=hvid2eid( hvid);
     end
 else
-    starting_half_vertex.eid=v2hv.eid(vid);
-    starting_half_vertex.lvid=v2hv.lvid(vid);
+    starting_half_vertex.eid=eid;
+    starting_half_vertex.lvid=lvid;
     hvid=starting_half_vertex;
 
     while hvid.eid
