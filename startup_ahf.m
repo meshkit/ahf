@@ -15,6 +15,8 @@ end
 
 addpath(projroot); %#ok<*MCAP>
 addpath([projroot '/util']);
-run([projroot '/util/CodeGen/startup.m']);
+if ~exist('m2c', 'file')
+    run([projroot '/util/CodeGen/startup.m']);
+end
 addpath([projroot '/data/sample_data']);
 
