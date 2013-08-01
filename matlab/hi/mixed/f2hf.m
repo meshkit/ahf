@@ -16,9 +16,6 @@ vid2=faces(fid,2);
 vid3=faces(fid,3);
 [found,fid,lvid1,lvid2,lvid3, etags] = examine_1ring_elems_tet_hf( vid1, vid2, vid3, tets, sibhfs, v2hf, etags);
 
-for i = 1 : size(etags,1)
-    etags(i,1)=false;
-end
 if (found)
     [fid, lfid]=match_halfface(fid,lvid1,lvid2,lvid3);
 else
@@ -68,13 +65,16 @@ sibhfs_tet = int32([1 2 4; 1 2 3; 1 3 4; 2 3 4]);
 
 MAXTETS=50;
 % Create a stack for storing tets and insert element itself into stack
-stack = nullcopy(zeros(MAXTETS,1, 'int32'));
+stack = nullcopy(zeros(MAXTETS,1, 'int32')); 
+queue = nullcopy(zeros(MAXTETS,1, 'int32')); count = int32(0);
 size_stack = int32(1); stack(1) = cid;
 
 while size_stack>0
     % Pop the element from top of stack
     cid = stack(size_stack); size_stack = size_stack-1;
     etags(cid) = true;
+    count = count+1;
+    queue(count)=cid;
     
     lvid1 = int32(0); % Stores which vertex vid is within the tetrahedron.
     lvid2 = int32(0);
@@ -93,7 +93,10 @@ while size_stack>0
         end
         % found matching face
         found = true;
-        etags(stack(1:size_stack,1),1) = false;
+        for i=1:count
+            etags(queue(i)) = false;
+        end
+        %etags(stack(1:size_stack,1),1) = false;
         return;
     end
     
@@ -109,4 +112,7 @@ while size_stack>0
         end
     end
 end
-etags(stack(1:size_stack,1),1);
+for i=1:count
+    etags(queue(i)) = false;
+end
+%etags(stack(1:size_stack,1),1);
