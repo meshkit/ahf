@@ -1,4 +1,4 @@
-function [success,heid] = obtain_1ring_surf_he_manifold(vid, second_vid, elems, sibhes, v2he, flist, nfaces) %#codegen
+function [success,heid] = obtain_1ring_surf_he_manifold(vid, second_vid, elems, sibhes, v2he) %#codegen
 success = false;
 type_struct = false;
 if isstruct(sibhes)
@@ -40,30 +40,49 @@ else
         lid_prv = prv(lid);
         if type_struct
             opp.fid = sibhes.fid(fid,lid_prv); opp.lid = sibhes.lid(fid,lid_prv);
+            if (opp.fid==0)
+                break
+            end
             ledg_endpnts = elems(opp.fid,edg_map(opp.lid,:));
-            if (ledg_endpnts(2) == second_vid)
+            if collinear_edges(vid,second_vid,ledg_endpnts)
                 heid.fid = fid; heid.lid = lid; success = true;break
             end
-            manifold = check_he_manifold(opp,sibhes);
+                      
+            oppopp.fid = sibhes.fid(opp.fid,opp.lid); oppopp.lid = sibhes.lid(opp.fid,opp.lid);
+            manifold = (oppopp.fid==fid)&&(oppopp.lid==lid);
+            
             if ~manifold
                 break
             end
-            
+            fid = opp.fid;
+            lid = opp.lid;
         else
             opp = sibhes(fid, lid_prv);
-            fid = heid2fid(opp); lid = heid2leid(opp);
-            ledg_endpnts = elems(fid,edg_map(lid,:));
-            if (ledg_endpnts(2) == second_vid)
+            if (heid2fid(opp)==0); break; end;
+            ledg_endpnts = elems(heid2fid(opp),edg_map(heid2leid(opp),:));
+            if collinear_edges(vid,second_vid,ledg_endpnts)
                 heid = opp; success = true; break
             end
-            manifold = check_he_manifold(opp,sibhes,flist,nfaces);
+            
+            oppopp = sibhes(heid2fid(opp),heid2leid(opp)); 
+            manifold = (heid2fid(oppopp)==fid)&&(heid2leid(oppopp)==lid);
+                        
             if ~manifold
                 break
             end
+            fid = heid2fid(opp); lid = heid2leid(opp);
         end
         
         if fid == fid_in % Finished cycle
             break;
         end
-    end   
+    end
+end
+end
+
+
+function match = collinear_edges(first_vid,second_vid,ledg_endpnts)
+same_orientation=(first_vid==ledg_endpnts(1))&&(second_vid==ledg_endpnts(2));
+opposite_orientation=(first_vid==ledg_endpnts(2))&&(second_vid==ledg_endpnts(1));
+match=same_orientation||opposite_orientation;
 end

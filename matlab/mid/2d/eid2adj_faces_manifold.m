@@ -1,4 +1,4 @@
-function [success, flist, nfaces, ftags]=eid2adj_faces_manifold(eid,edges,tris,v2he,sibhes,flist,ftags,type_struct)
+function [success, flist, nfaces, ftags]=eid2adj_faces_manifold(eid,edges,tris,v2he,sibhes,flist,ftags,varargin)
 %#codegen -args {int32(0), coder.typeof(int32(0), [inf,2]),coder.typeof(int32(0), [inf,3]),
 %#codegen coder.typeof(int32(0), [inf,1]),coder.typeof(int32(0), [inf,3]),coder.typeof(int32(0), [inf,1]),coder.typeof(false, [inf,1])}
 
@@ -9,18 +9,29 @@ function [success, flist, nfaces, ftags]=eid2adj_faces_manifold(eid,edges,tris,v
 
 % For edge, obtain adjacent faces
 % edge->half-edge->opposite half-edges
-
+type_struct=isstruct(sibhes);
 nfaces = int32(0);
 % Find half-edge
-[success,heid] = obtain_1ring_surf_he_manifold(edges(eid,1), edges(eid,2), tris, sibhes, v2he, flist, nfaces);
-
+[success,heid] = obtain_1ring_surf_he_manifold(edges(eid,1), edges(eid,2), tris, sibhes, v2he);
+if (~success)
+    [success,heid] = obtain_1ring_surf_he_manifold(edges(eid,2), edges(eid,1),  tris, sibhes, v2he);
+end
 if ~success
-    if nargin<8 || ~type_struct
+%       fprintf('fallback\n');
        nfaces = int32(0);return;   
-    end    
+       
 else
     % Check if the half-edge is a manifold or not
-    [manifold,flist, nfaces] = check_he_manifold(heid,sibhes,flist, nfaces);
+    if isstruct(heid)
+        opp.fid=sibhes.fid(heid.fid,heid.lid);  opp.lid=sibhes.lid(heid.fid,heid.lid);
+        oppopp.fid = sibhes.fid(opp.fid,opp.lid); oppopp.lid = sibhes.leid(opp.fid,opp.lid);
+        manifold = (oppopp.fid==heid.fid)&&(oppopp.lid==heid.lid);
+    else
+        opp=sibhes(heid2fid(heid),heid2leid(heid));
+        oppopp = sibhes(heid2fid(opp),heid2leid(opp)); 
+        manifold = (heid2fid(oppopp)==heid2fid(heid))&&(heid2leid(oppopp)==heid2leid(heid));
+    end
+    
     if ~manifold
         MAXFACES=150;
         if nargin<8 || ~type_struct
