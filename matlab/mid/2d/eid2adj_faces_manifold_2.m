@@ -1,14 +1,14 @@
-function [found, flist, nfaces, ftags]=eid2adj_faces_manifold_2(eid,edges,tris,v2he,sibhes,flist,ftags,varargin)
+function [found, flist, nfaces, ftags]=eid2adj_faces_manifold_2(eid,edges,tris,v2he,sibhes,flist,ftags,type_struct)
 %#codegen -args {int32(0), coder.typeof(int32(0), [inf,2]),coder.typeof(int32(0), [inf,3]),
-%#codegen coder.typeof(int32(0), [inf,1]),coder.typeof(int32(0), [inf,3]),coder.typeof(int32(0), [inf,1]),coder.typeof(false, [inf,1])}
+%#codegen coder.typeof(int32(0), [inf,1]),coder.typeof(int32(0), [inf,3]),
+%#codegen coder.typeof(int32(0), [inf,1]),coder.typeof(false, [inf,1]),false}
 
-type_struct = isstruct(sibhes);
-vid1=edges(eid,1);
-vid2=edges(eid,2);
+lfid_map=int32([1,3,2]);
+vid1=edges(eid,1); vid2=edges(eid,2);
 [found,fid,lvid1,lvid2,ftags] = examine_1ring_surf_he( vid1, vid2, tris, sibhes, v2he, ftags);
 
 if (found)
-    lid=match_halfedge(lvid1,lvid2);
+lid=lfid_map(lvid1+lvid2-2);
     if type_struct
         sibhe.fid=sibhes.fid(fid,lid); sibhe.leid=sibhes.leid(fid,lid);
         if (sibhe.fid ==0)
@@ -30,24 +30,9 @@ if (found)
         end
     end
 else
-    found = true; nfaces = int32(0);
+    if ~fid; found = true; end
+     nfaces = int32(0);    
 end
-
-
-
-
-function [lfid] = match_halfedge(lvid1,lvid2)
-%hf_tet    = int32([1 3 2; 1 2 4; 2 3 4; 3 1 4]);
-
-% it happens that we can uniquely match triplet [lvid1,lvid2,lvid3] to
-% local face id using sum of local ids (for tet)
-
-% sum = 6 -> lfid = 1
-% sum = 7 -> lfid = 2
-% sum = 8 -> lfid = 4
-% sum = 9 -> lfid = 3
-lfid_map=int32([1,3,2]);
-lfid=lfid_map(lvid1+lvid2-2);
 
 
 function [found,fid,lvid1,lvid2, ftags] = examine_1ring_surf_he(vid1, vid2, tris, sibhes, v2he, ftags)
@@ -65,7 +50,6 @@ lvid1 = int32(0); lvid2 = int32(0);
 if ~fid; return; end
 
 sibhes_tri = int32([1 3; 1 2; 2 3]);
-
 MAXTRIS=50;
 % Create a stack for storing tris and insert element itself into stack
 stack = nullcopy(zeros(MAXTRIS,1, 'int32'));
@@ -79,7 +63,7 @@ while size_stack>0
     count = count+1;
     queue(count)=fid;
     
-    lvid1 = int32(0); % Stores which vertex vid is within the triangle.
+    lvid1 = int32(0); 
     lvid2 = int32(0);
     
     for ii=int32(1):3
@@ -88,16 +72,11 @@ while size_stack>0
         if v==vid2; lvid2 = ii; end;
     end
     
-    if (lvid1 && lvid2)
-        %         if lvid1==lvid2 || lvid1==lvid3 || lvid2==lvid3
-        %             %fprintf('?\n');
-        %         end
-        % found matching face
+    if (lvid1 && lvid2)        
         found = true;
         for i=1:count
             ftags(queue(i)) = false;
-        end
-        %etags(stack(1:size_stack,1),1) = false;
+        end        
         return;
     end
     
@@ -116,4 +95,3 @@ end
 for i=1:count
     ftags(queue(i)) = false;
 end
-%etags(stack(1:size_stack,1),1);
