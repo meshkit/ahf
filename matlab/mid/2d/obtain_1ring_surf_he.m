@@ -25,7 +25,7 @@ else
 end
 [queue,tris,queue_size,ftags]=start(vid,v2he,sibhes,tris,queue,ftags);
 %fprintf('starting collect_n_compare...\n');
-[heid,ftags]=collect_n_compare(vid,sibhes,queue,queue_size,tris,ftags,second_vid);
+[heid,queue,queue_size,ftags]=collect_n_compare(vid,sibhes,queue,queue_size,tris,ftags,second_vid);
 %fprintf('done\n');
 if isstruct(queue)
     ftags(queue.fid(1:queue_size,1),1)=false;
@@ -60,7 +60,7 @@ end
 [queue,queue_size,ftags]=loop_sbihes(he2,sibhes,queue,queue_size,ftags);
 end
 
-function [he,ftags]=collect_n_compare(vid,sibhes,queue,queue_size,faces,ftags,second_vid)
+function [he,queue,queue_size,ftags]=collect_n_compare(vid,sibhes,queue,queue_size,faces,ftags,second_vid)
 if isstruct(sibhes)
     he.fid=int32(0); he.leid=int8(0);
 else

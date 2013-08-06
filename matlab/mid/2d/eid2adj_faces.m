@@ -17,10 +17,16 @@ MAXFACES=150;
 nfaces=0;
 [heid,ftags] = obtain_1ring_surf_he( edges(eid,1), edges(eid,2), tris, sibhes, v2he, ftags);
 
+% if nargin<8 || isempty(varargin{1}) || ~islogical(varargin{1})
+%     if (heid==0);  flist=zeros(1,1,'int32'); return;   end;
+% else
+%     if (heid.fid==0);  flist=zeros(1,1,'int32'); return;   end;
+% end    
+
 if nargin<8 || isempty(varargin{1}) || ~islogical(varargin{1})
-    if (heid==0);  flist=zeros(1,1,'int32'); return;   end;
+    if (heid==0);  return;   end;
 else
-    if (heid.fid==0);  flist=zeros(1,1,'int32'); return;   end;
+    if (heid.fid==0);  return;   end;
 end    
 
 % coder.varsize('flist',MAXFACES);
