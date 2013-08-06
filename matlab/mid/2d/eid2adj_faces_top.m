@@ -15,11 +15,11 @@ else
 end
 
 % First try the manifold case
-[success, flist, nfaces, ftags] = eid2adj_faces_manifold(eid,edges,tris,v2he,sibhes,flist,ftags, type_struct);
+[success, flist, nfaces, ftags] = eid2adj_faces_manifold_2(eid,edges,tris,v2he,sibhes,flist,ftags, type_struct);
 
 % If the above is not successful, we try the non-manifold case
-if ~success
-    [flist, nfaces, ftags] = eid2adj_faces_nonmanifold(eid,edges,tris,v2he,sibhes,flist,ftags,type_struct);
-end
+% if ~success
+%     [flist, nfaces, ftags] = eid2adj_faces_nonmanifold(eid,edges,tris,v2he,sibhes,flist,ftags,type_struct);
+% end
 end
 

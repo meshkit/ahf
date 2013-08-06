@@ -23,6 +23,7 @@ fprintf('No. of edges = %d\n',size(mesh.edges,1));
 fprintf('No. of faces = %d\n', size(mesh.faces,1));
 fprintf('No. of tets = %d\n', size(mesh.tets,1));
 %test_queries(mesh)
+%fprintf('Result from eid2faces_top\n');
 test_eid2faces_top(mesh)
 end
 
