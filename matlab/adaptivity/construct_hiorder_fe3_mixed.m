@@ -58,7 +58,7 @@ for triID=1:size(tris,1)
             nv = nv+1;
             
             % Obtain incident triangles on this implicit edge and update in tris_hi
-            [nTris, tris_1ring, leids_1ring] = obtain_tri_edges_around_implicit_edge(ii, edges, tris, v2he, sibhes);
+            [nTris, tris_1ring, leids_1ring] = obtain_tri_edges_around_implicit_edge(trisID, edgeID, sibhes);
             for k=1:nTris
                 tris_hi(tris_1ring(k),3+leids_1ring(k)) = nv;
             end
