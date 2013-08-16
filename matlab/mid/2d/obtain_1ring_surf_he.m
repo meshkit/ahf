@@ -60,11 +60,11 @@ end
 [queue,queue_size,ftags]=loop_sbihes(he2,sibhes,queue,queue_size,ftags);
 end
 
-function [he,queue,queue_size,ftags]=collect_n_compare(vid,sibhes,queue,queue_size,faces,ftags,second_vid)
+function [heid,queue,queue_size,ftags]=collect_n_compare(vid,sibhes,queue,queue_size,faces,ftags,second_vid)
 if isstruct(sibhes)
-    he.fid=int32(0); he.leid=int8(0);
+    heid.fid=int32(0); heid.leid=int8(0);
 else
-    he=int32(0);
+    heid=int32(0);
 end
 
 if (queue_size<1); return; end;
@@ -82,9 +82,11 @@ while queue_top<=queue_size && counter < 500
         if (nargin>6)
             if faces(heid2fid(he),heid2leid(he))==vid
                 if faces(heid2fid(he),next(heid2leid(he)))==second_vid
+                    heid = he;
                     return;
                 end
             elseif faces(heid2fid(he),heid2leid(he))==second_vid
+                heid = he;
                 return;
             end
         end
@@ -92,9 +94,11 @@ while queue_top<=queue_size && counter < 500
         if (nargin>6)
             if faces(he.fid,he.leid)==vid
                 if faces(he.fid,next(he.leid))==second_vid
+                    heid.fid = he.fid; heid.leid = he.leid;
                     return;
                 end
             elseif faces(he.fid,he.leid)==second_vid
+                heid.fid = he.fid; heid.leid = he.leid;
                 return;
             end
         end
