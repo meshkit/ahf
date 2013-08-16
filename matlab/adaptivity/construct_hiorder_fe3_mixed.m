@@ -20,7 +20,7 @@ for edgeID=int32(1):size(edges,1)
     if (edges_hi(edgeID,3) == 0)
         % Insert a new vertex
         nv=nv+1;
-        
+        edges_hi(edgeID,3)=nv;
         % Obtain incident triangles on this explicit edge and update in tris_hi
         [nTris, tris_1ring, leids_1ring] = obtain_tri_edges_around_explicit_edge(edgeID, edges, tris, v2he, sibhes);
         for k=1:nTris
@@ -28,7 +28,7 @@ for edgeID=int32(1):size(edges,1)
         end
         
         % Obtain incident tets on this explicit edge and update tets_hi
-        [nTets, tets_1ring, lfids_1ring] = obtain_tet_edges_around_explicit_edge(edgeID, edges, tets, v2hf, sibhfs);        
+        [nTets, tets_1ring, lfids_1ring] = obtain_tet_edges_around_explicit_edge(edges(edgeID,1), edges(edgeID,2), tets, v2hf, sibhfs);        
         for k=1:nTets
             tets_hi(tets_1ring(k),4+lfids_1ring(k)) = nv;
         end
@@ -38,7 +38,7 @@ for edgeID=int32(1):size(edges,1)
             if nv>size(xs_hi,1) % Enlarge array if necessary
                 xs_hi = [xs_hi; zeros( int32(MAXNEW*0.1),size(xs,2))]; %#ok<AGROW>
             end
-            xs_hi(nv,:) = 0.5*(xs(edges(ii,1),:)+xs(edges(ii,2),:));
+            xs_hi(nv,:) = 0.5*(xs(edges(edgeID,1),:)+xs(edges(edgeID,2),:));
         end
     end
 end
@@ -58,16 +58,17 @@ for triID=1:size(tris,1)
             nv = nv+1;
             
             % Obtain incident triangles on this implicit edge and update in tris_hi
-            [nTris, tris_1ring, leids_1ring] = obtain_tri_edges_around_implicit_edge(trisID, edgeID, sibhes);
+            [nTris, tris_1ring, leids_1ring] = obtain_tri_edges_around_implicit_edge(triID, edgeID, sibhes);
             for k=1:nTris
                 tris_hi(tris_1ring(k),3+leids_1ring(k)) = nv;
             end
             
-            % Obtain incident tets on this implicit edge and update in tets_hi
+            % Obtain incident tets on this explicit edge and update in tets_hi
             edg_v1 = tris(triID,triedge_nodes(edgeID,1));
             edg_v2 = tris(triID,triedge_nodes(edgeID,2));
-            [eid] = obtain_eid(edg_v1,edg_v2,tetID,tets);
-            [nTets, tets_1ring, lfids_1ring] = obtain_tet_edges_around_implicit_edge(tetID, eid, tets, sibhfs);           
+            %[eid] = obtain_eid(edg_v1,edg_v2,tetID,tets);
+            %[nTets, tets_1ring, lfids_1ring] = obtain_tet_edges_around_implicit_edge(tetID, eid, tets, sibhfs); 
+            [nTets, tets_1ring, lfids_1ring] = obtain_tet_edges_around_explicit_edge(edg_v1, edg_v2, tets, v2hf, sibhfs);
             for k=1:nTets
                 tets_hi(tets_1ring(k),4+lfids_1ring(k)) = nv;
             end
@@ -77,7 +78,7 @@ for triID=1:size(tris,1)
                 if nv>size(xs_hi,1) % Enlarge array if necessary
                     xs_hi = [xs_hi; zeros( int32(MAXNEW*0.1),size(xs,2))]; %#ok<AGROW>
                 end
-                xs_hi(nv,:) = 0.5*(xs(edges(ii,1),:)+xs(edges(ii,2),:));
+                xs_hi(nv,:) = 0.5*(xs(tris(triID,triedge_nodes(edgeID,1)),:)+xs(tris(triID,triedge_nodes(edgeID,2)),:));
             end
         end
     end

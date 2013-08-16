@@ -1,12 +1,12 @@
-function  [nTets, tets_1ring, leids_1ring] = obtain_tet_edges_around_explicit_edge(edgeID, edges, tets, v2hf, sibhfs)
+function  [nTets, tets_1ring, leids_1ring] = obtain_tet_edges_around_explicit_edge(v1, v2, tets, v2hf, sibhfs)
 % This function takes an explicit edge and returns the list of incident
 % tets and local id's of the edge wrt to the incident tets
 
 %DOES NOT SUPPORT STRUCTURES!
 
 % Input:
-%     edgeID: edge ID within edges
-%     edges:  list of explicit edges
+%     v1: the first vertex
+%     v2:  the second vertex
 %     tets:   list of tetrahedra
 %     v2hf:   vertex to one of its incident half face
 %     sibhfs: sibling half faces
@@ -30,9 +30,6 @@ nTets=int32(0);
 tetface_nodes = int32([1 3 2; 1 2 4; 2 3 4; 3 1 4]);
 tetface_signed_edges = int32([-3 -2 -1; 1 5 -4; 2 6 -5; 3 4 -6]);
 
-%Obtain the vertices
-v1=edges(edgeID,1);
-v2=edges(edgeID,2);
 
 %Find the incident half edge if possible
 [hfid,etags] = obtain_1ring_elems_tet_he( v1,v2, tets, v2hf, sibhfs, etags);
@@ -54,26 +51,14 @@ itet=hfid2cid(hfid);
 faceid=hfid2lfid(hfid);
 
 %Obtain the local edge id
-%The edge may have incorrect orientation
+%Assume the edge has the correct orientation
 for vertexID=1:3
     if tets(itet,tetface_nodes(faceid,1))==v1
-        if tets(itet,tetface_nodes(faceid,2))==v2
-            iedge=abs(tetface_signed_edges(faceid,1));
+        iedge=abs(tetface_signed_edges(faceid,1));
+    else if tets(itet,tetface_nodes(faceid,2))==v1
+            iedge=abs(tetface_signed_edges(faceid,2));
         else
             iedge=abs(tetface_signed_edges(faceid,3));
-        end
-    else if tets(itet,tetface_nodes(faceid,2))==v1
-            if tets(itet,tetface_nodes(faceid,1))==v2
-                iedge=abs(tetface_signed_edges(faceid,1));
-            else
-                iedge=abs(tetface_signed_edges(faceid,2));
-            end
-        else
-            if tets(itet,tetface_nodes(faceid,1))==v2
-                iedge=abs(tetface_signed_edges(faceid,3));
-            else
-                iedge=abs(tetface_signed_edges(faceid,2));
-            end
         end
     end
 end
@@ -98,9 +83,11 @@ coder.extrinsic('warning');
 MAXTETS = 1024;
 nelems=int32(0);
 if nargin<4; etags=false(size(tets,1)); end;
+hfid=int32(0);
+
 % Obtain incident tetrahedron of vid.
 eid = hfid2cid(v2hf(origin));
-if ~eid; return; end
+if ~eid || ~hfid2cid(v2hf(terminal_vertex)); return; end
 
 sibhfs_tet = int32([1 2 4; 1 2 3; 1 3 4; 2 3 4]);
 lookup_lfid = int32([0,2,1,4;1,0,3,2;4,1,0,3;2,3,4,0]);
@@ -112,7 +99,6 @@ overflow = false;
 queue = zeros(MAXTETS,1, 'int32'); 
 queue_top = int32(1);  queue_size = int32(1); 
 queue(1) = eid;
-hfid=int32(0);
 
 while queue_top<=queue_size
     % Pop the element from top of stack
