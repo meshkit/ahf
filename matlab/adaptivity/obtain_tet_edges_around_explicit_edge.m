@@ -114,7 +114,7 @@ while queue_top<=queue_size
     
     found=false;
     lvid = int32(0); % Stores which vertex vid is within the tetrahedron.
-    for ii=1:4
+    for ii=int32(1):4
         v = tets(eid,ii);
         if v==origin; 
             lvid = ii;             

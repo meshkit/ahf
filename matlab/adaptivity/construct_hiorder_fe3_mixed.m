@@ -1,6 +1,11 @@
 function [tets_hi, tris_hi, edges_hi, xs_hi] = construct_hiorder_fe3_mixed(xs,edges,tris,tets)
 % Refinement sequence: edges->tris->tets
 
+%#codegen -args {coder.typeof(0,[inf,3]), coder.typeof(int32(0), [inf,2]),
+%# coder.typeof(int32(0), [inf,3]), coder.typeof(int32(0), [inf,4])}
+
+
+
 nv = int32(size(xs,1));
 [sibhfs,v2hf] = construct_halffaces(nv,tets);
 [sibhes,v2he] = construct_halfedges(nv,tris);
@@ -44,15 +49,9 @@ for edgeID=int32(1):size(edges,1)
 end
 
 %% Refine tris
-etags=false(size(tets,1),1);
-for triID=1:size(tris,1)
-    % Obtain an incident tet for this triangle
-    [clist]=fid2adj_cells(triID,tris,tets,sibhfs,v2hf, etags);
-    if (clist(1)~=0)
-        tetID = clist(1);
-    end
+for triID=int32(1):size(tris,1)
     
-    for edgeID=1:3
+    for edgeID=int32(1):3
         if (tris_hi(triID,3+edgeID) == 0)
             % Insert vertex
             nv = nv+1;
@@ -66,8 +65,7 @@ for triID=1:size(tris,1)
             % Obtain incident tets on this explicit edge and update in tets_hi
             edg_v1 = tris(triID,triedge_nodes(edgeID,1));
             edg_v2 = tris(triID,triedge_nodes(edgeID,2));
-            %[eid] = obtain_eid(edg_v1,edg_v2,tetID,tets);
-            %[nTets, tets_1ring, lfids_1ring] = obtain_tet_edges_around_implicit_edge(tetID, eid, tets, sibhfs); 
+            
             [nTets, tets_1ring, lfids_1ring] = obtain_tet_edges_around_explicit_edge(edg_v1, edg_v2, tets, v2hf, sibhfs);
             for k=1:nTets
                 tets_hi(tets_1ring(k),4+lfids_1ring(k)) = nv;
@@ -85,7 +83,7 @@ for triID=1:size(tris,1)
 end
 
 %% Refine tets
-for tetID = 1:size(tets,1)
+for tetID = int32(1):size(tets,1)
     for edgeID=int32(1):6
         if (tets_hi(tetID,4+edgeID) == 0)
             % Insert a new vertex
@@ -109,6 +107,11 @@ for tetID = 1:size(tets,1)
         end
     end
 end
+
+if nargout>3;
+    xs_hi = xs_hi(1:nv,:);
+end
+
 end
 
 

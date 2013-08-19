@@ -4,8 +4,14 @@ function [tets_hi, tris_hi, edges_hi, xs_hi] = uniform_refinement_mixed_hi2lowdi
 % Input: mesh is the structure containing tets, tris, edges and their
 % coordinates.
 
+
+%#codegen -args {coder.typeof(0,[inf,3]), coder.typeof(int32(0), [inf,2]),
+%# coder.typeof(int32(0), [inf,3]), coder.typeof(int32(0), [inf,4])}
+
+
 nv = int32(size(xs,1));
-opphfs = determine_opposite_halfface( nv,tets);
+%opphfs = determine_opposite_halfface( nv,tets);
+opphfs = construct_halffaces(nv,tets);
 
 MAXNEW = int32(1.25*size(tets,1));
 tetedge_nodes = int32([1 2; 2 3; 3 1; 1 4; 2 4; 3 4]);
@@ -39,11 +45,11 @@ for tetID=1:int32(size(tets,1))
             for k=1:nTets
                 tets_hi(tets_1ring(k),4+leids_1ring(k)) = nv;
             end
-        end
-        % Check if this edge is given explicitly
-        [isedg, eid] = find_edg_in_list(edg_v1, edg_v2, edges);
-        if (isedg && (edges_hi(eid,3)==0))
-            edges_hi(eid,3) = nv;
+            % Check if this edge is given explicitly
+            [isedg, eid] = find_edg_in_list(edg_v1, edg_v2, edges);
+            if (isedg && (edges_hi(eid,3)==0))
+                edges_hi(eid,3) = nv;
+            end
         end
     end
     % Check if this face is given explicitly
