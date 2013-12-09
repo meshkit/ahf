@@ -63,10 +63,10 @@ is_index(1)=1;
 
 % Fill in sibhfs for each half-face.
 if nargin<3 || isempty(varargin{1}) || ~islogical(varargin{1})
-    sibhfs = zeros(size(elems), 'int32');
+    sibhfs = zeros(nelems,5, 'int32');
 elseif islogical(varargin{1})
     sibhfs = struct( 'cid', zeros(size(elems), 'int32'), ...
-        'lfid', zeros(size(elems), 'int8'));
+        'lfid', zeros(nelems,5, 'int8'));
 else
     sibhfs = varargin{1};
     assert( size(sibhfs,1)>=nelems && size(sibhfs,2)==5);
