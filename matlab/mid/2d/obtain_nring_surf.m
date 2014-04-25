@@ -199,7 +199,7 @@ while true
             
             v = tris(fid, nxt(lid));
             overflow = overflow || ~vtags(v) && nverts>=length(ngbvs);
-            if ~overflow
+            if ~overflow && ~vtags(v)
                 nverts = nverts + 1; ngbvs( nverts) = v; vtags(v)=true;
                 % Save starting position for next vertex
                 hebuf(nverts) = 0;
