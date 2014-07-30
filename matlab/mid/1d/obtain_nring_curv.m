@@ -85,10 +85,10 @@ while 1
                 % Insert opposite halfvertex
                 hvbuf(nverts) = sibhvs( eid, 3-lid);
             else
-                assert( false);
+                continue%assert( false);
             end
         else
-            assert( eid==0);
+            continue%assert( eid==0);
         end
     end
 

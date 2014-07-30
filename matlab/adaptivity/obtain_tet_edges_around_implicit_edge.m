@@ -1,4 +1,4 @@
-function [nTets, tets_1ring, leids_1ring] = obtain_tet_edges_around_implicit_edge(itet, iedge, tets, sibhfs)
+function [nTets, tets_1ring, leids_1ring, tets] = obtain_tet_edges_around_implicit_edge(itet, iedge, tets, sibhfs)
 % This function takes an implicit edge and returns the list of incident
 % tets and local id's of the edge wrt to the incident tets
 % Given an edge ID (starting from 1) within a tetrahedron, extract the
