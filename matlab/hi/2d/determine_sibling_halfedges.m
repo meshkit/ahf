@@ -113,7 +113,7 @@ for ii=int32(1):nelems
         for index = is_index(vn):is_index(vn+1)-1
             if v2nv(index)==v
                 if ~isstruct(sibhes)
-                    sibhes(prev_heid_fid,prev_heid_leid) = fleids2heid(v2he_fid(index), v2he_leid(index));
+                    sibhes(prev_heid_fid,prev_heid_leid) = fleids2heid(v2he_fid(index), int32(v2he_leid(index)));
                 else
                     sibhes.fid(prev_heid_fid,prev_heid_leid) = v2he_fid(index);
                     sibhes.leid(prev_heid_fid,prev_heid_leid) = v2he_leid(index);
@@ -130,7 +130,7 @@ for ii=int32(1):nelems
         for index = is_index(v):is_index(v+1)-1
             if v2nv(index)==vn && v2he_fid(index)~=ii
                 if ~isstruct(sibhes)
-                    sibhes(prev_heid_fid,prev_heid_leid) = fleids2heid(v2he_fid(index), v2he_leid(index));
+                    sibhes(prev_heid_fid,prev_heid_leid) = fleids2heid(v2he_fid(index), int32(v2he_leid(index)));
                 else
                     sibhes.fid(prev_heid_fid,prev_heid_leid) = v2he_fid(index);
                     sibhes.leid(prev_heid_fid,prev_heid_leid) = v2he_leid(index);
